@@ -1,51 +1,58 @@
-class ReadRasterFile:
+import numpy as np
+from .BaseReader import BaseReader
+
+
+class RasterFileReader(BaseReader):
     """
     Class that contains functions to read a rasterized file in .asc format
     """
+    def read_file(self, opened_file):
+        self.read_header(opened_file)
+        self.build_info()
+        self.read_data(opened_file)
 
-    def __init__(self, filename):
-        self.filename = filename
-        self.info_dict = {}
-        self.opened_file = open(self.filename, "r")
-        self.xydata_computed = False
-        self.read_header()
-        self.build_data_structure()
-        self.read_data()
-        print("Data has been read, these are the settings:")
-        print(self.info_dict)
-
-    def read_header(self, n_header=6):
+    def read_header(self, opened_file, n_header=6):
         for i in range(0, n_header):
-            line = self.opened_file.readline().split()
-            self.info_dict[line[0]] = float(line[1])
+            line = opened_file.readline().split()
+            self.info[line[0]] = float(line[1])
 
-    def read_data(self):
+    def read_data(self, opened_file):
         print(f"Reading data from {self.filename}")
-        for id, line in enumerate(self.opened_file.readlines()):
+        for id, line in enumerate(opened_file.readlines()):
             self.data[id] = line.split()
 
-    def build_data_structure(self):
+    def build_info(self):
         """
         Function that creates the internal data structure of the raster file
         """
-        assert self.info_dict is not {}
-        self.data = np.zeros(shape=(int(self.info_dict["nrows"]), int(self.info_dict["ncols"])))
-        x_range = np.arange(self.info_dict["xllcorner"], self.info_dict["nrows"] * self.info_dict["cellsize"],
-                            self.info_dict["cellsize"])
-        y_range = np.arange(self.info_dict["yllcorner"], self.info_dict["ncols"] * self.info_dict["cellsize"],
-                            self.info_dict["cellsize"])
+        assert self.info is not {}
+        self.xydata_computed = False
+        self.data = np.zeros(shape=(int(self.info["nrows"]), int(self.info["ncols"])))
+        x_range = np.arange(self.info["xllcorner"], self.info["xllcorner"] + self.info["nrows"] * self.info["cellsize"],
+                            self.info["cellsize"])
+        y_range = np.arange(self.info["yllcorner"], self.info["yllcorner"] + self.info["ncols"] * self.info["cellsize"],
+                            self.info["cellsize"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
         self.y_mesh = np.flipud(self.y_mesh)  # To fit into the .asc format criteria
 
+    def add_z_info(self, z_coord):
+        self.z_coord = z_coord
+
+    def get_data(self) -> np.ndarray:
+        if hasattr(self, "z_coord"):
+            return self.get_xyz_data()
+        else:
+            return self.get_xy_data()
+
     def rebuild_x_y(self):
-        x_range = np.arange(self.info_dict["xllcorner"], self.info_dict["nrows"] * self.info_dict["cellsize"],
-                            self.info_dict["cellsize"])
-        y_range = np.arange(self.info_dict["yllcorner"], self.info_dict["ncols"] * self.info_dict["cellsize"],
-                            self.info_dict["cellsize"])
+        x_range = np.arange(self.info["xllcorner"], self.info["nrows"] * self.info["cellsize"],
+                            self.info["cellsize"])
+        y_range = np.arange(self.info["yllcorner"], self.info["ncols"] * self.info["cellsize"],
+                            self.info["cellsize"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
 
-    def dump_to_xydata(self):
-        ndata = int(self.info_dict["nrows"] * self.info_dict["ncols"])
+    def get_xy_data(self) -> np.ndarray:
+        ndata = int(self.info["nrows"] * self.info["ncols"])
         self.xydata = np.zeros(shape=(ndata, 3))
         x_mesh_flatten = self.x_mesh.flatten()
         y_mesh_flatten = self.y_mesh.flatten()
@@ -53,6 +60,17 @@ class ReadRasterFile:
             self.xydata[id] = (x_mesh_flatten[id], y_mesh_flatten[id], data)
         self.xydata_computed = True
         return self.xydata
+
+    def get_xyz_data(self) -> np.ndarray:
+        assert hasattr(self, "z_coord"), "The z-coordinate of this raster file is not given"
+        ndata = int(self.info["nrows"] * self.info["ncols"])
+        self.flatten_data = np.zeros(shape=(ndata, 4))
+        x_mesh_flatten = self.x_mesh.flatten()
+        y_mesh_flatten = self.y_mesh.flatten()
+        for id, data in enumerate(self.data.flatten()):
+            self.flatten_data[id] = (x_mesh_flatten[id], y_mesh_flatten[id], self.z_coord, data)
+        self.xydata_computed = True
+        return self.flatten_data
 
     def dump_to_csv(self, output_file):
         """
@@ -92,8 +110,8 @@ class ReadRasterFile:
 
     def write_asc_header(self, file):
         # assert isinstance(file, type(open)), "is not a correct file"
-        for head in self.info_dict:
-            file.write(f"{head} {self.info_dict[head]}\n")
+        for head in self.info:
+            file.write(f"{head} {self.info[head]}\n")
 
     def write_asc_data(self, file):
         np.savetxt(file, self.data, fmt="%3.2f")
@@ -106,9 +124,10 @@ class ReadRasterFile:
         :return: downsampled dataset
         '''
         self.data = self.data[0::slice_factor, 0::slice_factor]
-        self.info_dict["nrows"] = self.data.shape[0]
-        self.info_dict["ncols"] = self.data.shape[1]
-        self.info_dict["cellsize"] *= slice_factor
-        AscReader.rebuild_x_y(self)
+        self.info["nrows"] = self.data.shape[0]
+        self.info["ncols"] = self.data.shape[1]
+        self.info["cellsize"] *= slice_factor
+        RasterFileReader.rebuild_x_y(self)
         print("Data has been downsampled, the new settings are these:")
-        print(self.info_dict)
+        print(self.info)
+
