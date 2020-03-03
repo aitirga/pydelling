@@ -4,8 +4,7 @@ Contains general purpose utility functions
 import munch
 import yaml
 
-
-def read_config(config_file="./config/config.yaml"):
+def read_config(config_file="./config.yaml"):
     """
     Reads the configuration file
     :param config_file:
@@ -13,5 +12,6 @@ def read_config(config_file="./config/config.yaml"):
     """
     with open(config_file) as file:
         context = yaml.load(file, Loader=yaml.FullLoader)
-    return munch.DefaultMunch().from_dict(context)
+    return munch.DefaultMunch.fromDict(context)
+    # return munch.DefaultMunch.from_dict(context)
 
