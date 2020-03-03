@@ -1,0 +1,26 @@
+name: PyFLOTRAN
+channels:
+  - anaconda-fusion
+  - defaults
+dependencies:
+  - jupyter
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - scipy
+  - ca-certificates=2020.1.1=0
+  - certifi=2019.11.28=py37_0
+  - openssl=1.1.1d=he774522_4
+  - pip=20.0.2=py37_1
+  - python=3.7.6=h60c2a47_2
+  - setuptools=45.2.0=py37_0
+  - sqlite=3.31.1=he774522_0
+  - vc=14.1=h0510ff6_4
+  - vs2015_runtime=14.16.27012=hf0eaf9b_1
+  - wheel=0.34.2=py37_0
+  - wincertstore=0.2=py37_0
+  - pip:
+    - numpy==1.18.1
+prefix: C:\Users\aitorlm\AppData\Local\Continuum\Anaconda3\envs\PyFLOTRAN
+
