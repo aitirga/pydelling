@@ -6,4 +6,6 @@ Configure the conda environment running
 
 `conda env create -f /config/conda_env.yml`
 
+## Instructions
 
+One can easily
