@@ -9,13 +9,21 @@ class BaseReader:
     def __init__(self, filename):
         self.filename = filename
         self.info = {}
-        self.data = None
+        self.data = {}
         with open(filename) as opened_file:
             self.read_file(opened_file)
+        self.build_info()
 
     def read_file(self, opened_file):
         """
         Reads the data and stores it inside the class
+        :return:
+        """
+        pass
+
+    def read_header(self):
+        """
+        Reads the header of the file
         :return:
         """
         pass
@@ -34,23 +42,12 @@ class BaseReader:
         """
         self.info = {}
 
-    def dump_to_csv(self, output_file):
+    def dump_to_csv(self, output_file, delimiter=","):
         """
         Writes the data into a csv file
         :param output_file:
         :return:
         """
         print(f"Starting dump into {output_file}")
-        f = open(output_file, "w")
-        for data in self.data:
-            f.write(f"{data[0]},{data[1]},{data[2]}\n")
-        f.close()
-        print(f"The data has been properly exported to the {output_file} file")
-
-    def dump_to_wsv(self, output_file):
-        print(f"Starting dump into {output_file}")
-        f = open(output_file, "w")
-        for data in self.data:
-            f.write(f"{data[0]} {data[1]} {data[2]}\n")
-        f.close()
+        np.savetxt(output_file, self.get_data(), delimiter=delimiter)
         print(f"The data has been properly exported to the {output_file} file")
