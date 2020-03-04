@@ -1,6 +1,6 @@
 import numpy as np
 from .BaseReader import BaseReader
-
+from ..utils import globals
 
 class RasterFileReader(BaseReader):
     """
@@ -17,7 +17,8 @@ class RasterFileReader(BaseReader):
             self.info[line[0]] = float(line[1])
 
     def read_data(self, opened_file):
-        print(f"Reading data from {self.filename}")
+        if globals.config.general.verbose:
+            print(f"Reading data from {self.filename}")
         for id, line in enumerate(opened_file.readlines()):
             self.data[id] = line.split()
 
@@ -34,6 +35,7 @@ class RasterFileReader(BaseReader):
                             self.info["cellsize"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
         self.y_mesh = np.flipud(self.y_mesh)  # To fit into the .asc format criteria
+        self.info["filename"] = self.filename
 
     def add_z_info(self, z_coord):
         self.z_coord = z_coord
