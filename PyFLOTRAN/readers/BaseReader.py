@@ -2,7 +2,6 @@
 Base interface for a reader class
 """
 import numpy as np
-from ..utils import globals
 
 
 class BaseReader:

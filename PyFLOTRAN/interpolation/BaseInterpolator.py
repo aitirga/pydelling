@@ -1,10 +1,11 @@
 """
 This class implements a basic interface for Interpolation classes
 """
-import numpy as np
-from ..utils import globals
 import os
+
 import h5py
+import numpy as np
+
 
 class BaseInterpolator:
     def __init__(self,
@@ -74,6 +75,13 @@ class BaseInterpolator:
             tempfile.close()
         with h5py.File(filename, "r+") as tempfile:
             tempfile.create_dataset(var_name, data=data)
+
+    def whipe_data(self):
+        """Whipes data structure
+        """
+        self.data = []
+        self.mesh = []
+        self.interpolated_data = []
 
 
 
