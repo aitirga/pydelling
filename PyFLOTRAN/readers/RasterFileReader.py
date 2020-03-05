@@ -8,7 +8,7 @@ class RasterFileReader(BaseReader):
     """
     def read_file(self, opened_file):
         self.read_header(opened_file)
-        self.build_info()
+        self.build_structure()
         self.read_data(opened_file)
 
     def read_header(self, opened_file, n_header=6):
@@ -20,12 +20,9 @@ class RasterFileReader(BaseReader):
         if globals.config.general.verbose:
             print(f"Reading data from {self.filename}")
         for id, line in enumerate(opened_file.readlines()):
-            self.data[id] = line.split()
+            self.data[id] = np.array(line.split(), dtype=np.float32)
 
-    def build_info(self):
-        """
-        Function that creates the internal data structure of the raster file
-        """
+    def build_structure(self):
         assert self.info is not {}
         self.xydata_computed = False
         self.data = np.zeros(shape=(int(self.info["nrows"]), int(self.info["ncols"])))
@@ -35,6 +32,11 @@ class RasterFileReader(BaseReader):
                             self.info["cellsize"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
         self.y_mesh = np.flipud(self.y_mesh)  # To fit into the .asc format criteria
+
+    def build_info(self):
+        """
+        Function that creates the internal data structure of the raster file
+        """
         self.info["filename"] = self.filename
 
     def add_z_info(self, z_coord):

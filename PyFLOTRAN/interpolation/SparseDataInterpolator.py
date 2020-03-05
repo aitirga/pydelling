@@ -1,11 +1,14 @@
 """
 Interpolates a given set of points into a PFLOTRAN mesh
 """
-from .BaseInterpolator import BaseInterpolator
-from scipy.interpolate import griddata
+import os
+
 import h5py
 import numpy as np
-import os
+from scipy.interpolate import griddata
+
+from .BaseInterpolator import BaseInterpolator
+
 
 class SparseDataInterpolator(BaseInterpolator):
     def interpolate(self, **kwargs):
