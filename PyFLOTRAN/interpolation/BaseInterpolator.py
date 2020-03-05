@@ -3,6 +3,8 @@ This class implements a basic interface for Interpolation classes
 """
 import numpy as np
 from ..utils import globals
+import os
+import h5py
 
 class BaseInterpolator:
     def __init__(self,
@@ -26,17 +28,25 @@ class BaseInterpolator:
         else:
             self.data = np.vstack((self.data, data))
 
-    def add_mesh(self, data):
+    def add_mesh(self, data, id_index=3):
         """
         Add the set of points on which interpolation will be performed
         :return:
         """
         if data.shape[1] > 3:
-            data = data[:, 0:3]
-        if self.mesh == []:
-            self.mesh = np.array(data)
+            temp_id_data = data[:, id_index]
+            temp_data = data[:, 0:3]
         else:
-            self.mesh = np.vstack((self.mesh, data))
+            temp_data = data
+
+        if self.mesh == []:
+            self.mesh = np.array(temp_data)
+            if data.shape[1] > 3:
+                self.id_data = np.array(temp_id_data)
+        else:
+            self.mesh = np.vstack((self.mesh, temp_data))
+            if data.shape[1] > 3:
+                self.id_data = np.vstack((self.id_data, temp_id_data))
 
     def interpolate(self):
         """
@@ -52,12 +62,18 @@ class BaseInterpolator:
         """
         return self.interpolated_data
 
-    def dump_to_hdf5(self):
+    def dump_to_hdf5(self, filename=None, var_name=None, data=None):
         """
         Dumps the data into HDF5 format
         :return:
         """
-        pass
+        if data == None:
+            data = self.interpolated_data
+        if not os.path.exists(filename):
+            tempfile = h5py.File(filename, "w")
+            tempfile.close()
+        with h5py.File(filename, "r+") as tempfile:
+            tempfile.create_dataset(var_name, data=data)
 
 
 
