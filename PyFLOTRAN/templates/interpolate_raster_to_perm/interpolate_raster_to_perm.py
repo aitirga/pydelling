@@ -16,16 +16,15 @@ def main():
     a = RasterFileReader(filename="S:/PERMEABILITY GLACIAL/Raster File 49100/SHYD_RelK_Layer_01_49100.txt")
     # PFLOTRAN_centroids = CentroidReader(filename="./data/centroid.dat")
     # print(a.get_data())
-    a.add_z_info(50)
+    a.add_z_info(50.0)
     # print(a.get_data())
     interpo = SparseDataInterpolator(interpolation_data=a.get_data())
     interpo.add_data(a.get_data())
     a.add_z_info(25.0)
     interpo.add_data(a.get_data())
     interpo.add_mesh(a.get_data())
-
-    print(interpo.interpolate(method="nearest"))
-    print(interpo.get_data())
+    interpo.interpolate(method="nearest")
+    interpo.dump_to_hdf5("proba.h5", var_name="permX")
 
 
 if __name__ == "__main__":
