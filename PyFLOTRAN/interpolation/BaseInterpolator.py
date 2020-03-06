@@ -1,9 +1,6 @@
 """
 This class implements a basic interface for Interpolation classes
 """
-import os
-
-import h5py
 import numpy as np
 
 
@@ -62,19 +59,6 @@ class BaseInterpolator:
         :return:
         """
         return self.interpolated_data
-
-    def dump_to_hdf5(self, filename=None, var_name=None, data=None):
-        """
-        Dumps the data into HDF5 format
-        :return:
-        """
-        if data == None:
-            data = self.interpolated_data
-        if not os.path.exists(filename):
-            tempfile = h5py.File(filename, "w")
-            tempfile.close()
-        with h5py.File(filename, "r+") as tempfile:
-            tempfile.create_dataset(var_name, data=data)
 
     def whipe_data(self):
         """Whipes data structure
