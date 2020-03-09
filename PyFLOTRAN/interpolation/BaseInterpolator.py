@@ -2,7 +2,9 @@
 This class implements a basic interface for Interpolation classes
 """
 import numpy as np
-
+import h5py
+import os
+from ..utils import globals
 
 class BaseInterpolator:
     def __init__(self,
@@ -60,7 +62,29 @@ class BaseInterpolator:
         """
         return self.interpolated_data
 
-    def whipe_data(self):
+    def dump_to_hdf5(self, filename=None, var_name=None, data=None):
+        """
+        Dumps the data into HDF5 format
+        :return:
+        """
+        if data == None:
+            data = self.interpolated_data
+        if not os.path.exists(filename):
+            tempfile = h5py.File(filename, "w")
+            tempfile.close()
+        with h5py.File(filename, "r+") as tempfile:
+            tempfile.create_dataset(var_name, data=data)
+
+    def dump_to_csv(self, filename=None, **kwargs):
+        temp_array = np.reshape(self.interpolated_data, (self.interpolated_data.shape[0], 1))
+        temp_array = np.concatenate((self.mesh, temp_array), axis=1)
+        np.savetxt(filename, temp_array, **kwargs)
+        if globals.config.general.verbose:
+            print(f"Data has been dumped into {filename}")
+
+        # return np.concatenate((self.mesh, temp_array), axis=1)
+
+    def wipe_data(self):
         """Whipes data structure
         """
         self.data = []
