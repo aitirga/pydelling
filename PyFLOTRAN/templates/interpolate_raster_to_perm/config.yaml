@@ -6,3 +6,6 @@ general:                                  # general parameters
   PFLOTRAN_centroid_file: ./data/centroid.dat # File containing the PFLOTRAN centroid files
   verbose: True                           # increases verbose
   eps: 1E-30                              # Numerical zero value
+coord:
+  x_local_to_global: 1.52E6
+  y_local_to_global: 6.79E6
