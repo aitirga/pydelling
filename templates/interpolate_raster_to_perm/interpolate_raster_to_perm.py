@@ -5,9 +5,10 @@ import PyFLOTRAN.utils.globals as globals
 import PyFLOTRAN.readers as readers
 import PyFLOTRAN.interpolation as interpolation
 from PyFLOTRAN.utils.common import interpolate_permeability_anisotropic
+from PyFLOTRAN.writers.HDF5Writer import HDF5Writer
 import glob
 import numpy as np
-from PyFLOTRAN.writers.HDF5Writer import HDF5Writer
+
 
 
 def main():
@@ -18,7 +19,10 @@ def main():
     perm_folders = glob.glob(globals.config.general.raster_files_folder+"/*RasterFiles*")
     print(perm_folders)
     PFLOTRAN_centroid = readers.CentroidReader(filename=globals.config.general.PFLOTRAN_centroid_file, header=False)
-
+    # normal_range = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
+    # diff_array = PFLOTRAN_centroid.get_data()[:, 3] - normal_range
+    # diff_array[diff_array != 0.0] = 1.0
+    # print(np.sum(diff_array))
     print("Generating Cell IDs")
     # cell_IDs = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
     h5exporter = HDF5Writer(filename="Permeability_interpolated_top_layer.h5")

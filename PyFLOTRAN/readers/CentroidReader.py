@@ -3,8 +3,9 @@ Centroid file reader
 """
 import numpy as np
 from ..utils import globals
+from .BaseReader import BaseReader
 
-class CentroidReader:
+class CentroidReader(BaseReader):
     def __init__(self, filename,
                   var_pos=3,
                   var_name="var",
