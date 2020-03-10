@@ -15,7 +15,7 @@ def main():
     # global config
     globals.initialize_config(config_file="./config.yaml")
 
-    perm_folders = glob.glob(globals.config.general.raster_files_folder+"/*RasterFiles*Permafrost")
+    perm_folders = glob.glob(globals.config.general.raster_files_folder+"/*RasterFiles*")
     print(perm_folders)
     PFLOTRAN_centroid = readers.CentroidReader(filename=globals.config.general.PFLOTRAN_centroid_file, header=False)
 
@@ -23,7 +23,7 @@ def main():
     # cell_IDs = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
     h5exporter = HDF5Writer(filename="Permeability_interpolated_top_layer.h5")
     # Export Cell IDs
-    h5exporter.load_data("Cell Ids", PFLOTRAN_centroid.get_data())
+    h5exporter.load_data("Cell Ids", np.array(PFLOTRAN_centroid.get_data()[:, 3], dtype=np.int32))
     h5exporter.dump_file(remove_if_exists=True)
 
     #Master permeability files
