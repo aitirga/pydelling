@@ -2,7 +2,7 @@ import os
 import h5py
 
 
-class HDF5Generator:
+class BaseWriter:
     def __init__(self, filename="h5_dump.hdf5", var_name=None, data=None):
         self.data_loaded = False
         if filename is not None:

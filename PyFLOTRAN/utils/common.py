@@ -3,10 +3,10 @@ Contains general purpose utility functions
 """
 import munch
 import yaml
-# import PyFLOTRAN.readers as readers
-# import PyFLOTRAN.interpolation as interpolation
-from PyFLOTRAN.readers.CentroidReader import CentroidReader
-from PyFLOTRAN.interpolation.SparseDataInterpolator import SparseDataInterpolator
+import PyFLOTRAN.readers as readers
+import PyFLOTRAN.interpolation as interpolation
+# from PyFLOTRAN.readers.CentroidReader import CentroidReader
+# from PyFLOTRAN.interpolation.SparseDataInterpolator import SparseDataInterpolator
 
 def read_config(config_file="./config.yaml"):
     """
