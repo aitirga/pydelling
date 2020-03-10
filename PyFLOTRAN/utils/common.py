@@ -30,7 +30,10 @@ def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh
     interpolator = SparseDataInterpolator(interpolation_data=perm.get_data(),
                                           mesh_data=mesh.get_data())
     interpolator.interpolate(method="nearest")
-    return interpolator, mesh
+    if mesh is None:
+        return interpolator, mesh
+    else:
+        return interpolator
 
 
 
