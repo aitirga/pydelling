@@ -5,26 +5,14 @@ import numpy as np
 from ..utils import globals
 from .BaseReader import BaseReader
 
+
 class CentroidReader(BaseReader):
-    def __init__(self, filename,
-                  var_pos=3,
-                  var_name="var",
-                  var_type=np.float32,
-                  centroid_pos=(0, 3),
-                  header=False):
-        self.var_pos = var_pos
-        self.var_name = var_name
-        self.var_type = var_type
-        self.centroid_pos = centroid_pos
-        self.filename = filename
-        self.header = header
-        self.info = {}
-        self.data = {}
-        with open(filename) as opened_file:
-            if self.header:
-                opened_file.readline()  # For now, skips the header if it has
-            self.read_file(opened_file, var_pos, var_name, var_type, centroid_pos)
-        self.build_info()
+    def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False):
+        super().__init__(filename, var_pos=var_pos,
+                         var_name=var_name,
+                         var_type=var_type,
+                         centroid_pos=centroid_pos,
+                         header=header)
 
     def read_file(self, opened_file,
                   var_pos=3,
@@ -53,6 +41,8 @@ class CentroidReader(BaseReader):
         :return:
         """
         pass
+
+
 
     def get_data(self) -> np.ndarray:
         """

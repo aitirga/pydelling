@@ -5,10 +5,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
 # C extensions
 *.so
-
+*.val
+*.zip
+*h5
 # Distribution / packaging
 .Python
 #PyFLOTRAN/templates/*data*
