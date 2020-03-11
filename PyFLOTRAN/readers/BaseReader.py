@@ -5,13 +5,13 @@ import numpy as np
 
 
 class BaseReader:
-    def __init__(self, filename):
+    def __init__(self, filename, header=False, **kwargs):
         self.filename = filename
         self.info = {}
         self.data = {}
-        with open(filename) as opened_file:
-            self.read_file(opened_file)
-        self.build_info()
+        self.header = header
+        self.__dict__.update(kwargs)
+        self.open_file(filename)
 
     def read_file(self, opened_file):
         """
@@ -20,7 +20,14 @@ class BaseReader:
         """
         pass
 
-    def read_header(self):
+    def open_file(self, filename):
+        with open(filename) as opened_file:
+            if self.header:
+                opened_file.readline()  # For now, skips the header if it has
+            self.read_file(opened_file)
+        self.build_info()
+
+    def read_header(self, opened_file):
         """
         Reads the header of the file
         :return:

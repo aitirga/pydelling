@@ -21,13 +21,13 @@ def read_config(config_file="./config.yaml"):
 
 
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):
-    perm = CentroidReader(filename=perm_filename, header=True)
+    perm = readers.CentroidReader(filename=perm_filename, header=True)
     if mesh is None:
         assert mesh_filename is not None, "A mesh file needs to be given under the mesh_filename tag"
-        mesh = CentroidReader(filename=mesh_filename, header=False)
+        mesh = readers.CentroidReader(filename=mesh_filename, header=False)
     else:
         mesh = mesh
-    interpolator = SparseDataInterpolator(interpolation_data=perm.get_data(),
+    interpolator = interpolation.SparseDataInterpolator(interpolation_data=perm.get_data(),
                                           mesh_data=mesh.get_data())
     interpolator.interpolate(method="nearest")
     if mesh is None:
