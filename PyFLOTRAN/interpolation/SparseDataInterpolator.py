@@ -8,7 +8,7 @@ from .BaseInterpolator import BaseInterpolator
 
 class SparseDataInterpolator(BaseInterpolator):
     def interpolate(self, **kwargs):
-        self.interpolated_data = griddata(self.data[:, 0:3], self.data[:, 3], self.mesh, **kwargs)
+        self.interpolated_data = griddata(self.data[:, 0:-1], self.data[:, -1], self.mesh, **kwargs)
         return self.get_data()
 
     def get_data(self):

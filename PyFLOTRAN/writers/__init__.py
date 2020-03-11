@@ -1,2 +1,2 @@
-from .HDF5Writer import HDF5Writer
-# from .BaseWriter import BaseWriter TODO: set up properly the BaseWriter
+from .HDF5CentroidWriter import HDF5CentroidWriter
+from .BaseWriter import BaseWriter
