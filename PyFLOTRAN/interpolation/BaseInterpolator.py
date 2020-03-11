@@ -5,6 +5,7 @@ import numpy as np
 import h5py
 import os
 from ..utils import globals
+from ..writers.BaseWriter import BaseWriter
 
 class BaseInterpolator:
     def __init__(self,
@@ -12,6 +13,7 @@ class BaseInterpolator:
                  mesh_data=None):
         self.data = []
         self.mesh = []
+        self.info = {}
         self.interpolated_data = []
         if interpolation_data is not None:
             self.add_data(data=interpolation_data)
@@ -53,7 +55,7 @@ class BaseInterpolator:
         Runs the interpolation algorithm.
         :return:
         """
-        self.interpolated_data = self.mesh
+        self.interpolated_data = self.data[:, 3]
 
     def get_data(self):
         """
@@ -85,11 +87,43 @@ class BaseInterpolator:
         # return np.concatenate((self.mesh, temp_array), axis=1)
 
     def wipe_data(self):
-        """Whipes data structure
+        """Wipes data structure
         """
         self.data = []
         self.mesh = []
         self.interpolated_data = []
+
+    def write_data(self, writer_class=BaseWriter, filename="test.dat", remove_if_exists=False,  **kwargs):
+        base_writer = writer_class(filename=filename, data=self.get_data(), var_name="var", **kwargs)
+        base_writer.dump_file(filename=filename, remove_if_exists=remove_if_exists)
+
+    def get_minmax_coords(self):
+        self.data_xmin = np.min(self.data[:, 0])
+        self.data_xmax = np.max(self.data[:, 0])
+        self.data_ymin = np.min(self.data[:, 1])
+        self.data_ymax = np.max(self.data[:, 1])
+
+    def create_regular_mesh(self, n_x, n_y, dilatation_factor=1.0):
+        """Create an inner regular mesh"""
+        self.info["interpolation"] = {"n_x": n_x,
+                                      "n_y": n_y,
+                                      "dilatation_factor": dilatation_factor,
+                                      "type": "regular_mesh"}
+        self.mesh = []
+        self.get_minmax_coords()
+        dx = abs(self.data_xmax - self.data_xmin)
+        dx_dil = dx * dilatation_factor
+        dx_correction = (dx_dil - dx) / 2.0
+
+        dy = abs(self.data_ymax - self.data_ymin)
+        dy_dil = dy * dilatation_factor
+        dy_correction = (dy_dil - dy) / 2.0
+
+        linspace_x = np.linspace(self.data_xmin - dx_correction, self.data_xmax + dx_correction, n_x)
+        linspace_y = np.linspace(self.data_ymin - dy_correction, self.data_ymax + dy_correction, n_y)
+        grid_x, grid_y = np.meshgrid(linspace_x, linspace_y)
+        self.mesh = np.hstack((grid_x.reshape((grid_x.size, 1)), grid_y.reshape((grid_y.size, 1))))
+
 
 
 

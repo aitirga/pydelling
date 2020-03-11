@@ -5,6 +5,8 @@ import PyFLOTRAN.utils.globals as globals
 import PyFLOTRAN.readers as readers
 import PyFLOTRAN.interpolation as interpolation
 import PyFLOTRAN.writers as writers
+from PyFLOTRAN.utils.modelling_utils import interpolate_centroid_to_structured_grid
+
 import glob
 import numpy as np
 import os
@@ -21,8 +23,26 @@ def main():
                                                                    "hhem_cal22_noditches_rcp45_min_49000_r1_export_velocity.val"),
                                              centroid_pos=(1, 3),
                                              var_pos=6,
+                                             # var_name="Vz",
                                              header=True)
-    print(pressure_raster)
+    # Convert global coordinates into local
+    pressure_raster.global_coords_to_local(x_local_to_global=float(globals.config.coord.x_local_to_global),
+                                           y_local_to_global=float(globals.config.coord.y_local_to_global))
+    bc_interpolator = interpolation.SparseDataInterpolator(interpolation_data=pressure_raster.get_data())
+    bc_interpolator.create_regular_mesh(n_x=10, n_y=10)
+    bc_interpolator.interpolate()
+    bc_interpolator.write_data(writer_class=writers.HDF5CentroidWriter, filename="prueba.h5")
+
+    # centroid_data = pressure_raster.get_data()[:, 0:2]
+    # local_factor = np.ones_like(pressure_raster.data["centroids"]) * [float(globals.config.coord.x_local_to_global),
+    #                                               float(globals.config.coord.y_local_to_global)]
+    # pressure_raster.data
+    # print(local_factor)
+    # centroid_data_local = centroid_data - local_factor
+    variable_data = pressure_raster.get_data()[:, 2]
+    # print(interpolate_centroid_to_structured_grid(centroid=centroid_data_local,
+    #                                               var=variable_data
+    #                                               ))
 
 
 

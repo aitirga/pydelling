@@ -5,10 +5,12 @@ import numpy as np
 
 
 class BaseReader:
+    data: np.ndarray  # Hint of self.data array
+
     def __init__(self, filename, header=False, **kwargs):
         self.filename = filename
         self.info = {}
-        self.data = {}
+        self.data = None
         self.header = header
         self.__dict__.update(kwargs)
         self.open_file(filename)
@@ -47,6 +49,19 @@ class BaseReader:
         :return:
         """
         self.info = {}
+
+    def global_coords_to_local(self, x_local_to_global, y_local_to_global):
+        """Converts global data coordinates into local"""
+        assert len(self.data.shape) >= 2 and self.data.shape[1] >= 2, "Error in data shape"
+        self.data[:, 0] -= x_local_to_global
+        self.data[:, 1] -= y_local_to_global
+
+    def local_coords_to_global(self, x_local_to_global, y_local_to_global):
+        """Converts local data coordinates into global"""
+        assert len(self.data.shape) >= 2 and self.data.shape[1] >= 2, "Error in data shape"
+        self.data[:, 0] += x_local_to_global
+        self.data[:, 1] += y_local_to_global
+
 
     def dump_to_csv(self, output_file, delimiter=","):
         """

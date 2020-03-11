@@ -1,9 +1,10 @@
 import os
 import h5py
+import numpy as np
 
 
 class BaseWriter:
-    def __init__(self, filename="h5_dump.hdf5", var_name=None, data=None):
+    def __init__(self, filename="data.dat", var_name=None, data=None):
         self.data_loaded = False
         if filename is not None:
             self.filename = filename
@@ -11,6 +12,7 @@ class BaseWriter:
             self.var_name = var_name
         if data is not None:
             self.data = data
+            self.data_loaded = True
 
     def load_data(self, var_name=None, data=None):
         """
@@ -43,9 +45,10 @@ class BaseWriter:
 
         if self.check_data():
             if not os.path.exists(self.filename):
-                h5temp = h5py.File(self.filename, "w")
-                h5temp.close()
-            with h5py.File(self.filename, "r+") as h5temp:
-                h5temp.create_dataset(self.var_name, data=self.data)
+                temp_writer = open(self.filename, "w")
+                temp_writer.close()
+            with open(self.filename) as temp_writer:
+                if type(self.data) == np.ndarray:
+                    np.savetxt(self.filename, self.data)
         else:
             print("Couldn't find data to dump!")

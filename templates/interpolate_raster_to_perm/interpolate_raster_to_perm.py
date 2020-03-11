@@ -4,8 +4,8 @@ Template to interpolate a set of raster files to a PFLOTRAN mesh
 import PyFLOTRAN.utils.globals as globals
 import PyFLOTRAN.readers as readers
 import PyFLOTRAN.interpolation as interpolation
-from PyFLOTRAN.utils.common import interpolate_permeability_anisotropic
-from PyFLOTRAN.writers.HDF5Writer import HDF5Writer
+from PyFLOTRAN.utils.modelling_utils import interpolate_permeability_anisotropic
+from PyFLOTRAN.writers.HDF5CentroidWriter import HDF5CentroidWriter
 import glob
 import numpy as np
 
@@ -25,7 +25,7 @@ def main():
     # print(np.sum(diff_array))
     print("Generating Cell IDs")
     # cell_IDs = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
-    h5exporter = HDF5Writer(filename="Permeability_interpolated_top_layer.h5")
+    h5exporter = HDF5CentroidWriter(filename="Permeability_interpolated_top_layer.h5")
     # Export Cell IDs
     h5exporter.load_data("Cell Ids", np.array(PFLOTRAN_centroid.get_data()[:, 3], dtype=np.int32))
     h5exporter.dump_file(remove_if_exists=True)
