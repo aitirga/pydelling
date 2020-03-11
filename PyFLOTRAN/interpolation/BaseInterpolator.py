@@ -13,7 +13,7 @@ class BaseInterpolator:
                  mesh_data=None):
         self.data = []
         self.mesh = []
-        self.info = {}
+        self.info = {"interpolation": {}}
         self.interpolated_data = []
         if interpolation_data is not None:
             self.add_data(data=interpolation_data)
@@ -93,8 +93,8 @@ class BaseInterpolator:
         self.mesh = []
         self.interpolated_data = []
 
-    def write_data(self, writer_class=BaseWriter, filename="test.dat", remove_if_exists=False,  **kwargs):
-        base_writer = writer_class(filename=filename, data=self.get_data(), var_name="var", **kwargs)
+    def write_data(self, writer_class=BaseWriter, filename="test.dat", remove_if_exists=False, **kwargs):
+        base_writer = writer_class(filename=filename, data=self.get_data(), info=self.info, **kwargs)
         base_writer.dump_file(filename=filename, remove_if_exists=remove_if_exists)
 
     def get_minmax_coords(self):
@@ -102,22 +102,33 @@ class BaseInterpolator:
         self.data_xmax = np.max(self.data[:, 0])
         self.data_ymin = np.min(self.data[:, 1])
         self.data_ymax = np.max(self.data[:, 1])
+        self.info["interpolation"]["x_min"] = self.data_xmin
+        self.info["interpolation"]["x_max"] = self.data_xmax
+        self.info["interpolation"]["y_min"] = self.data_ymin
+        self.info["interpolation"]["y_max"] = self.data_ymax
+
 
     def create_regular_mesh(self, n_x, n_y, dilatation_factor=1.0):
         """Create an inner regular mesh"""
-        self.info["interpolation"] = {"n_x": n_x,
-                                      "n_y": n_y,
-                                      "dilatation_factor": dilatation_factor,
-                                      "type": "regular_mesh"}
+
         self.mesh = []
         self.get_minmax_coords()
-        dx = abs(self.data_xmax - self.data_xmin)
+        dx = abs(self.data_xmax - self.data_xmin) / n_x
         dx_dil = dx * dilatation_factor
         dx_correction = (dx_dil - dx) / 2.0
 
-        dy = abs(self.data_ymax - self.data_ymin)
+        dy = abs(self.data_ymax - self.data_ymin) / n_y
         dy_dil = dy * dilatation_factor
         dy_correction = (dy_dil - dy) / 2.0
+
+        self.info["interpolation"].update({"n_x": n_x,
+                                      "n_y": n_y,
+                                      "dilatation_factor": dilatation_factor,
+                                      "type": "regular_mesh",
+                                      "d_x": dx_dil,
+                                      "d_y": dy_dil,
+                                      })
+
 
         linspace_x = np.linspace(self.data_xmin - dx_correction, self.data_xmax + dx_correction, n_x)
         linspace_y = np.linspace(self.data_ymin - dy_correction, self.data_ymax + dy_correction, n_y)

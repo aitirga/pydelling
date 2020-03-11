@@ -2,6 +2,7 @@ import numpy as np
 from .BaseReader import BaseReader
 from ..utils import globals
 
+
 class RasterFileReader(BaseReader):
     """
     Class that contains functions to read a rasterized file in .asc format
@@ -14,7 +15,7 @@ class RasterFileReader(BaseReader):
     def read_header(self, opened_file, n_header=6):
         for i in range(0, n_header):
             line = opened_file.readline().split()
-            self.info[line[0]] = float(line[1])
+            self.info["reader"][line[0]] = float(line[1])
 
     def read_data(self, opened_file):
         if globals.config.general.verbose:
@@ -24,12 +25,13 @@ class RasterFileReader(BaseReader):
 
     def build_structure(self):
         assert self.info is not {}
+        self.reader_info = self.info["reader"]
         self.xydata_computed = False
-        self.data = np.zeros(shape=(int(self.info["nrows"]), int(self.info["ncols"])))
-        x_range = np.arange(self.info["xllcorner"], self.info["xllcorner"] + self.info["nrows"] * self.info["cellsize"],
-                            self.info["cellsize"])
-        y_range = np.arange(self.info["yllcorner"], self.info["yllcorner"] + self.info["ncols"] * self.info["cellsize"],
-                            self.info["cellsize"])
+        self.data = np.zeros(shape=(int(self.reader_info["nrows"]), int(self.reader_info["ncols"])))
+        x_range = np.arange(self.reader_info["xllcorner"], self.reader_info["xllcorner"] + self.reader_info["nrows"] * self.reader_info["cellsize"],
+                            self.reader_info["cellsize"])
+        y_range = np.arange(self.reader_info["yllcorner"], self.reader_info["yllcorner"] + self.reader_info["ncols"] * self.reader_info["cellsize"],
+                            self.reader_info["cellsize"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
         self.y_mesh = np.flipud(self.y_mesh)  # To fit into the .asc format criteria
 
@@ -37,7 +39,7 @@ class RasterFileReader(BaseReader):
         """
         Function that creates the internal data structure of the raster file
         """
-        self.info["filename"] = self.filename
+        self.info["reader"]["filename"] = self.filename
 
     def add_z_info(self, z_coord):
         self.z_coord = z_coord
@@ -49,14 +51,14 @@ class RasterFileReader(BaseReader):
             return self.get_xy_data()
 
     def rebuild_x_y(self):
-        x_range = np.arange(self.info["xllcorner"], self.info["nrows"] * self.info["cellsize"],
-                            self.info["cellsize"])
-        y_range = np.arange(self.info["yllcorner"], self.info["ncols"] * self.info["cellsize"],
-                            self.info["cellsize"])
+        x_range = np.arange(self.info["reader"]["xllcorner"], self.info["reader"]["nrows"] * self.info["reader"]["cellsize"],
+                            self.info["reader"]["cellsize"])
+        y_range = np.arange(self.info["reader"]["yllcorner"], self.info["reader"]["ncols"] * self.info["reader"]["cellsize"],
+                            self.info["reader"]["cellsize"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
 
     def get_xy_data(self) -> np.ndarray:
-        ndata = int(self.info["nrows"] * self.info["ncols"])
+        ndata = int(self.info["reader"]["nrows"] * self.info["reader"]["ncols"])
         self.xydata = np.zeros(shape=(ndata, 3))
         x_mesh_flatten = self.x_mesh.flatten()
         y_mesh_flatten = self.y_mesh.flatten()
@@ -67,7 +69,7 @@ class RasterFileReader(BaseReader):
 
     def get_xyz_data(self) -> np.ndarray:
         assert hasattr(self, "z_coord"), "The z-coordinate of this raster file is not given"
-        ndata = int(self.info["nrows"] * self.info["ncols"])
+        ndata = int(self.info["reader"]["nrows"] * self.info["reader"]["ncols"])
         self.flatten_data = np.zeros(shape=(ndata, 4))
         x_mesh_flatten = self.x_mesh.flatten()
         y_mesh_flatten = self.y_mesh.flatten()

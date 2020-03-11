@@ -4,12 +4,17 @@ import numpy as np
 
 
 class BaseWriter:
-    def __init__(self, filename="data.dat", var_name=None, data=None):
+    info: dict
+
+    def __init__(self, filename="data.dat", var_name=None, data=None, region_name=None, **kwargs):
         self.data_loaded = False
+        self.__dict__.update(**kwargs)
         if filename is not None:
             self.filename = filename
         if var_name is not None:
             self.var_name = var_name
+        if region_name is not None:
+            self.region_name = region_name
         if data is not None:
             self.data = data
             self.data_loaded = True
@@ -50,5 +55,6 @@ class BaseWriter:
             with open(self.filename) as temp_writer:
                 if type(self.data) == np.ndarray:
                     np.savetxt(self.filename, self.data)
+            self.info["writer"] = {"filename": self.filename}
         else:
             print("Couldn't find data to dump!")

@@ -56,7 +56,7 @@ class CentroidReader(BaseReader):
         Generates a dictionary containing the basic info of the read data
         :return:
         """
-        self.info = {"n_cells": self.data.shape[0],
+        self.info["reader"] = {"n_cells": self.data.shape[0],
                      "filename": self.filename,
                      "var_name": self.var_name,
                      "var_position": self.var_pos}

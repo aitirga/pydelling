@@ -18,7 +18,6 @@ def main():
     globals.initialize_config(config_file="./config.yaml")
 
     # Read centroid files for pressure
-
     pressure_raster = readers.CentroidReader(filename=os.path.join(globals.config.general.pressure_raster_folder,
                                                                    "hhem_cal22_noditches_rcp45_min_49000_r1_export_velocity.val"),
                                              centroid_pos=(1, 3),
@@ -29,102 +28,14 @@ def main():
     pressure_raster.global_coords_to_local(x_local_to_global=float(globals.config.coord.x_local_to_global),
                                            y_local_to_global=float(globals.config.coord.y_local_to_global))
     bc_interpolator = interpolation.SparseDataInterpolator(interpolation_data=pressure_raster.get_data())
-    bc_interpolator.create_regular_mesh(n_x=10, n_y=10)
+    bc_interpolator.create_regular_mesh(n_x=1000, n_y=1000)
     bc_interpolator.interpolate()
-    bc_interpolator.write_data(writer_class=writers.HDF5CentroidWriter, filename="prueba.h5")
+    bc_interpolator.write_data(writer_class=writers.HDF5RasterWriter,
+                               filename="prueba.h5",
+                               region_name="top_BC",
+                               remove_if_exists=True,
+                               )
 
-    # centroid_data = pressure_raster.get_data()[:, 0:2]
-    # local_factor = np.ones_like(pressure_raster.data["centroids"]) * [float(globals.config.coord.x_local_to_global),
-    #                                               float(globals.config.coord.y_local_to_global)]
-    # pressure_raster.data
-    # print(local_factor)
-    # centroid_data_local = centroid_data - local_factor
-    variable_data = pressure_raster.get_data()[:, 2]
-    # print(interpolate_centroid_to_structured_grid(centroid=centroid_data_local,
-    #                                               var=variable_data
-    #                                               ))
-
-
-
-
-    #
-    #
-    # perm_folders = glob.glob(globals.config.general.raster_files_folder+"/*RasterFiles*")
-    # print(perm_folders)
-    # PFLOTRAN_centroid = readers.CentroidReader(filename=globals.config.general.PFLOTRAN_centroid_file, header=False)
-    # # normal_range = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
-    # # diff_array = PFLOTRAN_centroid.get_data()[:, 3] - normal_range
-    # # diff_array[diff_array != 0.0] = 1.0
-    # # print(np.sum(diff_array))
-    # print("Generating Cell IDs")
-    # # cell_IDs = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
-    # h5exporter = HDF5Writer(filename="Permeability_interpolated_top_layer.h5")
-    # # Export Cell IDs
-    # h5exporter.load_data("Cell Ids", np.array(PFLOTRAN_centroid.get_data()[:, 3], dtype=np.int32))
-    # h5exporter.dump_file(remove_if_exists=True)
-    #
-    # #Master permeability files
-    # permX = interpolate_permeability_anisotropic(
-    #     perm_filename=globals.config.general.permeability_files_folder + "/permX_newdata.dat",
-    #     mesh=PFLOTRAN_centroid
-    # )
-    # # permX.dump_to_csv(filename="permX-original.csv")
-    #
-    # permY = interpolate_permeability_anisotropic(
-    #     perm_filename=globals.config.general.permeability_files_folder + "/permY_newdata.dat",
-    #     mesh=PFLOTRAN_centroid
-    # )
-    # # permY.dump_to_csv(filename="permY-original.csv")
-    # permZ = interpolate_permeability_anisotropic(
-    #     perm_filename=globals.config.general.permeability_files_folder + "/permZ_newdata.dat",
-    #     mesh=PFLOTRAN_centroid
-    # )
-    # # permZ.dump_to_csv(filename="permZ.csv")
-    #
-    # for perm_folder in perm_folders:
-    #     permeability_name_from_folder = perm_folder.split("_")[-1]
-    #
-    #     # PFLOTRAN_centroid = CentroidReader(filename="./data/centroid_mini.dat")
-    #     z_depth = [int(dummy.strip()) for dummy in open(globals.config.general.permeability_files_folder+"/z.dat").readlines()]
-    #     raster_file_interpolator = interpolation.SparseDataInterpolator()
-    #     for idx, raster_file in enumerate(glob.glob(perm_folder+"/*.txt")):
-    #         raster_file_data = readers.RasterFileReader(filename=raster_file)
-    #         raster_file_data.add_z_info(z_depth[idx])
-    #         raster_file_data = raster_file_data.get_data()
-    #         raster_file_data[:, 0] -= float(globals.config.coord.x_local_to_global)
-    #         raster_file_data[:, 1] -= float(globals.config.coord.y_local_to_global)
-    #         raster_file_interpolator.add_data(raster_file_data)
-    #     raster_file_interpolator.add_mesh(PFLOTRAN_centroid.get_data())
-    #     raster_file_interpolator.interpolate(method="nearest")
-    #     permX_final = np.multiply(permX.get_data()[:, 3], raster_file_interpolator.get_data()[:, 3])
-    #     print("X permeability generated")
-    #     temp_array = np.reshape(permX_final, (permX_final.shape[0], 1))
-    #     temp_array = np.concatenate((permX.mesh, temp_array), axis=1)
-    #     # np.savetxt("permX.csv", temp_array, delimiter=",")
-    #
-    #     # Export PermX
-    #     print("Exporting X Permeability")
-    #     h5exporter.load_data(permeability_name_from_folder+"X", permX_final)
-    #     h5exporter.dump_file()
-    #
-    #
-    #     permY_final = np.multiply(permY.get_data()[:, 3], raster_file_interpolator.get_data()[:, 3])
-    #     print("Y permeability generated")
-    #     # Export PermY
-    #     print("Exporting Y Permeability")
-    #     h5exporter.load_data(permeability_name_from_folder+"Y", permY_final)
-    #     h5exporter.dump_file()
-    #
-    #
-    #     permZ_final = np.multiply(permZ.get_data()[:, 3], raster_file_interpolator.get_data()[:, 3])
-    #     print("Z permeability generated")
-    #     # Export PermZ
-    #     print("Exporting Z Permeability")
-    #     h5exporter.load_data(permeability_name_from_folder+"Z", permZ_final)
-    #     h5exporter.dump_file()
-    #     # np.savetxt("permZ.csv", temp_array, delimiter=",")
-    #
-    # print("Dumping Done")
 
 
 if __name__ == "__main__":
