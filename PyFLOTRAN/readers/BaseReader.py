@@ -6,10 +6,11 @@ import numpy as np
 
 class BaseReader:
     data: np.ndarray  # Hint of self.data array
+    info: dict
 
     def __init__(self, filename, header=False, **kwargs):
         self.filename = filename
-        self.info = {}
+        self.info = {"reader": {}}
         self.data = None
         self.header = header
         self.__dict__.update(kwargs)
@@ -61,7 +62,6 @@ class BaseReader:
         assert len(self.data.shape) >= 2 and self.data.shape[1] >= 2, "Error in data shape"
         self.data[:, 0] += x_local_to_global
         self.data[:, 1] += y_local_to_global
-
 
     def dump_to_csv(self, output_file, delimiter=","):
         """
