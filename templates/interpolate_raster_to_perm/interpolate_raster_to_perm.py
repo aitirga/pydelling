@@ -8,6 +8,7 @@ from PyFLOTRAN.utils.modelling_utils import interpolate_permeability_anisotropic
 from PyFLOTRAN.writers.HDF5CentroidWriter import HDF5CentroidWriter
 import glob
 import numpy as np
+import os
 
 
 
@@ -16,7 +17,7 @@ def main():
     # global config
     globals.initialize_config(config_file="./config.yaml")
 
-    perm_folders = glob.glob(globals.config.general.raster_files_folder+"/*RasterFiles*")
+    perm_folders = glob.glob(globals.config.general.raster_files_folder+"/Perm*")
     print(perm_folders)
     PFLOTRAN_centroid = readers.CentroidReader(filename=globals.config.general.PFLOTRAN_centroid_file, header=False)
     # normal_range = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
@@ -48,8 +49,9 @@ def main():
     )
     # permZ.dump_to_csv(filename="permZ.csv")
 
-    for perm_folder in perm_folders:
-        permeability_name_from_folder = perm_folder.split("_")[-1]
+    for stepID, perm_folder in enumerate(perm_folders):
+        print(f"Step {stepID} of {len(perm_folders)}")
+        permeability_name_from_folder = os.path.basename(perm_folder)
 
         # PFLOTRAN_centroid = CentroidReader(filename="./data/centroid_mini.dat")
         z_depth = [int(dummy.strip()) for dummy in open(globals.config.general.permeability_files_folder+"/z.dat").readlines()]
