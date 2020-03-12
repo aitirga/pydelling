@@ -27,9 +27,10 @@ def main():
     print("Generating Cell IDs")
     # cell_IDs = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
     h5exporter = HDF5CentroidWriter(filename="Permeability_interpolated_top_layer.h5")
+    h5exporter.remove_output_file()
     # Export Cell IDs
     h5exporter.load_data("Cell Ids", np.array(PFLOTRAN_centroid.get_data()[:, 3], dtype=np.int32))
-    h5exporter.dump_file(remove_if_exists=True)
+    h5exporter.dump_file()
 
     #Master permeability files
     permX = interpolate_permeability_anisotropic(

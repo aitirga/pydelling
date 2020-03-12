@@ -5,7 +5,6 @@ import PyFLOTRAN.utils.globals as globals
 import PyFLOTRAN.readers as readers
 import PyFLOTRAN.interpolation as interpolation
 import PyFLOTRAN.writers as writers
-from PyFLOTRAN.utils.modelling_utils import interpolate_centroid_to_structured_grid
 
 import glob
 import numpy as np
@@ -18,24 +17,33 @@ def main():
     globals.initialize_config(config_file="./config.yaml")
 
     # Read centroid files for pressure
-    pressure_raster = readers.CentroidReader(filename=os.path.join(globals.config.general.pressure_raster_folder,
-                                                                   "hhem_cal22_noditches_rcp45_min_49000_r1_export_velocity.val"),
-                                             centroid_pos=(1, 3),
-                                             var_pos=6,
-                                             # var_name="Vz",
-                                             header=True)
-    # Convert global coordinates into local
-    pressure_raster.global_coords_to_local(x_local_to_global=float(globals.config.coord.x_local_to_global),
-                                           y_local_to_global=float(globals.config.coord.y_local_to_global))
-    bc_interpolator = interpolation.SparseDataInterpolator(interpolation_data=pressure_raster.get_data())
-    bc_interpolator.create_regular_mesh(n_x=1000, n_y=1000)
-    bc_interpolator.interpolate()
-    bc_interpolator.write_data(writer_class=writers.HDF5RasterWriter,
-                               filename="prueba.h5",
-                               region_name="top_BC",
-                               remove_if_exists=True,
-                               )
+    velocity_BC_files_list = glob.glob(globals.config.general.pressure_raster_folder + "/*")
+    output_filename = "top_BC_velocities.h5"
+    bc_interpolator = interpolation.SparseDataInterpolator()
+    bc_interpolator.remove_output_file(filename=output_filename)
+    bc_times = []
+    interpolated_array = []
+    for year_iterator, year_file in enumerate(velocity_BC_files_list):
+        print(f"{year_iterator} of {len(velocity_BC_files_list)}")
+        print(os.path.basename(year_file))
+        bc_times.append(float(os.path.basename(year_file).split("_")[5]) * 365 * 24 * 3600)
+        pressure_raster = readers.CentroidReader(filename=year_file,
+                                                 centroid_pos=(1, 3),
+                                                 var_pos=6,
+                                                 var_name=os.path.basename(year_file),
+                                                 header=True)
 
+        bc_interpolator.wipe_data()
+        bc_interpolator.add_data(pressure_raster.get_data())
+        bc_interpolator.create_regular_mesh(n_x=1000, n_y=1000)
+        # Convert global coordinates into local
+        pressure_raster.global_coords_to_local(x_local_to_global=float(globals.config.coord.x_local_to_global),
+                                               y_local_to_global=float(globals.config.coord.y_local_to_global))
+        bc_interpolator.interpolate()
+        interpolated_array.append(bc_interpolator.get_data())
+    base_writer = writers.HDF5RasterWriter(filename=output_filename, data=np.array(interpolated_array),
+                                           info=bc_interpolator.info, times=bc_times)
+    base_writer.dump_file(filename=output_filename)
 
 
 if __name__ == "__main__":
