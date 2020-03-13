@@ -5,6 +5,7 @@ general:                                                                        
   pressure_raster_folder: S:\PERMEABILITY GLACIAL\BC\200221_hhem_cal22_noditches_rcp45_min_r1_export_velocity_val     # Folder containing the raster files
   verbose: True                                                                                                       # increases verbose
   eps: 1E-30                                                                                                          # Numerical zero value
+  dilatation_factor: 1.01
 time:
   zero_time_modifier: 49100
 coord:

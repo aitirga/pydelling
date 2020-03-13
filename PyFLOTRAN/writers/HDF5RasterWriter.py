@@ -2,6 +2,7 @@ import os
 import h5py
 import numpy as np
 from .BaseWriter import BaseWriter
+from ..utils import globals
 
 
 class HDF5RasterWriter(BaseWriter):
@@ -13,7 +14,8 @@ class HDF5RasterWriter(BaseWriter):
             if len(self.data.shape) == 3:
                 _data = []
                 for layer in self.data:
-                    _data.append(self._centroid_transform_to_mesh(layer))
+                    _data.append(np.array(self._centroid_transform_to_mesh(layer)))
+                self.data = np.array(_data)
                 self.data = np.swapaxes(np.array(_data), 0, 1)
                 self.data = np.swapaxes(self.data, 1, 2)
         if self.data is not None:
@@ -37,9 +39,19 @@ class HDF5RasterWriter(BaseWriter):
 
 
     def add_default_attributes(self, hdf5_group: h5py.Dataset):
+        dilatation_factor = float(globals.config.general.dilatation_factor)
+        l_x = np.abs(self.info["interpolation"]["x_max"] - self.info["interpolation"]["x_min"])
+        l_x_dilatated = np.abs(self.info["interpolation"]["x_max"] - self.info["interpolation"]["x_min"]) * dilatation_factor
+        delta_x = (l_x_dilatated - l_x) / 2.0
+        dx = self.info["interpolation"]["d_x"] * dilatation_factor
+        l_y = np.abs(self.info["interpolation"]["y_max"] - self.info["interpolation"]["y_min"])
+        l_y_dilatated = np.abs(self.info["interpolation"]["y_max"] - self.info["interpolation"]["y_min"]) * dilatation_factor
+        delta_y = (l_y_dilatated - l_y) / 2.0
+        dy = self.info["interpolation"]["d_y"] * dilatation_factor
+
         hdf5_group.attrs.create('Dimension', "XY", dtype="S3")
-        hdf5_group.attrs["Discretization"] = [self.info["interpolation"]["d_x"], self.info["interpolation"]["d_y"]]
-        hdf5_group.attrs["Origin"] = [self.info["interpolation"]["x_min"], self.info["interpolation"]["y_min"]]
+        hdf5_group.attrs["Discretization"] = [dx, dy]
+        hdf5_group.attrs["Origin"] = [self.info["interpolation"]["x_min"] - delta_x, self.info["interpolation"]["y_min"] - delta_y]
         hdf5_group.attrs["Interpolation_Method"] = "STEP"
 
     def dump_file(self, filename=None):
