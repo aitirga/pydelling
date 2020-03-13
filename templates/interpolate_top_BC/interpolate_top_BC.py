@@ -18,15 +18,16 @@ def main():
 
     # Read centroid files for pressure
     velocity_BC_files_list = glob.glob(globals.config.general.pressure_raster_folder + "/*")
+    velocity_BC_files_list = sorted(velocity_BC_files_list)
     output_filename = "top_BC_velocities.h5"
     bc_interpolator = interpolation.SparseDataInterpolator()
     bc_interpolator.remove_output_file(filename=output_filename)
     bc_times = []
     interpolated_array = []
     for year_iterator, year_file in enumerate(velocity_BC_files_list):
+        normalized_time = (float(os.path.basename(year_file).split("_")[5])-globals.config.time.zero_time_modifier) * 365 * 24 * 3600
         print(f"{year_iterator} of {len(velocity_BC_files_list)}")
-        print(os.path.basename(year_file))
-        bc_times.append(float(os.path.basename(year_file).split("_")[5]) * 365 * 24 * 3600)
+        bc_times.append(normalized_time)
         pressure_raster = readers.CentroidReader(filename=year_file,
                                                  centroid_pos=(1, 3),
                                                  var_pos=6,
