@@ -35,11 +35,12 @@ def main():
                                                  header=True)
 
         bc_interpolator.wipe_data()
-        bc_interpolator.add_data(pressure_raster.get_data())
-        bc_interpolator.create_regular_mesh(n_x=1000, n_y=1000)
+
         # Convert global coordinates into local
         pressure_raster.global_coords_to_local(x_local_to_global=float(globals.config.coord.x_local_to_global),
                                                y_local_to_global=float(globals.config.coord.y_local_to_global))
+        bc_interpolator.add_data(pressure_raster.get_data())
+        bc_interpolator.create_regular_mesh(n_x=1000, n_y=1000)
         bc_interpolator.interpolate()
         interpolated_array.append(bc_interpolator.get_data())
     base_writer = writers.HDF5RasterWriter(filename=output_filename, data=np.array(interpolated_array),
