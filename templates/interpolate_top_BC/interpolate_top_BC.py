@@ -25,8 +25,11 @@ def main():
     bc_times = []
     interpolated_array = []
     for year_iterator, year_file in enumerate(velocity_BC_files_list):
-        normalized_time = (float(os.path.basename(year_file).split("_")[5])-globals.config.time.zero_time_modifier) * 365 * 24 * 3600
-        print(f"{year_iterator} of {len(velocity_BC_files_list)}")
+        normalized_time = os.path.basename(year_file)
+        for split_filter in globals.config.filters.time_from_file_splits:
+            normalized_time = normalized_time.split(split_filter[0])[split_filter[1]]
+        normalized_time = (float(normalized_time) - globals.config.time.zero_time_modifier) * 365 * 24 * 3600
+        print(f"{year_iterator+1} of {len(velocity_BC_files_list)}")
         bc_times.append(normalized_time)
         pressure_raster = readers.CentroidReader(filename=year_file,
                                                  centroid_pos=(1, 3),
