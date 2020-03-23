@@ -9,16 +9,22 @@ from PyFLOTRAN.writers.HDF5CentroidWriter import HDF5CentroidWriter
 import glob
 import numpy as np
 import os
+import sys
 
 
-
-def main():
+def main(argv):
     # Read configuration file
     # global config
-    globals.initialize_config(config_file="./config.yaml")
+    try:
+        config_file_path = argv[1]
+    except IndexError as ie:
+        config_file_path = "./config.yaml"
+        print(f"INFO: Using default config file: {config_file_path}")
+        print(f"INFO: You can specify the config file as an argument. "
+              f"Eg: python script/path/to/script_file.py path/to/config_file.yaml")
+    globals.initialize_config(config_file=config_file_path)
 
     perm_folders = glob.glob(globals.config.general.raster_files_folder+"/Perm*")
-    print(perm_folders)
     PFLOTRAN_centroid = readers.CentroidReader(filename=globals.config.general.PFLOTRAN_centroid_file, header=False)
     # normal_range = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
     # diff_array = PFLOTRAN_centroid.get_data()[:, 3] - normal_range
@@ -98,4 +104,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

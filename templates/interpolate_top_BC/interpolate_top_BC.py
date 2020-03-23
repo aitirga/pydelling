@@ -9,12 +9,20 @@ import PyFLOTRAN.writers as writers
 import glob
 import numpy as np
 import os
+import sys
 
 
-def main():
+def main(argv):
     # Read configuration file
     # global config
-    globals.initialize_config(config_file="./config.yaml")
+    try:
+        config_file_path = argv[1]
+    except IndexError as ie:
+        config_file_path = "./config.yaml"
+        print(f"INFO: Using default config file: {config_file_path}")
+        print(f"INFO: You can specify the config file as an argument. " 
+              f"Eg: python script/path/to/script_file.py path/to/config_file.yaml")
+    globals.initialize_config(config_file=config_file_path)
 
     # Read centroid files for pressure
     velocity_BC_files_list = glob.glob(globals.config.general.pressure_raster_folder + "/*")
@@ -52,4 +60,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
