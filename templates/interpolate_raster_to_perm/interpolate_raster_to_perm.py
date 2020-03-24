@@ -8,16 +8,23 @@ from PyFLOTRAN.utils.modelling_utils import interpolate_permeability_anisotropic
 from PyFLOTRAN.writers.HDF5CentroidWriter import HDF5CentroidWriter
 import glob
 import numpy as np
+import os
+import sys
 
 
-
-def main():
+def main(argv):
     # Read configuration file
     # global config
-    globals.initialize_config(config_file="./config.yaml")
+    try:
+        config_file_path = argv[1]
+    except IndexError as ie:
+        config_file_path = "./config.yaml"
+        print(f"INFO: Using default config file: {config_file_path}")
+        print(f"INFO: You can specify the config file as an argument. "
+              f"Eg: python script/path/to/script_file.py path/to/config_file.yaml")
+    globals.initialize_config(config_file=config_file_path)
 
-    perm_folders = glob.glob(globals.config.general.raster_files_folder+"/*RasterFiles*")
-    print(perm_folders)
+    perm_folders = glob.glob(globals.config.general.raster_files_folder+"/Perm*")
     PFLOTRAN_centroid = readers.CentroidReader(filename=globals.config.general.PFLOTRAN_centroid_file, header=False)
     # normal_range = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
     # diff_array = PFLOTRAN_centroid.get_data()[:, 3] - normal_range
@@ -26,9 +33,10 @@ def main():
     print("Generating Cell IDs")
     # cell_IDs = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
     h5exporter = HDF5CentroidWriter(filename="Permeability_interpolated_top_layer.h5")
+    h5exporter.remove_output_file()
     # Export Cell IDs
     h5exporter.load_data("Cell Ids", np.array(PFLOTRAN_centroid.get_data()[:, 3], dtype=np.int32))
-    h5exporter.dump_file(remove_if_exists=True)
+    h5exporter.dump_file()
 
     #Master permeability files
     permX = interpolate_permeability_anisotropic(
@@ -48,8 +56,9 @@ def main():
     )
     # permZ.dump_to_csv(filename="permZ.csv")
 
-    for perm_folder in perm_folders:
-        permeability_name_from_folder = perm_folder.split("_")[-1]
+    for stepID, perm_folder in enumerate(perm_folders):
+        print(f"Step {stepID} of {len(perm_folders)}")
+        permeability_name_from_folder = os.path.basename(perm_folder)
 
         # PFLOTRAN_centroid = CentroidReader(filename="./data/centroid_mini.dat")
         z_depth = [int(dummy.strip()) for dummy in open(globals.config.general.permeability_files_folder+"/z.dat").readlines()]
@@ -95,4 +104,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)

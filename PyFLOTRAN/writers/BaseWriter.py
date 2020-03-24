@@ -39,15 +39,9 @@ class BaseWriter:
     def check_data(self):
         return self.data_loaded
 
-    def dump_file(self, filename=None, remove_if_exists=False):
+    def dump_file(self, filename=None):
         if filename is not None:
             self.filename = filename
-        if remove_if_exists:
-            try:
-                os.remove(self.filename)
-            except FileNotFoundError as ef:
-                print("Nothing to overwrite!")
-
         if self.check_data():
             if not os.path.exists(self.filename):
                 temp_writer = open(self.filename, "w")
@@ -58,3 +52,16 @@ class BaseWriter:
             self.info["writer"] = {"filename": self.filename}
         else:
             print("Couldn't find data to dump!")
+
+    def remove_output_file(self, filename=None):
+        if filename is None:
+            filename = self.filename
+        else:
+            self.filename = filename
+        try:
+            os.remove(filename)
+        except FileNotFoundError as ef:
+            print(f"Nothing to delete!")
+        except PermissionError as perr:
+            print(f"ERROR: Cannot delete file: {perr}")
+            exit(1)
