@@ -19,5 +19,9 @@ def read_config(config_file="./config.yaml"):
 
 def initialize_config(config_file="./config/config.yaml"):
     global config
-    config = read_config(config_file)
+    try:
+        config = read_config(config_file)
+    except FileNotFoundError as fe:
+        print(f"ERROR: Config file({config_file}) not found.")
+        exit(1)
 
