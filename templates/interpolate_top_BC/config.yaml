@@ -1,0 +1,17 @@
+## All config here
+
+general:                                                                                                              # general parameters
+  working_folder: ./                                                                                                  # Sets up the working folder directory
+  pressure_raster_folder: S:\PERMEABILITY GLACIAL\BC\200316_hhem_cal22_noditches_rcp45_min_r1_darcy_export_20m
+  verbose: True                                                                                                       # increases verbose
+  eps: 1E-30                                                                                                          # Numerical zero value
+  dilatation_factor: 1.01
+time:
+  zero_time_modifier: 49100
+filters:
+  time_from_file_splits:
+    - [_, -1]
+    - [AD, 0]
+coord:
+  x_local_to_global: 1.52E6                                                                                           # Coordinate change x_local = x_global - x_local_to_global
+  y_local_to_global: 6.79E6                                                                                           # Coordinate change y_local = y_global - y_local_to_global
