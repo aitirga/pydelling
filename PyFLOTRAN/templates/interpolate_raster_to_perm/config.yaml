@@ -1,8 +1,0 @@
-## All config here
-
-general:                                  # general parameters
-  working_folder: ./                      # Sets up the working folder directory
-  raster_files_folder: ./data/raster_files/ # Folder containing the raster files
-  PFLOTRAN_centroid_file: ./data/centroid.dat # File containing the PFLOTRAN centroid files
-  verbose: True                           # increases verbose
-  eps: 1E-30                              # Numerical zero value

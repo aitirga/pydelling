@@ -1,13 +1,15 @@
 # Created by .ignore support plugin (hsz.mobi)
 .idea
+*.csv*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-
 # C extensions
 *.so
-
+*.val
+*.zip
+*h5
 # Distribution / packaging
 .Python
 #PyFLOTRAN/templates/*data*
