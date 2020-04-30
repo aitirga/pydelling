@@ -24,7 +24,7 @@ def main(argv):
               f"Eg: python script/path/to/script_file.py path/to/config_file.yaml")
     globals.initialize_config(config_file=config_file_path)
 
-    perm_folders = glob.glob(globals.config.general.raster_files_folder+"/Perm*")
+    perm_folders = sorted(glob.glob(globals.config.general.raster_files_folder+"/Perm*"))
     PFLOTRAN_centroid = readers.CentroidReader(filename=globals.config.general.PFLOTRAN_centroid_file, header=False)
     # normal_range = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
     # diff_array = PFLOTRAN_centroid.get_data()[:, 3] - normal_range
@@ -32,10 +32,11 @@ def main(argv):
     # print(np.sum(diff_array))
     print("Generating Cell IDs")
     # cell_IDs = np.arange(1, PFLOTRAN_centroid.info["n_cells"] + 1)
-    h5exporter = HDF5CentroidWriter(filename="Permeability_interpolated_top_layer.h5")
+    h5exporter = HDF5CentroidWriter(filename=f"Permeability_interpolated_top_layer_limited{globals.config.results.min_value}.h5")
+    h5exporter.set_data_limits(globals.config.results.min_value, globals.config.results.max_value)
     h5exporter.remove_output_file()
     # Export Cell IDs
-    h5exporter.load_data("Cell Ids", np.array(PFLOTRAN_centroid.get_data()[:, 3], dtype=np.int32))
+    h5exporter.load_data("Cell Ids", np.array(PFLOTRAN_centroid.get_data()[:, 3], dtype=np.int32), False)
     h5exporter.dump_file()
 
     #Master permeability files
