@@ -27,7 +27,7 @@ class BaseInterpolator:
         Add a dataset that will be used to interpolate
         :return:
         """
-        if not self.data:
+        if len(self.data) == 0:
             self.data = np.array(data)
         else:
             self.data = np.vstack((self.data, data))
