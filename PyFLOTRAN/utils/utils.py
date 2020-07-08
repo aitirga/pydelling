@@ -6,7 +6,8 @@ import yaml
 import PyFLOTRAN.readers as readers
 import PyFLOTRAN.interpolation as interpolation
 import numpy as np
-
+from pathlib import Path
+import os
 
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):
     perm = readers.CentroidReader(filename=perm_filename, header=True)
@@ -46,5 +47,12 @@ def interpolate_centroid_to_structured_grid(centroid: np.ndarray,
     if len(var.shape) == 1:
         _var = np.reshape(_var, (var.shape[0], 1))
     grid_x, grid_y = np.meshgrid(linspace_x, linspace_y)
-    
 
+
+def root_path():
+    """Returns path to the root of the project"""
+    return Path(__file__).parent
+
+
+def runtime_path():
+    return Path(os.getcwd())

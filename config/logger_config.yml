@@ -1,0 +1,32 @@
+version: 1
+disable_existing_loggers: False
+
+# Formatters to be assigned to the different outputs
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: '%Y-%m-%d,%H:%M:%S'
+  log_info:
+    format: "%(asctime)s - %(levelname)s - %(message)s"
+    datefmt: '%Y-%m-%d,%H:%M:%S'
+
+# Output handlers
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+
+  info_file_handler:
+    class: logging.FileHandler
+    level: DEBUG
+    mode: w
+    formatter: log_info
+    filename: logs/info.log
+    encoding: utf8
+
+root:
+  level: DEBUG
+  handlers: [console, info_file_handler]

@@ -2,6 +2,9 @@
 Base interface for a reader class
 """
 import numpy as np
+import logging
+
+logger = logging.getLogger(__file__)
 
 
 class BaseReader:
