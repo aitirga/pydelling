@@ -13,7 +13,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 #PyFLOTRAN/templates/*data*
-*data*
+**/data/*
 build/
 develop-eggs/
 dist/

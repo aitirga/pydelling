@@ -3,7 +3,8 @@ Global variables
 """
 # from ..utils.common import read_config
 import yaml
-import munch
+from box import Box
+
 
 def read_config(config_file="./config.yaml"):
     """
@@ -13,7 +14,7 @@ def read_config(config_file="./config.yaml"):
     """
     with open(config_file) as file:
         context = yaml.load(file, Loader=yaml.FullLoader)
-    return munch.DefaultMunch.fromDict(context)
+    return Box(context, default_box=True)
     # return munch.DefaultMunch.from_dict(context)
 
 

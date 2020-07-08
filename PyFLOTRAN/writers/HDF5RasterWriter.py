@@ -2,7 +2,7 @@ import os
 import h5py
 import numpy as np
 from .BaseWriter import BaseWriter
-from ..utils import globals
+from config import config
 
 
 class HDF5RasterWriter(BaseWriter):
@@ -39,7 +39,7 @@ class HDF5RasterWriter(BaseWriter):
 
 
     def add_default_attributes(self, hdf5_group: h5py.Dataset):
-        dilatation_factor = float(globals.config.general.dilatation_factor)
+        dilatation_factor = float(config.general.dilatation_factor)
         l_x = np.abs(self.info["interpolation"]["x_max"] - self.info["interpolation"]["x_min"])
         l_x_dilatated = np.abs(self.info["interpolation"]["x_max"] - self.info["interpolation"]["x_min"]) * dilatation_factor
         delta_x = (l_x_dilatated - l_x) / 2.0
