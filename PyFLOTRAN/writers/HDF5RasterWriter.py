@@ -2,7 +2,7 @@ import os
 import h5py
 import numpy as np
 from .BaseWriter import BaseWriter
-from config import config
+from PyFLOTRAN.config import config
 
 
 class HDF5RasterWriter(BaseWriter):

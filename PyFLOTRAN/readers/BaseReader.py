@@ -4,14 +4,14 @@ Base interface for a reader class
 import numpy as np
 import logging
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 class BaseReader:
     data: np.ndarray  # Hint of self.data array
     info: dict
 
-    def __init__(self, filename, header=False, **kwargs):
+    def __init__(self, filename=None, header=False, **kwargs):
         self.filename = filename
         self.info = {"reader": {}}
         self.data = None
