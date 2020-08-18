@@ -14,10 +14,10 @@ coord:
   x_local_to_global: 1.52E6
   y_local_to_global: 6.79E6
 structured_list_reader:
-  filename: C:\Users\Aitor\PycharmProjects\PyFLOTRAN\templates\interpolate_grains_to_mesh\data\calcite_32_small
-  nx: 2 #400
-  ny: 2 #400
-  nz: 2 # 20
+  filename: C:\Users\Aitor\PycharmProjects\PyFLOTRAN\templates\interpolate_grains_to_mesh\data\calcite_32
+  nx: 400
+  ny: 400
+  nz: 20
   dx: 2.5E-4
   dy: 2.5E-4
   dz: 3.265E-4
@@ -26,3 +26,6 @@ structured_list_reader:
   oz: -2.52E-3
   header_offset: 3
   csv_file: ./grain_3d.csv
+
+open_foam_reader:
+  filename: C:\Users\Aitor\PycharmProjects\PyFLOTRAN\templates\interpolate_grains_to_mesh\data\open_foam_file

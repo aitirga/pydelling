@@ -54,7 +54,7 @@ class HDF5RasterWriter(BaseWriter):
         hdf5_group.attrs["Origin"] = [self.info["interpolation"]["x_min"] - delta_x, self.info["interpolation"]["y_min"] - delta_y]
         hdf5_group.attrs["Interpolation_Method"] = "STEP"
 
-    def dump_file(self, filename=None):
+    def run(self, filename=None):
         if filename is not None:
             self.filename = filename
 

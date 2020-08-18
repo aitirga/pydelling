@@ -63,7 +63,7 @@ class BaseWriter:
     def check_data(self):
         return self.data_loaded
 
-    def dump_file(self, filename=None):
+    def run(self, filename=None):
         if filename is not None:
             self.filename = filename
         if self.check_data():
