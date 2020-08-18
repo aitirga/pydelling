@@ -4,10 +4,14 @@ Interpolates a given set of points into a PFLOTRAN mesh
 import numpy as np
 from scipy.interpolate import griddata
 from .BaseInterpolator import BaseInterpolator
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SparseDataInterpolator(BaseInterpolator):
     def interpolate(self, **kwargs):
+        logger.info(f"Interpolating data based on {self.info}")
         self.interpolated_data = griddata(self.data[:, 0:-1], self.data[:, -1], self.mesh, **kwargs)
         return self.get_data()
 

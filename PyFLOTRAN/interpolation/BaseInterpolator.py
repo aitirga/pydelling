@@ -99,7 +99,7 @@ class BaseInterpolator:
 
     def write_data(self, writer_class=BaseWriter, filename="test.dat", **kwargs):
         base_writer = writer_class(filename=filename, data=self.get_data(), info=self.info, **kwargs)
-        base_writer.dump_file(filename=filename)
+        base_writer.run(filename=filename)
 
     def remove_output_file(self, writer_class=BaseWriter, filename=None, **kwargs):
         base_writer = writer_class(filename=filename, **kwargs)

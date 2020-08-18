@@ -4,7 +4,7 @@ from .BaseWriter import BaseWriter
 
 
 class HDF5CentroidWriter(BaseWriter):
-    def dump_file(self, filename=None, remove_if_exists=False):
+    def run(self, filename=None, remove_if_exists=False):
         if filename is not None:
             self.filename = filename
         if remove_if_exists:
