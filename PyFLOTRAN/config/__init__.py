@@ -3,7 +3,7 @@ import yaml
 from pathlib import Path
 import os
 import logging.config
-from PyFLOTRAN.utils import runtime_path
+from pathlib import Path
 
 def read_config(config_file: Path="./config.yaml"):
     """
@@ -21,7 +21,7 @@ _config_file = list(Path(os.getcwd()).glob("**/*config.yml") and Path(os.getcwd(
 assert len(_config_file) == 1, "Please provide a configuration file that has a '*config.yaml' name structure"
 config = read_config(config_file=_config_file[0])
 
-os.makedirs(config.path.logs if config.path.logs else runtime_path() / "logs", exist_ok=True)
+os.makedirs(config.path.logs if config.path.logs else Path().cwd() / "logs", exist_ok=True)
 with open(Path(__file__).parent / "logger_config.yml", "r") as ymlfile:
     log_config = yaml.safe_load(ymlfile)
 logging.config.dictConfig(log_config)

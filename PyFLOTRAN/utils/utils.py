@@ -9,6 +9,7 @@ import numpy as np
 from pathlib import Path
 import os
 
+
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):
     perm = readers.CentroidReader(filename=perm_filename, header=True)
     if mesh is None:

@@ -13,3 +13,16 @@ results:
 coord:
   x_local_to_global: 1.52E6
   y_local_to_global: 6.79E6
+structured_list_reader:
+  filename: C:\Users\Aitor\PycharmProjects\PyFLOTRAN\templates\interpolate_grains_to_mesh\data\calcite_32_small
+  nx: 2 #400
+  ny: 2 #400
+  nz: 2 # 20
+  dx: 2.5E-4
+  dy: 2.5E-4
+  dz: 3.265E-4
+  ox: 0.0
+  oy: 0.0
+  oz: -2.52E-3
+  header_offset: 3
+  csv_file: ./grain_3d.csv
