@@ -48,6 +48,7 @@ class StructuredListReader(BaseReader):
                         # idx = nx + config.structured_list_reader.nx * ny + config.structured_list_reader.nx * config.structured_list_reader.ny * nz + config.structured_list_reader.header_offset
                         # _temp_array.append(np.array())
         grain_array = pd.DataFrame(_temp_array, columns=["x", "y", "z", "v"])
+        # grain_array[grain_array["v"] < config.structured_list_reader.min_value] = config.structured_list_reader.min_value
         self.data = grain_array
 
     def read_header(self):

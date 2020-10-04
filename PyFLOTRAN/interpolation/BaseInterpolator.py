@@ -97,7 +97,7 @@ class BaseInterpolator:
         self.mesh = []
         self.interpolated_data = []
 
-    def write_data(self, writer_class=BaseWriter, filename="test.dat", **kwargs):
+    def write_data(self, writer_class=BaseWriter, filename=None, **kwargs):
         base_writer = writer_class(filename=filename, data=self.get_data(), info=self.info, **kwargs)
         base_writer.run(filename=filename)
 

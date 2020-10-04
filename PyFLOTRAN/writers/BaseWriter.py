@@ -5,19 +5,17 @@ import numpy as np
 
 class BaseWriter:
     info: dict
-
-    def __init__(self, filename="data.dat", var_name=None, data=None, region_name=None, **kwargs):
+    def __init__(self, filename=None, var_name=None, data=None, region_name=None, **kwargs):
         self.data_loaded = False
         self.a_min = None
         self.a_max = None
         self.__dict__.update(**kwargs)
-        if filename is not None:
-            self.filename = filename
-        if var_name is not None:
+        self.filename = filename if filename else "test.dat"
+        if var_name:
             self.var_name = var_name
-        if region_name is not None:
+        if region_name:
             self.region_name = region_name
-        if data is not None:
+        if data:
             self.data = data
             self.data_loaded = True
 

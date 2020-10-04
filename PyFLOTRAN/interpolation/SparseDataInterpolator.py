@@ -19,3 +19,7 @@ class SparseDataInterpolator(BaseInterpolator):
         temp_array = np.reshape(self.interpolated_data, (self.interpolated_data.shape[0], 1))
         return np.concatenate((self.mesh, temp_array), axis=1)
 
+    def change_min_value(self, min_value=None):
+        logger.info(f"Equaling values <{min_value} to {min_value}")
+        self.interpolated_data[self.interpolated_data < min_value] = min_value
+        return self.interpolated_data
