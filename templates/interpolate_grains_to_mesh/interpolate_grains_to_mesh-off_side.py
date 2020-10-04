@@ -14,6 +14,8 @@ from PyFLOTRAN.writers import HDF5CentroidWriter, OpenFoamVariableWriter
 def main(argv):
     # Read grain files with the list reader
     grain_reader = StructuredListReader()
+    grain_reader.data.loc[grain_reader.data["x"].astype(np.float) < config.structured_list_reader.threshold_x, "v"] = "1"
+    grain_reader.dump_to_csv(output_file="test_grains_threshold.csv")
     # Read the OpenFOAM mesh
     open_foam_reader = OpenFoamReader()
     # Interpolate the grain information to the OpenFOAM mesh
@@ -25,7 +27,6 @@ def main(argv):
     sparse_data_interpolator.change_min_value(min_value=config.structured_list_reader.min_value)
     # Write the epsilon field in the OpenFOAM format
     sparse_data_interpolator.write_data(writer_class=OpenFoamVariableWriter)
-
 
 if __name__ == "__main__":
     main(sys.argv)
