@@ -4,7 +4,6 @@ This class implements a basic interface for Interpolation classes
 import numpy as np
 import h5py
 import os
-from ..utils import globals
 from ..writers.BaseWriter import BaseWriter
 
 

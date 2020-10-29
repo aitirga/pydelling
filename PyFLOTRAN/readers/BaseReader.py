@@ -12,7 +12,7 @@ class BaseReader:
     info: dict
 
     def __init__(self, filename=None, header=False, **kwargs):
-        self.filename = filename
+        self.filename = str(filename)
         self.info = {"reader": {}}
         self.data = None
         self.header = header
