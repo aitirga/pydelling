@@ -5,6 +5,7 @@ import os
 import logging.config
 from pathlib import Path
 
+
 def read_config(config_file: Path="./config.yaml"):
     """
     Reads the configuration file
@@ -16,8 +17,8 @@ def read_config(config_file: Path="./config.yaml"):
     return Box(context, default_box=True)
 
 
-
-_config_file = list(Path(os.getcwd()).glob("**/*config.yml") and Path(os.getcwd()).glob("**/*config.yaml"))
+_config_file = list(Path(os.getcwd()).glob("**/*config.yml") and Path(os.getcwd()).glob("**/*config.yaml") and Path().cwd().glob("*config*.yml"))
+_config_file = _config_file if _config_file else list(Path(__file__).parent.glob("config.yml"))
 assert len(_config_file) == 1, "Please provide a configuration file that has a '*config.yaml' name structure"
 config = read_config(config_file=_config_file[0])
 

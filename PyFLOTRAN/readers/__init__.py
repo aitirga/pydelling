@@ -4,3 +4,4 @@ from .RasterFileReader import RasterFileReader
 from .StructuredGridReader import StructuredGridReader
 from .StructuredListReader import StructuredListReader
 from .OpenFoamReader import OpenFoamReader
+from .StreamlineReader import StreamlineReader
