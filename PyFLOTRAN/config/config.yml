@@ -1,0 +1,10 @@
+## All config here
+
+general:                                  # general parameters
+  working_folder: None                    # Sets up the working folder directory
+  verbose: True                           # increases verbose
+  eps: 1E-30                              # Numerical zero value
+
+streamline_reader:
+  file: streamline_test_data.csv
+  reason_of_termination: 1

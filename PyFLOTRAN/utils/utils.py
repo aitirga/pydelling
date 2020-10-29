@@ -10,7 +10,6 @@ from pathlib import Path
 import os
 
 
-
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):
     perm = readers.CentroidReader(filename=perm_filename, header=True)
     if mesh is None:
@@ -51,9 +50,19 @@ def interpolate_centroid_to_structured_grid(centroid: np.ndarray,
     grid_x, grid_y = np.meshgrid(linspace_x, linspace_y)
 
 
-def root_path():
+def root_path() -> Path:
     """Returns path to the root of the project"""
     return Path(__file__).parent
+
+
+def config_path() -> Path:
+    """Returns path to the root of the project"""
+    return Path(__file__).parent / "config"
+
+
+def test_data_path() -> Path:
+    """Returns path to the root of the project"""
+    return Path(__file__).parent.parent / "tests/test_data"
 
 
 def runtime_path():
