@@ -1,19 +1,24 @@
 import numpy as np
-from .BaseReader import BaseReader
 from paraview.simple import *
 from paraview.vtk.numpy_interface import dataset_adapter as dsa
 from paraview import servermanager as sm
-from vtk.util.numpy_support import vtk_to_numpy
-from vtkmodules.vtkCommonDataModel import vtkPolyData
+from typing import Dict
 
-class VtkReader(BaseReader):
+
+class ParaviewProcessor:
     """
     This class provides the framework to read data from a VTK file and do different postprocessing steps
     """
     current_array: None
     calculator: Calculator
+    pipeline: Dict[str, object]
+    read_data_counter: int = 0
 
-    def read_file(self, opened_file):
+    def __init__(self):
+        pass
+
+    def read_vtk_file(self):
+        print(self.read_data_counter)
         self.vtk_file = LegacyVTKReader(FileNames=self.filename)
         self.current_array = self.vtk_file
 
