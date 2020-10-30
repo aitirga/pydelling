@@ -1,3 +1,5 @@
+from PyFLOTRAN.paraview_processor.filters import BaseFilter
 
-class CalculatorFilter:
+
+class CalculatorFilter(BaseFilter):
     pass
