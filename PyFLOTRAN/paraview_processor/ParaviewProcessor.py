@@ -5,7 +5,7 @@ from paraview import servermanager as sm
 from typing import Dict
 import logging
 
-from PyFLOTRAN.paraview_processor.filters import VtkFilter, BaseFilter
+from PyFLOTRAN.paraview_processor.filters import VtkFilter, BaseFilter, CalculatorFilter
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class ParaviewProcessor:
     pipeline: Dict[str, BaseFilter] = {}
     vtk_data_counter: int = 0
 
-    def add_vtk_file(self, path, name=None):
+    def add_vtk_file(self, path, name=None) -> VtkFilter:
         """
         Reads a given vtk file. This is done by adding an instance of the LegacyVTKReader class to the pipeline.
         Args:
@@ -31,8 +31,23 @@ class ParaviewProcessor:
 
         pipeline_name = name if name else f"vtk_data_{VtkFilter.counter}"
         self.vtk_data_counter += 1
-        self.pipeline[pipeline_name] = VtkFilter(filename=str(path), name=pipeline_name)
-        return self.pipeline[pipeline_name]
+        vtk_filter = VtkFilter(filename=str(path), name=pipeline_name)
+        self.pipeline[pipeline_name] = vtk_filter
+        return vtk_filter
+
+    def add_calculator(self, input_filter=None, function='', name=None, output_array_name='Results') -> CalculatorFilter:
+        """
+        Adds a calculator filter to a dataset
+        Returns:
+            The Calculator object
+        """
+        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        calculator_filter = CalculatorFilter(input_filter=self.process_input_filter(filter=input_filter),
+                                           function=function,
+                                           name=pipeline_name,
+                                           output_array_name=output_array_name)
+        self.pipeline[pipeline_name] = calculator_filter
+        return calculator_filter
 
     def print_pipeline(self) -> str:
         """
@@ -76,18 +91,21 @@ class ParaviewProcessor:
         """
         return self.pipeline[name]
 
-    def add_calculator(self, input=None, function=''):
+    def process_input_filter(self, filter) -> object:
         """
-        Adds a calculator filter to a dataset
-        Returns:
-            The Calculator object
-        """
-        input = input if input else self.current_array
-        self.calculator = Calculator(Input=input)
-        self.calculator.Function = function
+        Processes the filter object and returns the proper datatype
+        Args:
+            input_filter: an object refering to an existing filter
 
-        self.current_array = self.calculator
-        return self.current_array
+        Returns:
+            A proper Paraview object
+        """
+        if type(filter) == str:
+            # Assume the filter specifies the name of the pipeline
+            return self.pipeline[filter]
+        else:
+            return filter.filter
+
 
     def __repr__(self):
         return self.print_pipeline()
