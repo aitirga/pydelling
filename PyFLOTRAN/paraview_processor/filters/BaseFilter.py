@@ -1,0 +1,3 @@
+
+class BaseFilter:
+    pass
