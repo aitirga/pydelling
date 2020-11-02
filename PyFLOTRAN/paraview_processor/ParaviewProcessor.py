@@ -5,7 +5,7 @@ from paraview import servermanager as sm
 from typing import Dict
 import logging
 
-from PyFLOTRAN.paraview_processor.filters import VtkFilter, BaseFilter, CalculatorFilter
+from PyFLOTRAN.paraview_processor.filters import VtkFilter, BaseFilter, CalculatorFilter, IntegrateVariablesFilter
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +48,19 @@ class ParaviewProcessor:
                                            output_array_name=output_array_name)
         self.pipeline[pipeline_name] = calculator_filter
         return calculator_filter
+
+    def add_integrate_variables(self, input_filter=None, name=None) -> IntegrateVariablesFilter:
+        """
+        Adds the integrate_variables filter to a dataset
+        Returns:
+            An IntegrateVariablesFilter object
+        """
+        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        integrate_variables_filter = IntegrateVariablesFilter(input_filter=self.process_input_filter(filter=input_filter),
+                                           name=pipeline_name,
+                                                              )
+        self.pipeline[pipeline_name] = integrate_variables_filter
+        return integrate_variables_filter
 
     def print_pipeline(self) -> str:
         """
