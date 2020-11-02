@@ -17,6 +17,7 @@ class IntegrateVariablesFilter(BaseFilter):
         super().__init__(name=name)
         IntegrateVariablesFilter.counter += 1
         self.filter = IntegrateVariables(Input=input_filter)
+        self.set_divide_cell_data_by_volume(divide_cell_data_by_volume)
 
     def set_divide_cell_data_by_volume(self, value):
         self.filter.DivideCellDataByVolume = value

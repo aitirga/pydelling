@@ -49,7 +49,7 @@ class ParaviewProcessor:
         self.pipeline[pipeline_name] = calculator_filter
         return calculator_filter
 
-    def add_integrate_variables(self, input_filter=None, name=None) -> IntegrateVariablesFilter:
+    def add_integrate_variables(self, input_filter=None, name=None, divide_cell_data_by_volume=False) -> IntegrateVariablesFilter:
         """
         Adds the integrate_variables filter to a dataset
         Returns:
@@ -57,7 +57,8 @@ class ParaviewProcessor:
         """
         pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
         integrate_variables_filter = IntegrateVariablesFilter(input_filter=self.process_input_filter(filter=input_filter),
-                                           name=pipeline_name,
+                                                              name=pipeline_name,
+                                                              divide_cell_data_by_volume=divide_cell_data_by_volume
                                                               )
         self.pipeline[pipeline_name] = integrate_variables_filter
         return integrate_variables_filter
