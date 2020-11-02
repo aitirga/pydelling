@@ -3,10 +3,10 @@ disable_existing_loggers: False
 
 # Formatters to be assigned to the different outputs
 formatters:
-  simple:
+  log_info:
     format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     datefmt: '%Y-%m-%d,%H:%M:%S'
-  log_info:
+  simple:
     format: "%(asctime)s - %(levelname)s - %(message)s"
     datefmt: '%Y-%m-%d,%H:%M:%S'
 

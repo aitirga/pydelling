@@ -28,11 +28,11 @@ class ParaviewProcessor:
         Returns:
             The created LegacyVTKReader instance
         """
-
         pipeline_name = name if name else f"vtk_data_{VtkFilter.counter}"
         self.vtk_data_counter += 1
         vtk_filter = VtkFilter(filename=str(path), name=pipeline_name)
         self.pipeline[pipeline_name] = vtk_filter
+        logger.info(f"Added VTK file {path} as {vtk_filter.name} object to Paraview processor")
         return vtk_filter
 
     def add_calculator(self, input_filter=None, function='', name=None, output_array_name='Results') -> CalculatorFilter:
@@ -47,6 +47,7 @@ class ParaviewProcessor:
                                            name=pipeline_name,
                                            output_array_name=output_array_name)
         self.pipeline[pipeline_name] = calculator_filter
+        logger.info(f"Added calculator filter based on {input_filter} as {calculator_filter.name} object to Paraview processor")
         return calculator_filter
 
     def add_integrate_variables(self, input_filter=None, name=None, divide_cell_data_by_volume=False) -> IntegrateVariablesFilter:
@@ -61,6 +62,8 @@ class ParaviewProcessor:
                                                               divide_cell_data_by_volume=divide_cell_data_by_volume
                                                               )
         self.pipeline[pipeline_name] = integrate_variables_filter
+        logger.info(
+            f"Added integrate_variables filter based on {input_filter} as {integrate_variables_filter.name} object to Paraview processor")
         return integrate_variables_filter
 
     def print_pipeline(self) -> str:
