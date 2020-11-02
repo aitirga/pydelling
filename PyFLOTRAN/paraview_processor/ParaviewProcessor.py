@@ -47,7 +47,7 @@ class ParaviewProcessor:
                                            name=pipeline_name,
                                            output_array_name=output_array_name)
         self.pipeline[pipeline_name] = calculator_filter
-        logger.info(f"Added calculator filter based on {input_filter} as {calculator_filter.name} object to Paraview processor")
+        logger.info(f"Added calculator filter based on {self.get_input_object_name(input_filter)} as {calculator_filter.name} object to Paraview processor")
         return calculator_filter
 
     def add_integrate_variables(self, input_filter=None, name=None, divide_cell_data_by_volume=False) -> IntegrateVariablesFilter:
@@ -56,14 +56,14 @@ class ParaviewProcessor:
         Returns:
             An IntegrateVariablesFilter object
         """
-        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pipeline_name = name if name else f"integrate_variables_{IntegrateVariablesFilter.counter}"
         integrate_variables_filter = IntegrateVariablesFilter(input_filter=self.process_input_filter(filter=input_filter),
                                                               name=pipeline_name,
                                                               divide_cell_data_by_volume=divide_cell_data_by_volume
                                                               )
         self.pipeline[pipeline_name] = integrate_variables_filter
         logger.info(
-            f"Added integrate_variables filter based on {input_filter} as {integrate_variables_filter.name} object to Paraview processor")
+            f"Added integrate_variables filter based on {self.get_input_object_name(input_filter)} as {integrate_variables_filter.name} object to Paraview processor")
         return integrate_variables_filter
 
     def print_pipeline(self) -> str:
@@ -123,6 +123,23 @@ class ParaviewProcessor:
             return self.pipeline[filter].filter
         else:
             return filter.filter
+
+    @staticmethod
+    def get_input_object_name(filter) -> str:
+        """
+        Gets the name of a given filter
+        Args:
+            filter: filter to be processed
+
+        Returns:
+            String containing the filter's name
+        """
+        if type(filter) == str:
+            return filter
+        else:
+            return filter.name
+
+
 
 
     def __repr__(self):
