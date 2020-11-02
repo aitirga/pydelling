@@ -67,6 +67,7 @@ class ParaviewProcessor:
             #     continue
             identation = "\t"*identation_level
             print_string += f"{identation}- {pipeline_element} [{self.pipeline[pipeline_element].filter_type}]\n"
+        print(print_string)
         return print_string
 
     def print_pipeline_block(self, pipeline_dict: Dict, output_string:str,  starting_identation_level: int = 0):
@@ -102,7 +103,7 @@ class ParaviewProcessor:
         """
         if type(filter) == str:
             # Assume the filter specifies the name of the pipeline
-            return self.pipeline[filter]
+            return self.pipeline[filter].filter
         else:
             return filter.filter
 
