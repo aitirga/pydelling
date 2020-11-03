@@ -31,3 +31,8 @@ class PlotOverLineFilter(BaseFilter):
         self.filter.Source.Point1 = point_1
         self.filter.Source.Point2 = point_2
 
+    @property
+    def point_data(self):
+        return self.point_data.dropna()
+
+
