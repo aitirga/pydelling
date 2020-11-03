@@ -5,7 +5,8 @@ from paraview import servermanager as sm
 from typing import Dict
 import logging
 
-from PyFLOTRAN.paraview_processor.filters import VtkFilter, BaseFilter, CalculatorFilter, IntegrateVariablesFilter
+from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
+    BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,7 @@ class ParaviewProcessor:
         logger.info(f"Added VTK file {path} as {vtk_filter.name} object to Paraview processor")
         return vtk_filter
 
-    def add_calculator(self, input_filter=None, function='', name=None, output_array_name='Results') -> CalculatorFilter:
+    def add_calculator(self, input_filter, function='', name=None, output_array_name='Results') -> CalculatorFilter:
         """
         Adds a calculator filter to a dataset
         Returns:
@@ -50,7 +51,7 @@ class ParaviewProcessor:
         logger.info(f"Added calculator filter based on {self.get_input_object_name(input_filter)} as {calculator_filter.name} object to Paraview processor")
         return calculator_filter
 
-    def add_integrate_variables(self, input_filter=None, name=None, divide_cell_data_by_volume=False) -> IntegrateVariablesFilter:
+    def add_integrate_variables(self, input_filter, name=None, divide_cell_data_by_volume=False) -> IntegrateVariablesFilter:
         """
         Adds the integrate_variables filter to a dataset
         Returns:
@@ -65,6 +66,23 @@ class ParaviewProcessor:
         logger.info(
             f"Added integrate_variables filter based on {self.get_input_object_name(input_filter)} as {integrate_variables_filter.name} object to Paraview processor")
         return integrate_variables_filter
+
+    def add_plot_over_line(self, input_filter, name=None, point_1=None, point_2=None) -> IntegrateVariablesFilter:
+        """
+        Adds the plot_over_line filter to a dataset
+        Returns:
+            A [PlotOverLineFilter][PyFLOTRAN/paraview_processor/filters/PlotOverLineFilter.py] object
+        """
+        pipeline_name = name if name else f"plot_over_line_{PlotOverLineFilter.counter}"
+        plot_over_line_filter = PlotOverLineFilter(input_filter=self.process_input_filter(filter=input_filter),
+                                                   name=pipeline_name,
+                                                   point_1=point_1,
+                                                   point_2=point_2,
+                                                   )
+        self.pipeline[pipeline_name] = plot_over_line_filter
+        logger.info(
+            f"Added plot_over_line_filter filter based on {self.get_input_object_name(input_filter)} as {plot_over_line_filter.name} object to Paraview processor")
+        return plot_over_line_filter
 
     def print_pipeline(self) -> str:
         """
