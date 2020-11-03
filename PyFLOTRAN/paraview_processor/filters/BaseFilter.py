@@ -35,7 +35,7 @@ class BaseFilter:
         return vtk_object.FieldData.keys()
 
     @property
-    def cell_data(self):
+    def cell_data(self) -> pd.DataFrame:
         vtk_object = sm.Fetch(self.filter)
         vtk_object = dsa.WrapDataObject(vtk_object)
         pd_df = pd.DataFrame()
@@ -51,7 +51,7 @@ class BaseFilter:
         return pd_df
 
     @property
-    def point_data(self):
+    def point_data(self) -> pd.DataFrame:
         vtk_object = sm.Fetch(self.filter)
         vtk_object = dsa.WrapDataObject(vtk_object)
         pd_df = pd.DataFrame()
@@ -68,7 +68,7 @@ class BaseFilter:
 
 
     @property
-    def field_data(self):
+    def field_data(self) -> pd.DataFrame:
         vtk_object = sm.Fetch(self.filter)
         vtk_object = dsa.WrapDataObject(vtk_object)
         pd_df = pd.DataFrame()
@@ -82,3 +82,8 @@ class BaseFilter:
             else:
                 pd_df[key] = temp_dataset
         return pd_df
+
+    @property
+    def mesh_points(self) -> pd.DataFrame:
+        vtk_object = sm.Fetch(self.filter)
+        return pd.DataFrame(vtk_to_numpy(vtk_object.GetPoints().GetData()), columns=["x", "y", "z"])
