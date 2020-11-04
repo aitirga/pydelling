@@ -4,17 +4,27 @@ from paraview.vtk.numpy_interface import dataset_adapter as dsa
 from paraview.vtk.numpy_interface import algorithms as algs
 from paraview import servermanager as sm
 from vtk.util.numpy_support import vtk_to_numpy
-from typing import List
+from typing import List, Dict
 
 
 class BaseFilter:
+    """
+    Class used as a basecase class for the different Paraview filters
+    """
     filter_type: str = "VTK_reader"
     counter: int = 0
     filter: object
     vector_keys: List = ["x", "y", "z"]
+    x_min: float
+    x_max: float
+    y_min: float
+    y_max: float
+    z_min: float
+    z_max: float
 
     def __init__(self, name):
         self.name = name
+
 
     @property
     def cell_keys(self):
@@ -87,3 +97,4 @@ class BaseFilter:
     def mesh_points(self) -> pd.DataFrame:
         vtk_object = sm.Fetch(self.filter)
         return pd.DataFrame(vtk_to_numpy(vtk_object.GetPoints().GetData()), columns=["x", "y", "z"])
+
