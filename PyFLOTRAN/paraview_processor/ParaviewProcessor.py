@@ -4,6 +4,7 @@ from paraview.vtk.numpy_interface import dataset_adapter as dsa
 from paraview import servermanager as sm
 from typing import Dict
 import logging
+import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter
@@ -67,7 +68,7 @@ class ParaviewProcessor:
             f"Added integrate_variables filter based on {self.get_input_object_name(input_filter)} as {integrate_variables_filter.name} object to Paraview processor")
         return integrate_variables_filter
 
-    def add_plot_over_line(self, input_filter, name=None, point_1=None, point_2=None) -> IntegrateVariablesFilter:
+    def add_plot_over_line(self, input_filter, name=None, point_1=None, point_2=None, line_resolution=None) -> PlotOverLineFilter:
         """
         Adds the plot_over_line filter to a dataset
         Returns:
@@ -78,11 +79,76 @@ class ParaviewProcessor:
                                                    name=pipeline_name,
                                                    point_1=point_1,
                                                    point_2=point_2,
+                                                   n_line=line_resolution,
                                                    )
         self.pipeline[pipeline_name] = plot_over_line_filter
         logger.info(
             f"Added plot_over_line_filter filter based on {self.get_input_object_name(input_filter)} as {plot_over_line_filter.name} object to Paraview processor")
         return plot_over_line_filter
+
+    # Utility methods
+    def plot_over_z_given_xy_point(self, dataset: BaseFilter, x_point, y_point, line_resolution=None) -> PlotOverLineFilter:
+        """
+        This method interpolates the dataset over a line going in the z-axis given XY coordinates in space
+        Args:
+            x_point: X coordinate
+            y_point: Y coordinate
+
+        Returns:
+            A plot_over_line object
+        """
+        # Compute z_min and z_max values of the dataset
+        point_1 = [x_point, y_point, dataset.z_min]
+        point_2 = [x_point, y_point, dataset.z_max]
+        plot_over_line_filter = PlotOverLineFilter(input_filter=self.process_input_filter(filter=dataset),
+                                                   name="plot_over_z_given_xy_point",
+                                                   point_1=point_1,
+                                                   point_2=point_2,
+                                                   n_line=line_resolution,
+                                                   )
+        return plot_over_line_filter
+
+    def aperture_given_xy_point(self, dataset: BaseFilter, x_point, y_point, variable=None, target_value=1.0, threshold=0.45, line_resolution=100) -> float:
+        """
+        This method computes the aperture at a given position in the XY plane.
+        Args:
+            x_point: X coordinate
+            y_point: Y coordinate
+            variable: The variable to consider that indicates the aperture
+            target_value: Value of the variable when the fracture is open
+            threshold: Value of the maximum variation from the target_value |line[variable] - target_value| < threshold is assumed
+            line_resolution: Resolution of the line interpolation that is being used
+        Returns:
+            The value of the aperture at a given point
+        """
+        line_interpolation = self.plot_over_z_given_xy_point(x_point=x_point,
+                                                             y_point=y_point,
+                                                             line_resolution=line_resolution,
+                                                             dataset=dataset,
+                                                             )
+        line_interpolation_point_data = line_interpolation.point_data
+        dataset_mesh_points = dataset.mesh_points
+        if variable:
+            # If a target variable is defined,
+            line_interpolation = line_interpolation_point_data[abs(line_interpolation_point_data[variable] - target_value) < threshold]
+            z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation.index]["z"]
+            if len(z_points) > 0:
+                aperture = abs(z_points.max() - z_points.min())
+            else:
+                aperture = 0.0
+            return aperture
+
+        if not variable:
+            # Calculate directly the aperture
+            z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation_point_data.index]["z"]
+            if len(z_points) > 0:
+                aperture = abs(z_points.max() - z_points.min())
+            else:
+                aperture = 0.0
+            return aperture
+
+
+
 
     def print_pipeline(self) -> str:
         """
