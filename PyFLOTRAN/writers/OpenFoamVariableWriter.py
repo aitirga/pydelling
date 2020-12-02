@@ -4,12 +4,25 @@ from .BaseWriter import BaseWriter
 from pathlib import Path
 from PyFLOTRAN.config import config
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
 
 class OpenFoamVariableWriter(BaseWriter):
-    def __init__(self, filename=None, header=None, outer=None, data=None, *args, **kwargs):
+    """This class creates an OpenFOAM variable data file"""
+    def __init__(self, filename: str = None, header=None, outer=None, data=None, *args, **kwargs):
+        """
+        A correct set of header/outer needs to be provided to the class.
+
+        It can be automatically used from the config file by creating an instance called "open_foam_variable_writer" for the settings.
+
+        Args:
+            filename: Name of the output file
+            header: Dictionary containing the header variables
+            outer: Dictioanary containing the end variables
+            data: Data to be set into the OpenFOAM file
+        """
         self.header = header if header else config.open_foam_variable_writer.header
         self.outer = outer if outer else config.open_foam_variable_writer.outer
         self.filename = filename if filename else config.open_foam_variable_writer.filename
@@ -17,11 +30,8 @@ class OpenFoamVariableWriter(BaseWriter):
         super().__init__(filename=self.filename, *args, **kwargs)
 
     def run(self, *args, **kwargs):
-        """Writes the data into an OpenFOAM variable format
-
-        Returns
-        -------
-
+        """
+        Writes the data into an OpenFOAM variable format
         """
         logger.info(f"Writing data to {self.filename}")
         with open(self.filename, "w") as self.output_file:
@@ -30,11 +40,8 @@ class OpenFoamVariableWriter(BaseWriter):
             self.write_outer()
 
     def write_header(self):
-        """Writes the header of the file
-
-        Returns
-        -------
-
+        """
+        Writes the header of the file
         """
         self.output_file.write(f"""/*--------------------------------*- C++ -*----------------------------------*\\
   =========                 |
@@ -60,7 +67,14 @@ internalField   {config.open_foam_variable_writer.header.data_type} {config.open
         self.output_file.write(f"{len(self.data)}\n")
         self.output_file.write("(\n")
         for data_element in self.data:
-            self.output_file.write(f"{data_element[3]}\n")
+            if type(data_element) == np.float64 or type(data_element) == np.float32:
+                self.output_file.write(f"{data_element[3]}\n")
+            elif len(data_element) == 4:
+                self.output_file.write(f"{data_element[3]}\n")
+            else:
+                logger.error("There is an error provided the data element vector")
+                raise ValueError("There was an error providing the data element")
+
         self.output_file.write(")\n")
         self.output_file.write(";\n")
 
