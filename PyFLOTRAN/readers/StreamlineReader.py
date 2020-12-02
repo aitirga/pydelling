@@ -10,6 +10,7 @@ import pandas as pd
 from pandas.core.groupby import DataFrameGroupBy
 logger = logging.getLogger(__name__)
 
+
 class StreamlineReader(BaseReader):
     data: pd.DataFrame
     raw_data: pd.DataFrame

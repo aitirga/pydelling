@@ -7,6 +7,7 @@ from .BaseReader import BaseReader
 
 
 class CentroidReader(BaseReader):
+    """This class reads a data file described by a set of centroids"""
     def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False):
         self.var_pos = None
         self.var = None
@@ -23,7 +24,6 @@ class CentroidReader(BaseReader):
     def read_file(self, opened_file):
         """
         Reads the data and stores it inside the class
-        :return:
         """
         if globals.config.general.verbose:
             print(f"Reading centroid file from {self.filename}")

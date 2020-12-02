@@ -8,7 +8,8 @@ import PyFLOTRAN.interpolation as interpolation
 import numpy as np
 from pathlib import Path
 import os
-
+from PyFLOTRAN.paraview_processor.filters import BaseFilter, PlotOverLineFilter
+import pandas as pd
 
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):
     perm = readers.CentroidReader(filename=perm_filename, header=True)
@@ -48,6 +49,45 @@ def interpolate_centroid_to_structured_grid(centroid: np.ndarray,
     if len(var.shape) == 1:
         _var = np.reshape(_var, (var.shape[0], 1))
     grid_x, grid_y = np.meshgrid(linspace_x, linspace_y)
+
+
+def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpolator: PlotOverLineFilter, variable=None, target_value=1.0, threshold=0.45, line_resolution=100):
+    """
+    This method computes the aperture at a given position in the XY plane.
+    Args:
+        x_point: X coordinate
+        y_point: Y coordinate
+        variable: The variable to consider that indicates the aperture
+        target_value: Value of the variable when the fracture is open
+        threshold: Value of the maximum variation from the target_value |line[variable] - target_value| < threshold is assumed
+        line_resolution: Resolution of the line interpolation that is being used
+    Returns:
+        The value of the aperture at a given point
+    """
+    point_1 = [x_point, y_point, dataset.z_min]
+    point_2 = [x_point, y_point, dataset.z_max]
+    line_interpolator.set_points(point_1=point_1, point_2=point_2)
+
+    line_interpolation_point_data = line_interpolator.point_data
+    dataset_mesh_points = dataset.mesh_points
+    if variable:
+        # If a target variable is defined,
+        line_interpolation = line_interpolation_point_data[abs(line_interpolation_point_data[variable] - target_value) < threshold]
+        z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation.index]["z"]
+        if len(z_points) > 0:
+            aperture = abs(z_points.max() - z_points.min())
+        else:
+            aperture = 0.0
+        return aperture
+
+    if not variable:
+        # Calculate directly the aperture
+        z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation_point_data.index]["z"]
+        if len(z_points) > 0:
+            aperture = abs(z_points.max() - z_points.min())
+        else:
+            aperture = 0.0
+        return aperture
 
 
 def root_path() -> Path:
