@@ -24,7 +24,7 @@ class iGPReader(BaseReader):
 
     def __init__(self, path, project_name, build_mesh=False, output_folder=None, write_materials=True):
         logger.info("Initializing iGP Reader module")
-        from rwm_scripts.source.io import AscReader, BoreholeReader, CsvWriter, PflotranExplicitWriter, PflotranImplicitWriter
+        from PyFLOTRAN.readers.iGPReader.io import AscReader, BoreholeReader, CsvWriter, PflotranExplicitWriter, PflotranImplicitWriter
         self.ExplicitWriter = PflotranExplicitWriter
         self.ImplicitWriter = PflotranImplicitWriter
         self.CsvWriter = CsvWriter

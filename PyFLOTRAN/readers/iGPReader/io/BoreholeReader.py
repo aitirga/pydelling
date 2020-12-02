@@ -1,11 +1,11 @@
-from rwm_scripts.source.io import BaseReader, iGPReader
-from rwm_scripts.config import config
+from PyFLOTRAN.readers.iGPReader.io import BaseReader, iGPReader
+from PyFLOTRAN.config import config
 import pandas as pd
 from pathlib import Path
 import logging
 from typing import Dict
 import numpy as np
-from rwm_scripts.utils import utils
+from PyFLOTRAN.readers.iGPReader.utils import utils
 from scipy import stats
 logger = logging.getLogger(__name__)
 import matplotlib.pyplot as plt

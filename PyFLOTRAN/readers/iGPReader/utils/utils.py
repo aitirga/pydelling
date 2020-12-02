@@ -22,7 +22,7 @@ def get_output_path():
 
 
 def get_material_id_from_centroids(igp_reader, borehole_coordinates) -> np.array:
-    from rwm_scripts.source.io import iGPReader, BoreholeReader
+    from PyFLOTRAN.readers.iGPReader.io import iGPReader, BoreholeReader
     igp_reader: iGPReader = igp_reader
     borehole_coordinates: pd.DataFrame = borehole_coordinates
     centroid_coordinates: np.array = igp_reader.centroids

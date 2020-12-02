@@ -1,9 +1,8 @@
 import numpy as np
 
-from rwm_scripts.source.io import BaseReader
-from rwm_scripts.utils.decorators import *
-from rwm_scripts.utils import get_output_path
-from rwm_scripts.config import config
+from PyFLOTRAN.readers.iGPReader.io import BaseReader
+from PyFLOTRAN.readers.iGPReader.utils import get_output_path
+from PyFLOTRAN.config import config
 import h5py
 import logging
 

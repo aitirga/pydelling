@@ -1,6 +1,6 @@
 import numpy as np
 
-from rwm_scripts.source.geometry import BaseFace
+from PyFLOTRAN.readers.iGPReader.geometry import BaseFace
 
 
 class TriangleFace(BaseFace):

@@ -1,4 +1,4 @@
-from rwm_scripts.config import config
+from PyFLOTRAN.config import config
 
 
 class BaseElement:

@@ -1,4 +1,4 @@
-from rwm_scripts.utils.geometry_utils import *
+from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 
 
 class BaseFace:
