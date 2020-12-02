@@ -686,6 +686,32 @@ class iGPReader(BaseReader):
             node_coordinates_df: pd.DataFrame = pd.DataFrame(self.nodes[id_list], columns=["x", "y", "z"])
             node_coordinates_df.to_csv(get_output_path() / f"{region}_nodes.csv", index=False)
 
+    @property
+    def materials(self) -> pd.DataFrame:
+        """
+        This property returns a pandas dataframe containing the materials of the iGP model
+        Returns:
+            A pandas dataframe object containing the materials of the iGP project
+        """
+        return self.material_dict
+
+    @property
+    def n_mesh_elements(self) -> int:
+        """
+        Gives the total number of mesh elements
+        Returns:
+            The total number of mesh elements
+        """
+        return self.mesh_info["n_elements"]
+
+    @property
+    def n_mesh_nodes(self) -> int:
+        """
+        Gives the total number of mesh nodes
+        Returns:
+            The total number of mesh nodes
+        """
+        return self.mesh_info["n_nodes"]
 
 
 def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_size, centroids):
