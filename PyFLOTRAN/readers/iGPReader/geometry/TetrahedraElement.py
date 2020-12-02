@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.qhull import ConvexHull
 
-from rwm_scripts.source.geometry import TriangleFace, BaseElement
+from PyFLOTRAN.readers.iGPReader.geometry import TriangleFace, BaseElement
 
 
 class TetrahedraElement(BaseElement):

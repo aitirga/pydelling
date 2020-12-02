@@ -1,7 +1,7 @@
 import os
 
-from rwm_scripts.source.io import iGPReader
-from rwm_scripts.utils.geometry_utils import *
+from PyFLOTRAN.readers.iGPReader.io import iGPReader
+from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 from pathlib import Path
 
 class CsvWriter(iGPReader):

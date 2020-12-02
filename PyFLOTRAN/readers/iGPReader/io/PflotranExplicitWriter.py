@@ -1,9 +1,9 @@
 import os
 
-from rwm_scripts.config import config
-from rwm_scripts.source.geometry import *
-from rwm_scripts.source.io import iGPReader
-from rwm_scripts.utils.geometry_utils import *
+from PyFLOTRAN.config import config
+from PyFLOTRAN.readers.iGPReader.geometry import *
+from PyFLOTRAN.readers.iGPReader.io import iGPReader
+from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 
 
 class PflotranExplicitWriter(iGPReader):

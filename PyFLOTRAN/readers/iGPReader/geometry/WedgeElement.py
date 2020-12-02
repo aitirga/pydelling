@@ -1,7 +1,7 @@
 from scipy.spatial.qhull import ConvexHull
 
-from rwm_scripts.source.geometry import QuadrilateralFace, TriangleFace, BaseElement
-from rwm_scripts.utils.geometry_utils import *
+from PyFLOTRAN.readers.iGPReader.geometry import QuadrilateralFace, TriangleFace, BaseElement
+from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 
 
 class WedgeElement(BaseElement):

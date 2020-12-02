@@ -1,7 +1,7 @@
 import numpy as np
 
-from rwm_scripts.config import config
-from rwm_scripts.source.io import BaseWriter, iGPReader
+from PyFLOTRAN.config import config
+from PyFLOTRAN.readers.iGPReader.io import BaseWriter, iGPReader
 
 
 class PflotranImplicitWriter(BaseWriter, iGPReader):
