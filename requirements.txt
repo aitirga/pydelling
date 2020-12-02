@@ -3,3 +3,5 @@ numpy
 pandas
 h5py
 vtk
+matplotlib
+scipy
