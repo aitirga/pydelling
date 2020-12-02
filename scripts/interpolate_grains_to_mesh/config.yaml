@@ -1,0 +1,43 @@
+## All config here
+structured_list_reader:
+  filename: C:\Users\Aitor\PycharmProjects\PyFLOTRAN\templates\interpolate_grains_to_mesh\data\16_calcite
+  nx: 400
+  ny: 400
+  nz: 20
+  dx: 2.5E-4
+  dy: 2.5E-4
+  dz: 3.265E-4
+  ox: 0.0
+  oy: 0.0
+  oz: -2.52E-3
+  header_offset: 3
+  csv_file: ./grain_3d.csv
+  min_value: 0.01
+  threshold_x: 2.5E-3
+
+open_foam_reader:
+  filename: C:\Users\Aitor\PycharmProjects\PyFLOTRAN\templates\interpolate_grains_to_mesh\data\open_foam_file
+
+open_foam_variable_writer:
+  header:
+    field_type: volScalarField
+    location: 0
+    object: eps
+    dimensions: "[0 0 0 0 0 0 0]"
+    data_type: nonuniform
+    data_structure: List<scalar>
+  filename: eps_16
+  outer:
+    boundary_fields:
+      west_surface:
+        type: zeroGradient
+      east_surface:
+        type: zeroGradient
+      north_surface:
+        type: zeroGradient
+      south_surface:
+        type: zeroGradient
+      top_surface:
+        type: zeroGradient
+      bottom_surface:
+        type: zeroGradient
