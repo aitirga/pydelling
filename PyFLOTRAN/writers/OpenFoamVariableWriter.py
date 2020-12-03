@@ -68,7 +68,7 @@ internalField   {config.open_foam_variable_writer.header.data_type} {config.open
         self.output_file.write("(\n")
         for data_element in self.data:
             if type(data_element) == np.float64 or type(data_element) == np.float32:
-                self.output_file.write(f"{data_element[3]}\n")
+                self.output_file.write(f"{data_element}\n")
             elif len(data_element) == 4:
                 self.output_file.write(f"{data_element[3]}\n")
             else:
