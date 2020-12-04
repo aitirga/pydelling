@@ -32,7 +32,6 @@ In order to execute PyFLOTRAN, `PyFLOTRAN` conda env needs to be loaded.
 
 `conda activate PyFLOTRAN`
 
-
 ### Running script
 
 Run the script and set the config file as argument. If the config file is not specified, `./config.yaml` will be taken as default.
