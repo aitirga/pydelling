@@ -10,6 +10,7 @@ from pathlib import Path
 import os
 from PyFLOTRAN.paraview_processor.filters import BaseFilter, PlotOverLineFilter
 import pandas as pd
+from box import Box
 
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):
     perm = readers.CentroidReader(filename=perm_filename, header=True)
@@ -107,3 +108,24 @@ def test_data_path() -> Path:
 
 def runtime_path():
     return Path(os.getcwd())
+
+
+def read_local_config():
+    def read_config(config_file: Path = "./config.yaml"):
+        """
+        Reads the configuration file
+        :param config_file:
+        :return:
+        """
+        with open(config_file) as file:
+            context = yaml.load(file, Loader=yaml.FullLoader)
+        return Box(context, default_box=True)
+
+    _config_file = list(
+        Path(os.getcwd()).glob("**/*config.yml") and Path(os.getcwd()).glob("**/*config.yaml") and Path().cwd().glob(
+            "*config*.yml") and Path().cwd().glob(
+            "*config*.yaml"))
+    _config_file = _config_file if _config_file else list(Path(__file__).parent.glob("config.yml"))
+    assert len(_config_file) == 1, "Please provide a configuration file that has a '*config.yaml' name structure"
+    config = read_config(config_file=_config_file[0])
+    return config
