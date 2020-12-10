@@ -5,13 +5,14 @@ from pathlib import Path
 from PyFLOTRAN.config import config
 import logging
 import numpy as np
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
 
 class OpenFoamVariableWriter(BaseWriter):
     """This class creates an OpenFOAM variable data file"""
-    def __init__(self, filename: str = None, header=None, outer=None, data=None, *args, **kwargs):
+    def __init__(self, filename: str = None, header=None, outer=None, data=None, configuration_dict=None, *args, **kwargs):
         """
         A correct set of header/outer needs to be provided to the class.
 
@@ -23,9 +24,14 @@ class OpenFoamVariableWriter(BaseWriter):
             outer: Dictioanary containing the end variables
             data: Data to be set into the OpenFOAM file
         """
-        self.header = header if header else config.open_foam_variable_writer.header
-        self.outer = outer if outer else config.open_foam_variable_writer.outer
-        self.filename = filename if filename else config.open_foam_variable_writer.filename
+        if configuration_dict:
+            self.header = configuration_dict.header
+            self.outer = configuration_dict.outer
+            self.filename = configuration_dict.filename
+        else:
+            self.header = header if header else config.open_foam_variable_writer.header
+            self.outer = outer if outer else config.open_foam_variable_writer.outer
+            self.filename = filename if filename else config.open_foam_variable_writer.filename
         self.data = data
         super().__init__(filename=self.filename, *args, **kwargs)
 
@@ -54,14 +60,14 @@ FoamFile
 {{
     version     2.0;
     format      ascii;
-    class       {config.open_foam_variable_writer.header.field_type};
-    location    "{config.open_foam_variable_writer.header.location}";
-    object      {config.open_foam_variable_writer.header.object};
+    class       {self.header.field_type};
+    location    "{self.header.location}";
+    object      {self.header.object};
 }}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      {config.open_foam_variable_writer.header.dimensions};
-internalField   {config.open_foam_variable_writer.header.data_type} {config.open_foam_variable_writer.header.data_structure}\n""")
+dimensions      {self.header.dimensions};
+internalField   {self.header.data_type} {self.header.data_structure}\n""")
 
     def write_data(self):
         self.output_file.write(f"{len(self.data)}\n")
@@ -80,8 +86,8 @@ internalField   {config.open_foam_variable_writer.header.data_type} {config.open
 
     def write_outer(self):
         self.output_file.write(f"""boundaryField\n{{\n""")
-        for region in config.open_foam_variable_writer.outer.boundary_fields:
-            region_dict = config.open_foam_variable_writer.outer.boundary_fields[region]
+        for region in self.outer.boundary_fields:
+            region_dict = self.outer.boundary_fields[region]
             self.output_file.write(f"""\t{region}\n\t{{\n\t\ttype\t{region_dict["type"]};\n\t}}\n""")
         self.output_file.write("}\n")
         self.output_file.write("\n")
