@@ -1,7 +1,6 @@
 """
 Contains general purpose utility functions
 """
-import munch
 import yaml
 import PyFLOTRAN.readers as readers
 import PyFLOTRAN.interpolation as interpolation
