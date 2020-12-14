@@ -1,7 +1,4 @@
 import numpy as np
-from paraview.simple import *
-from paraview.vtk.numpy_interface import dataset_adapter as dsa
-from paraview import servermanager as sm
 from typing import Dict
 import logging
 import pandas as pd
@@ -10,7 +7,12 @@ from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter
 
 logger = logging.getLogger(__name__)
-
+try:
+    from paraview.simple import *
+    from paraview.vtk.numpy_interface import dataset_adapter as dsa
+    from paraview import servermanager as sm
+except:
+    logger.warning("Paraview python implementation is not properly set-up")
 
 class ParaviewProcessor:
     """

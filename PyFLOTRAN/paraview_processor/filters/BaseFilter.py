@@ -1,8 +1,11 @@
 import pandas as pd
 import numpy as np
-from paraview.vtk.numpy_interface import dataset_adapter as dsa
-from paraview.vtk.numpy_interface import algorithms as algs
-from paraview import servermanager as sm
+try:
+    from paraview.vtk.numpy_interface import dataset_adapter as dsa
+    from paraview.vtk.numpy_interface import algorithms as algs
+    from paraview import servermanager as sm
+except:
+    pass
 from vtk.util.numpy_support import vtk_to_numpy
 from typing import List, Dict
 
