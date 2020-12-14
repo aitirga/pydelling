@@ -94,7 +94,7 @@ class BoreholeReader(BaseReader):
             _borehole_coordinates.insert(1, "y", self.boreholes_info[borehole]["y"] * np.ones(self.data[borehole].shape[0]))
             _borehole_coordinates.columns = ["x", "y", "z", "Material_ID"]
             logger.debug(f"Calculating material IDs for borehole {borehole}")
-            _material_id_vector = utils.get_material_id_from_ocentroids(igp_reader=self.igp_reader,
+            _material_id_vector = utils.get_material_id_from_centroids(igp_reader=self.igp_reader,
                                                                        borehole_coordinates=_borehole_coordinates,
                                                                        )
             self.data[borehole]["Material_ID"] = _material_id_vector
