@@ -18,6 +18,5 @@ class StreamlineReaderCase(unittest.TestCase):
         self.assertEqual(self.stream_line_reader.compute_arrival_times()[0], 0.0)
 
 
-
 if __name__ == '__main__':
     unittest.main()
