@@ -1,5 +1,8 @@
 from PyFLOTRAN.paraview_processor.filters import BaseFilter
-from paraview.simple import *
+try:
+    from paraview.simple import *
+except:
+    pass
 
 
 class VtkFilter(BaseFilter):

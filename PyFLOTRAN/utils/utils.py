@@ -7,9 +7,13 @@ import PyFLOTRAN.interpolation as interpolation
 import numpy as np
 from pathlib import Path
 import os
-from PyFLOTRAN.paraview_processor.filters import BaseFilter, PlotOverLineFilter
+try:
+    from PyFLOTRAN.paraview_processor.filters import BaseFilter, PlotOverLineFilter
+except:
+    from PyFLOTRAN.paraview_processor.filters import BaseFilter
 import pandas as pd
 from box import Box
+
 
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):
     perm = readers.CentroidReader(filename=perm_filename, header=True)
@@ -51,7 +55,7 @@ def interpolate_centroid_to_structured_grid(centroid: np.ndarray,
     grid_x, grid_y = np.meshgrid(linspace_x, linspace_y)
 
 
-def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpolator: PlotOverLineFilter, variable=None, target_value=1.0, threshold=0.45, line_resolution=100):
+def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpolator, variable=None, target_value=1.0, threshold=0.45, line_resolution=100):
     """
     This method computes the aperture at a given position in the XY plane.
     Args:

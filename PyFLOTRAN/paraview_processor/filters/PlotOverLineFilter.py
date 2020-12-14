@@ -1,10 +1,16 @@
 from PyFLOTRAN.paraview_processor.filters import BaseFilter
-from paraview.simple import *
+try:
+    from paraview.simple import *
+    from paraview.vtk.numpy_interface import dataset_adapter as dsa
+    from paraview.vtk.numpy_interface import algorithms as algs
+    from paraview import servermanager as sm
+except:
+    pass
+
+
 import pandas as pd
 import numpy as np
-from paraview.vtk.numpy_interface import dataset_adapter as dsa
-from paraview.vtk.numpy_interface import algorithms as algs
-from paraview import servermanager as sm
+
 from vtk.util.numpy_support import vtk_to_numpy
 
 
