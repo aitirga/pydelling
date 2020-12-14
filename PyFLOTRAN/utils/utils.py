@@ -94,12 +94,12 @@ def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpo
         return aperture
 
 
-def root_path() -> Path:
+def get_root_path() -> Path:
     """Returns path to the root of the project"""
     return Path(__file__).parent
 
 
-def config_path() -> Path:
+def get_config_path() -> Path:
     """Returns path to the root of the project"""
     return Path(__file__).parent / "config"
 
@@ -107,7 +107,6 @@ def config_path() -> Path:
 def test_data_path() -> Path:
     """Returns path to the root of the project"""
     return Path(__file__).parent.parent / "tests/test_data"
-
 
 def runtime_path():
     return Path(os.getcwd())
