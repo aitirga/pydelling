@@ -717,7 +717,6 @@ class iGPReader(BaseReader):
         """
         This method prints the material info in a neat way
         """
-        step = 0
         for material in self.material_info:
             step = 0
             print(f"{step * '  '}{material}:")
