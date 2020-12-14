@@ -1,0 +1,37 @@
+BeginZE G:/Mi unidad/PROJECTS/RWM/291019-implicit_to_explicit/test_implicit_to_explicit.gid/test_implicit_to_explicit.vv
+   x -10.3325519561767578 6.84860849380493164
+   y 3.38586688041687012 -6.31707954406738281
+   z -10.4220294952392578 4.61696243286132813
+   e 3.95849967002868652
+   v 0.531451242598544593 -0.0815827352776908876 -0.144304821476139378
+   r 0.830710510673732028
+   m 0.945040762424468994 0.153036564588546753 -0.288925230503082275 0 -0.32646554708480835 0.393471390008926392 -0.859418690204620361 0 -0.0178386811167001724 0.906509816646575928 0.421807676553726196 0 0 0 0 1
+   c -0.748572349548339844 -1.92240273952484131 2.90253353118896484
+   pd 0
+   pno 0
+   pfo 0
+   pf 4
+   pv 0
+   NowUse 1
+   DrawingType 1
+   LightVector 90 90 150 0
+   OGLShadow(UseShadows) 0
+   OGLShadow(RenderMode) RenderNice
+   OGLShadow(ShadowBias) -0.002
+   OGLShadow(AmbientShadows) 1
+   OGLShadow(UseFBO) 1
+   OGLShadow(FBOSize) 2048
+   OGLShadow(DimmedLightFactor) 0.02
+   OGLStereo(UseStereo) 0
+   OGLStereo(RelativeEyeDistance) 1
+   OGLStereo(FlipEyes) 0
+   OGLStereo(StereoMode) AnaglyphColors
+   OGLStereo(EyeDistance) 0.075
+   OGLStereo(LeftEyeDistance) 1 0 0 1
+   OGLStereo(RightEyeDistance) 0 1 1 1
+EndZE G:/Mi unidad/PROJECTS/RWM/291019-implicit_to_explicit/test_implicit_to_explicit.gid/test_implicit_to_explicit.vv
+
+BeginMirror
+   Mirror 0 Angle 0.0 AngleFake -15.0 SizeFactor 2.0 HeightOffset 0.25 Color #d9e5f24d Backlight Off EdgeStyle No Type Scene DrawMode Mirror
+EndMirror
+

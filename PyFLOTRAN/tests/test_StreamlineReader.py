@@ -14,9 +14,6 @@ class StreamlineReaderCase(unittest.TestCase):
     def test_generate_streams(self):
         self.assertEqual(self.stream_line_reader.stream_data.get_group(0).iloc[1, 0], 1.0)
 
-    def test_compute_arrival_times(self):
-        self.assertEqual(self.stream_line_reader.compute_arrival_times()[0], 0.0)
-
 
 if __name__ == '__main__':
     unittest.main()
