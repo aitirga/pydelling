@@ -3,10 +3,10 @@ Centroid file reader
 """
 import numpy as np
 from .BaseReader import BaseReader
-from PyFLOTRAN.config import config
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class StructuredGridReader(BaseReader):
     def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False):
@@ -23,8 +23,6 @@ class StructuredGridReader(BaseReader):
                          header=header)
 
     def read_file(self, opened_file: BaseReader):
-        if globals.config.general.verbose:
-            logger.info(f"Reading centroid file from {self.filename}")
         temp_centroid = []
         temp_id = []
         for line in opened_file.readlines():

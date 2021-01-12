@@ -1,7 +1,12 @@
 ofpp
-numpy
+numpy==1.19.3
 pandas
 h5py
 vtk
 matplotlib
 scipy
+python-box
+pyyaml
+setuptools~=51.0.0
+xlrd==1.2.0
+openpyxl

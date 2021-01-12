@@ -1,6 +1,5 @@
 import numpy as np
 from .BaseReader import BaseReader
-from ..utils import globals
 
 
 class RasterFileReader(BaseReader):
@@ -18,8 +17,6 @@ class RasterFileReader(BaseReader):
             self.info["reader"][line[0]] = float(line[1])
 
     def read_data(self, opened_file):
-        if globals.config.general.verbose:
-            print(f"Reading data from {self.filename}")
         for id, line in enumerate(opened_file.readlines()):
             self.data[id] = np.array(line.split(), dtype=np.float32)
 
