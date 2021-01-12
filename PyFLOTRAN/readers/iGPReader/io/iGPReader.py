@@ -713,6 +713,17 @@ class iGPReader(BaseReader):
         """
         return self.mesh_info["n_nodes"]
 
+    def print_material_info(self):
+        """
+        This method prints the material info in a neat way
+        """
+        for material in self.material_info:
+            step = 0
+            print(f"{step * '  '}{material}:")
+            for property in self.material_info[material]:
+                step = 1
+                print(f"{step * '  '}{property} = {self.material_info[material][property]}")
+
 
 def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_size, centroids):
     amount_read = 0.0

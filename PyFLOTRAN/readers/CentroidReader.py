@@ -2,7 +2,6 @@
 Centroid file reader
 """
 import numpy as np
-from ..utils import globals
 from .BaseReader import BaseReader
 
 
