@@ -3,6 +3,9 @@ Centroid file reader
 """
 import numpy as np
 from .BaseReader import BaseReader
+import logging
+
+logger = logging.getLogger(__path__)
 
 
 class CentroidReader(BaseReader):
@@ -24,8 +27,7 @@ class CentroidReader(BaseReader):
         """
         Reads the data and stores it inside the class
         """
-        if globals.config.general.verbose:
-            print(f"Reading centroid file from {self.filename}")
+        logger.info(f"Reading centroid file from {self.filename}")
         temp_centroid = []
         temp_id = []
         for line in opened_file.readlines():
@@ -66,7 +68,7 @@ class CentroidReader(BaseReader):
         :param output_file:
         :return:
         """
-        print(f"Starting dump into {output_file}")
+        logger.info(f"Starting dump into {output_file}")
         np.savetxt(output_file, self.get_data(), delimiter=delimiter)
-        print(f"The data has been properly exported to the {output_file} file")
+        logger.info(f"The data has been properly exported to the {output_file} file")
 
