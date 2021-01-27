@@ -65,7 +65,7 @@ class PflotranExplicitWriter(iGPReader):
                 intersection_point = line_plane_perpendicular_intersection(line_point=line_point,
                                                                            plane_points=conn_coords)
                 file_cond.write(
-                    f"{conn_element_id + 1} {intersection_point[0]:1.4e} {intersection_point[1]:1.4e} {intersection_point[2]:1.4e} {conn_area}\n")
+                    f"{conn_element_id + 1} {intersection_point[0]:1.4e} {intersection_point[1]:1.4e} {intersection_point[2]:1.4e} {conn_area:1.4e}\n")
             file_cond.close()
 
     def write_domain_postprocess_hdf5(self, export_file):
