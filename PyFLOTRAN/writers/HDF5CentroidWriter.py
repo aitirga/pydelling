@@ -3,8 +3,9 @@ import h5py
 from .BaseWriter import BaseWriter
 import numpy as np
 
+
 class HDF5CentroidWriter(BaseWriter):
-    def run(self, filename=None, remove_if_exists=False):
+    def run(self, filename=None, remove_if_exists=False, include_cell_id=True):
         if filename is not None:
             self.filename = filename
         if remove_if_exists:
@@ -19,7 +20,8 @@ class HDF5CentroidWriter(BaseWriter):
                 h5temp.close()
             with h5py.File(self.filename, "r+") as h5temp:
                 h5temp.create_dataset(self.var_name, data=self.data)
-                cell_id = np.array([index + 1 for index in range(len(self.data))])
-                h5temp.create_dataset("CellID", data=cell_id)
+                if include_cell_id:
+                    cell_id = np.array([index + 1 for index in range(len(self.data))])
+                    h5temp.create_dataset("Cell Ids", data=cell_id)
         else:
             print("Couldn't find data to dump!")
