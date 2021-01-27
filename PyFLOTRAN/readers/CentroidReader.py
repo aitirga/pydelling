@@ -5,7 +5,7 @@ import numpy as np
 from .BaseReader import BaseReader
 import logging
 
-logger = logging.getLogger(__path__)
+logger = logging.getLogger(__name__)
 
 
 class CentroidReader(BaseReader):
