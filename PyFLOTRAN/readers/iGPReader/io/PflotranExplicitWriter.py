@@ -79,7 +79,6 @@ class PflotranExplicitWriter(iGPReader):
             _cells.append(config.globals.explicit_writer_dict[element_length])
             # Add elements on the _cells dataset
             list(map(lambda x: _cells.append(x), element.nodes))
-        print(_cells)
         domain_group.create_dataset("Cells", data=_cells)
         # Create Vertices
         domain_group.create_dataset("Vertices", data=self.nodes)
