@@ -3,17 +3,21 @@ Centroid file reader
 """
 import numpy as np
 from .BaseReader import BaseReader
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class CentroidReader(BaseReader):
     """This class reads a data file described by a set of centroids"""
-    def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False):
+    def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False, split_key=" "):
         self.var_pos = None
         self.var = None
         self.var_name = None
         self.var_type = None
         self.centroid_pos = None
         self.header = None
+        self.split_key = split_key
         super().__init__(filename, var_pos=var_pos,
                          var_name=var_name,
                          var_type=var_type,
@@ -24,12 +28,11 @@ class CentroidReader(BaseReader):
         """
         Reads the data and stores it inside the class
         """
-        if globals.config.general.verbose:
-            print(f"Reading centroid file from {self.filename}")
+        logger.info(f"Reading centroid file from {self.filename}")
         temp_centroid = []
         temp_id = []
         for line in opened_file.readlines():
-            data_row = line.split()
+            data_row = line.split(self.split_key)
             temp_centroid.append(data_row[self.centroid_pos[0]:self.centroid_pos[1]])
             temp_id.append([data_row[self.var_pos]])
         self.data = np.array(temp_centroid, dtype=np.float32)
@@ -66,7 +69,7 @@ class CentroidReader(BaseReader):
         :param output_file:
         :return:
         """
-        print(f"Starting dump into {output_file}")
+        logger.info(f"Starting dump into {output_file}")
         np.savetxt(output_file, self.get_data(), delimiter=delimiter)
-        print(f"The data has been properly exported to the {output_file} file")
+        logger.info(f"The data has been properly exported to the {output_file} file")
 

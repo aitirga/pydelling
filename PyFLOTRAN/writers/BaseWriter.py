@@ -15,7 +15,7 @@ class BaseWriter:
             self.var_name = var_name
         if region_name:
             self.region_name = region_name
-        if data:
+        if data is not None:
             self.data = data
             self.data_loaded = True
 
