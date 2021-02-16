@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
-    BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter
+    BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -38,6 +38,22 @@ class ParaviewProcessor:
         self.pipeline[pipeline_name] = vtk_filter
         logger.info(f"Added VTK file {path} as {vtk_filter.name} object to Paraview processor")
         return vtk_filter
+
+    def add_xdmf_file(self, path, name=None) -> XDMFFilter:
+        """
+        Reads a given xdmf file.
+        Args:
+            filename: The path of the xdmf file.
+            name: A custom name to be given in the pipeline.
+        Returns:
+            The created XDMFReader instance
+        """
+        pipeline_name = name if name else f"xdmf_data_{VtkFilter.counter}"
+        self.vtk_data_counter += 1
+        pv_filter = XDMFFilter(filename=str(path), name=pipeline_name)
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added XDMF file {path} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
 
     def add_calculator(self, input_filter, function='', name=None, output_array_name='Results') -> CalculatorFilter:
         """
