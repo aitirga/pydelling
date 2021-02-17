@@ -4,7 +4,8 @@ import logging
 import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
-    BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter
+    BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
+    ClipFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -19,7 +20,7 @@ class ParaviewProcessor:
     This class provides the framework to read data from a VTK file and do different postprocessing steps
     """
     current_array: None
-    calculator: Calculator
+   # calculator: Calculator
     pipeline: Dict[str, BaseFilter] = {}
     vtk_data_counter: int = 0
 
