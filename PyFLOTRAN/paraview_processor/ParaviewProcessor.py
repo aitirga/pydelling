@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
-    BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter
+    BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -69,6 +69,21 @@ class ParaviewProcessor:
         self.pipeline[pipeline_name] = calculator_filter
         logger.info(f"Added calculator filter based on {self.get_input_object_name(input_filter)} as {calculator_filter.name} object to Paraview processor")
         return calculator_filter
+
+
+    def add_point_data_to_cell_data(self, input_filter, name=None) -> CellDataToPointDataFilter:
+        """
+        Adds a cell data to point data filter to a dataset
+        Returns:
+            The CellDataToPointDataFilter object
+        """
+        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pv_filter = CellDataToPointDataFilter(input_filter=self.process_input_filter(filter=input_filter),
+                                           name=pipeline_name,
+                                                      )
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added cell_data_to_point_data filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
 
     def add_integrate_variables(self, input_filter, name=None, divide_cell_data_by_volume=False) -> IntegrateVariablesFilter:
         """
