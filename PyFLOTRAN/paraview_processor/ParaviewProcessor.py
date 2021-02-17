@@ -71,7 +71,7 @@ class ParaviewProcessor:
         return calculator_filter
 
 
-    def add_point_data_to_cell_data(self, input_filter, name=None) -> CellDataToPointDataFilter:
+    def add_cell_data_to_point_data(self, input_filter, name=None) -> CellDataToPointDataFilter:
         """
         Adds a cell data to point data filter to a dataset
         Returns:

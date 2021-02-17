@@ -15,6 +15,6 @@ class CellDataToPointDataFilter(BaseFilter):
     def __init__(self, input_filter, name):
         super().__init__(name=name)
         CellDataToPointDataFilter.counter += 1
-        self.filter = CellDataToPointDataFilter(Input=input_filter)
+        self.filter = CellDatatoPointData(Input=input_filter)
 
 
