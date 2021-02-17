@@ -85,6 +85,22 @@ class ParaviewProcessor:
         logger.info(f"Added cell_data_to_point_data filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
+
+    def add_clip(self, input_filter, name=None) -> ClipFilter:
+        """
+        Adds a clip filter to a dataset
+        Returns:
+            The ClipFilter object
+        """
+        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pv_filter = ClipFilter(input_filter=self.process_input_filter(filter=input_filter),
+                                           name=pipeline_name,
+                                                      )
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added clip filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
+
+
     def add_integrate_variables(self, input_filter, name=None, divide_cell_data_by_volume=False) -> IntegrateVariablesFilter:
         """
         Adds the integrate_variables filter to a dataset
