@@ -93,7 +93,7 @@ class ParaviewProcessor:
         Returns:
             The ClipFilter object
         """
-        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pipeline_name = name if name else f"clip_{ClipFilter.counter}"
         pv_filter = ClipFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            name=pipeline_name, *args, **kwargs
                                                       )
