@@ -1,4 +1,5 @@
 from PyFLOTRAN.paraview_processor.filters import BaseFilter
+from PyFLOTRAN.readers import XDMFReader
 try:
     from paraview.simple import *
 except:

@@ -7,3 +7,4 @@ from .OpenFoamReader import OpenFoamReader
 from .StreamlineReader import StreamlineReader
 from .VtkReader import VtkReader
 from .iGPReader.io.iGPReader import iGPReader
+from .XDMFReader import XDMFReader
