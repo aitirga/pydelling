@@ -87,7 +87,7 @@ class ParaviewProcessor:
         return pv_filter
 
 
-    def add_clip(self, input_filter, name=None) -> ClipFilter:
+    def add_clip(self, input_filter, name=None, *args, **kwargs) -> ClipFilter:
         """
         Adds a clip filter to a dataset
         Returns:
@@ -95,7 +95,7 @@ class ParaviewProcessor:
         """
         pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
         pv_filter = ClipFilter(input_filter=self.process_input_filter(filter=input_filter),
-                                           name=pipeline_name,
+                                           name=pipeline_name, *args, **kwargs
                                                       )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added clip filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
