@@ -8,6 +8,9 @@ except:
     pass
 from vtk.util.numpy_support import vtk_to_numpy
 from typing import List, Dict
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BaseFilter:
@@ -101,3 +104,13 @@ class BaseFilter:
         vtk_object = sm.Fetch(self.filter)
         return pd.DataFrame(vtk_to_numpy(vtk_object.GetPoints().GetData()), columns=["x", "y", "z"])
 
+    def add_attribute(self, name: str, value: object):
+        """
+        This method sets a given attribute to the filter
+        Args:
+            name: String containing the name of the attribute
+            value: Value to set in the attribute
+        """
+
+        setattr(self.filter, name, value)
+        logger.info(f"Attribute {name} = {value} has been added to {self.name}")

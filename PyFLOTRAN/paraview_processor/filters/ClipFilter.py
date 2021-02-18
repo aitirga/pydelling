@@ -12,9 +12,9 @@ class ClipFilter(BaseFilter):
     filter_type: str = "Clip"
     counter: int = 0
 
-    def __init__(self, input_filter, name):
+    def __init__(self, input_filter, name, *args, **kwargs):
         super().__init__(name=name)
         ClipFilter.counter += 1
         self.filter = Clip(Input=input_filter)
-
-
+        for kwarg in kwargs:
+            setattr(self.filter, kwarg, kwargs[kwarg])
