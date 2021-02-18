@@ -1,7 +1,7 @@
 ofpp
 numpy==1.19.3
 pandas
-h5py
+h5py==2.10.0
 vtk
 matplotlib
 scipy

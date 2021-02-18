@@ -11,8 +11,6 @@ except:
 import pandas as pd
 import numpy as np
 
-from vtk.util.numpy_support import vtk_to_numpy
-
 
 class PlotOverLineFilter(BaseFilter):
     """
