@@ -49,8 +49,8 @@ class ParaviewProcessor:
         Returns:
             The created XDMFReader instance
         """
-        pipeline_name = name if name else f"xdmf_data_{VtkFilter.counter}"
-        self.vtk_data_counter += 1
+        pipeline_name = name if name else f"xdmf_data_{XDMFFilter.counter}"
+        self.xdmf_data_counter += 1
         pv_filter = XDMFFilter(filename=str(path), name=pipeline_name)
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added XDMF file {path} as {pv_filter.name} object to Paraview processor")
@@ -78,7 +78,7 @@ class ParaviewProcessor:
         Returns:
             The CellDataToPointDataFilter object
         """
-        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pipeline_name = name if name else f"cell_data_to_point_data_{CellDataToPointDataFilter.counter}"
         pv_filter = CellDataToPointDataFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            name=pipeline_name,
                                                       )
@@ -108,7 +108,7 @@ class ParaviewProcessor:
         Returns:
             The StreamTracerWithCustomSourceFilter object
         """
-        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pipeline_name = name if name else f"stream_tracer_with_custom_source_{StreamTracerWithCustomSourceFilter.counter}"
         pv_filter = StreamTracerWithCustomSourceFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            seed_source=seed_source,
                                            name=pipeline_name,
