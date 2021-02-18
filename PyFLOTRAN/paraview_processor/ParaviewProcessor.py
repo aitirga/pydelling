@@ -5,7 +5,7 @@ import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
-    ClipFilter
+    ClipFilter, StreamTracerWithCustomSourceFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -99,6 +99,22 @@ class ParaviewProcessor:
                                                       )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added clip filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
+
+
+    def add_stream_tracer_with_custom_source(self, input_filter, seed_source, name=None) -> StreamTracerWithCustomSourceFilter:
+        """
+        Adds a stream tracer filter to a custom source
+        Returns:
+            The StreamTracerWithCustomSourceFilter object
+        """
+        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pv_filter = StreamTracerWithCustomSourceFilter(input_filter=self.process_input_filter(filter=input_filter),
+                                           seed_source=seed_source,
+                                           name=pipeline_name,
+                                                        )
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added stream tracer filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
 
