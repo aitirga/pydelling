@@ -5,7 +5,7 @@ import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
-    ClipFilter, StreamTracerWithCustomSourceFilter
+    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -110,13 +110,31 @@ class ParaviewProcessor:
         Returns:
             The StreamTracerWithCustomSourceFilter object
         """
-        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pipeline_name = name if name else f"stream_tracer_with_custom_source_{StreamTracerWithCustomSourceFilter.counter}"
         pv_filter = StreamTracerWithCustomSourceFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            seed_source=seed_source,
                                            name=pipeline_name,
                                                         )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added stream tracer filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
+
+
+    def add_save_data(self, path, proxy, PointDataArrays, CellDataArrays, name=None) -> SaveDataFilter:
+        """
+        Writes a csv file.
+        Args:
+            filename: The path of the xdmf file.
+            name: A custom name to be given in the pipeline.
+        Returns:
+            The created SaveDataFilter object
+        """
+        pipeline_name = name if name else f"save_data_{SaveDataFilter.counter}"
+        pv_filter = SaveDataFilter(filename=str(path), proxy=self.process_input_filter(filter=proxy),
+                                   point_data_arrays=PointDataArrays, cell_data_arrays=CellDataArrays,
+                                   name=pipeline_name)
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added csv file based on {self.get_input_object_name(proxy)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
 
