@@ -23,6 +23,7 @@ class ParaviewProcessor:
    # calculator: Calculator
     pipeline: Dict[str, BaseFilter] = {}
     vtk_data_counter: int = 0
+    xdmf_data_counter: int = 0
 
     def add_vtk_file(self, path, name=None) -> VtkFilter:
         """
