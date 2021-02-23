@@ -96,7 +96,7 @@ class ParaviewProcessor:
         pipeline_name = name if name else f"clip_{ClipFilter.counter}"
         pv_filter = ClipFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            name=pipeline_name, *args, **kwargs
-                                                      )
+                              )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added clip filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
