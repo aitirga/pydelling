@@ -58,7 +58,7 @@ class ParaviewProcessor:
         logger.info(f"Added XDMF file {path} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
-    def add_calculator(self, input_filter, function='', name=None, output_array_name='Results') -> CalculatorFilter:
+    def add_calculator(self, input_filter, function='', name=None, output_array_name='Results', *args, **kwargs) -> CalculatorFilter:
         """
         Adds a calculator filter to a dataset
         Returns:
@@ -68,7 +68,7 @@ class ParaviewProcessor:
         calculator_filter = CalculatorFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            function=function,
                                            name=pipeline_name,
-                                           output_array_name=output_array_name)
+                                           output_array_name=output_array_name, *args, **kwargs)
         self.pipeline[pipeline_name] = calculator_filter
         logger.info(f"Added calculator filter based on {self.get_input_object_name(input_filter)} as {calculator_filter.name} object to Paraview processor")
         return calculator_filter
