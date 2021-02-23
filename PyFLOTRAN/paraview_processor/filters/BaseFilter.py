@@ -4,6 +4,7 @@ try:
     from paraview.vtk.numpy_interface import dataset_adapter as dsa
     from paraview.vtk.numpy_interface import algorithms as algs
     from paraview import servermanager as sm
+    from paraview.simple import *
 except:
     pass
 from vtk.util.numpy_support import vtk_to_numpy
@@ -114,3 +115,11 @@ class BaseFilter:
 
         setattr(self.filter, name, value)
         logger.info(f"Attribute {name} = {value} has been added to {self.name}")
+
+    def to_csv(self, filename=None):
+        """
+        This method exports the current filter's data into a csv file
+        """
+        filename = filename if filename else f"{self.name}_filter_data.csv"
+        SaveData(filename=filename, proxy=self.filter)
+        logger.info(f"Saving {self.name} data into {filename}")
