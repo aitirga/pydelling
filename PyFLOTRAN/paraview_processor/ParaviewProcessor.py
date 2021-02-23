@@ -73,21 +73,19 @@ class ParaviewProcessor:
         logger.info(f"Added calculator filter based on {self.get_input_object_name(input_filter)} as {calculator_filter.name} object to Paraview processor")
         return calculator_filter
 
-
     def add_cell_data_to_point_data(self, input_filter, name=None) -> CellDataToPointDataFilter:
         """
         Adds a cell data to point data filter to a dataset
         Returns:
             The CellDataToPointDataFilter object
         """
-        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pipeline_name = name if name else f"cell_data_to_point_data{CellDataToPointDataFilter.counter}"
         pv_filter = CellDataToPointDataFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            name=pipeline_name,
                                                       )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added cell_data_to_point_data filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
-
 
     def add_clip(self, input_filter, name=None, *args, **kwargs) -> ClipFilter:
         """
