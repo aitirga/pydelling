@@ -110,7 +110,7 @@ class ParaviewProcessor:
         """
         pipeline_name = name if name else f"stream_tracer_with_custom_source_{StreamTracerWithCustomSourceFilter.counter}"
         pv_filter = StreamTracerWithCustomSourceFilter(input_filter=self.process_input_filter(filter=input_filter),
-                                           seed_source=seed_source,
+                                           seed_source=self.process_input_filter(filter=seed_source),
                                            name=pipeline_name,
                                                         )
         self.pipeline[pipeline_name] = pv_filter
