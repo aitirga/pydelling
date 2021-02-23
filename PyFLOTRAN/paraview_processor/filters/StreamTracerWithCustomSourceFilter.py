@@ -20,3 +20,6 @@ class StreamTracerWithCustomSourceFilter(BaseFilter):
 
     def set_seed_source(self, seed_source):
         self.filter.SeedSource = seed_source
+
+    def add_vector(self, vector_name):
+        self.filter.Vectors = ['POINTS', vector_name]
