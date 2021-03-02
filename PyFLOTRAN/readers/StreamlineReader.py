@@ -9,7 +9,6 @@ import pandas as pd
 from pandas.core.groupby import DataFrameGroupBy
 logger = logging.getLogger(__name__)
 
-
 class StreamlineReader(BaseReader):
     data: pd.DataFrame
     raw_data: pd.DataFrame
@@ -34,21 +33,32 @@ class StreamlineReader(BaseReader):
                                               "Points:2": "z",
                                               }
                                      )
-
         self.stream_data: DataFrameGroupBy = self.data.groupby("SeedIds")
 
     def compute_arrival_times(self, reason_of_termination=None) -> pd.Series:
         """
         This method computes the arrival times of the streamlines
-        Returns: An pd.Series object containing the arrival times of the streamlines
+        Returns:
+             A pd.Series object containing the arrival times of the streamlines
         """
         logger.info("Computing arrival times of the streamlines")
         reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
         temp_df = self.stream_data
         if reason_of_termination:
-            temp_df =temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
+            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
         return temp_series
+
+    def compute_beta(self):
+        """
+        This method computes beta values for each streamline
+        Returns:
+            A pd.Series object containing the streamline info with the beta column added
+        """
+        logger.info("Computing beta values for the streamlines")
+        for stream in self.stream_data:
+            for
+
 
     def get_data(self) -> np.ndarray:
         """
@@ -64,6 +74,7 @@ class StreamlineReader(BaseReader):
         :return:
         """
         print(f"Starting dump into {output_file}")
-        self.data.to_csv(output_file, delimiter=delimiter)
+        # self.data.to_csv(output_file, delimiter=delimiter)
+        self.data.to_csv(output_file)
         print(f"The data has been properly exported to the {output_file} file")
 
