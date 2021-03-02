@@ -6,8 +6,7 @@ try:
     from paraview import servermanager as sm
 except:
     pass
-from vtk.util.numpy_support import vtk_to_numpy
-from vtkmodules.vtkCommonDataModel import vtkPolyData
+
 
 
 class XDMFReader(BaseReader):

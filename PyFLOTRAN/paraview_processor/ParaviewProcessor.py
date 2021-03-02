@@ -5,7 +5,7 @@ import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
-    ClipFilter, StreamTracerWithCustomSourceFilter
+    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -23,6 +23,7 @@ class ParaviewProcessor:
    # calculator: Calculator
     pipeline: Dict[str, BaseFilter] = {}
     vtk_data_counter: int = 0
+    xdmf_data_counter: int = 0
 
     def add_vtk_file(self, path, name=None) -> VtkFilter:
         """
@@ -51,12 +52,13 @@ class ParaviewProcessor:
         """
         pipeline_name = name if name else f"xdmf_data_{VtkFilter.counter}"
         self.vtk_data_counter += 1
+        print(str(path))
         pv_filter = XDMFFilter(filename=str(path), name=pipeline_name)
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added XDMF file {path} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
-    def add_calculator(self, input_filter, function='', name=None, output_array_name='Results') -> CalculatorFilter:
+    def add_calculator(self, input_filter, function='', name=None, output_array_name='Results', *args, **kwargs) -> CalculatorFilter:
         """
         Adds a calculator filter to a dataset
         Returns:
@@ -66,11 +68,10 @@ class ParaviewProcessor:
         calculator_filter = CalculatorFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            function=function,
                                            name=pipeline_name,
-                                           output_array_name=output_array_name)
+                                           output_array_name=output_array_name, *args, **kwargs)
         self.pipeline[pipeline_name] = calculator_filter
         logger.info(f"Added calculator filter based on {self.get_input_object_name(input_filter)} as {calculator_filter.name} object to Paraview processor")
         return calculator_filter
-
 
     def add_cell_data_to_point_data(self, input_filter, name=None) -> CellDataToPointDataFilter:
         """
@@ -78,14 +79,13 @@ class ParaviewProcessor:
         Returns:
             The CellDataToPointDataFilter object
         """
-        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pipeline_name = name if name else f"cell_data_to_point_data{CellDataToPointDataFilter.counter}"
         pv_filter = CellDataToPointDataFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            name=pipeline_name,
                                                       )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added cell_data_to_point_data filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
-
 
     def add_clip(self, input_filter, name=None, *args, **kwargs) -> ClipFilter:
         """
@@ -96,7 +96,7 @@ class ParaviewProcessor:
         pipeline_name = name if name else f"clip_{ClipFilter.counter}"
         pv_filter = ClipFilter(input_filter=self.process_input_filter(filter=input_filter),
                                            name=pipeline_name, *args, **kwargs
-                                                      )
+                              )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added clip filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
@@ -108,13 +108,31 @@ class ParaviewProcessor:
         Returns:
             The StreamTracerWithCustomSourceFilter object
         """
-        pipeline_name = name if name else f"calculator_{CalculatorFilter.counter}"
+        pipeline_name = name if name else f"stream_tracer_with_custom_source_{StreamTracerWithCustomSourceFilter.counter}"
         pv_filter = StreamTracerWithCustomSourceFilter(input_filter=self.process_input_filter(filter=input_filter),
-                                           seed_source=seed_source,
+                                           seed_source=self.process_input_filter(filter=seed_source),
                                            name=pipeline_name,
                                                         )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added stream tracer filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
+
+
+    def add_save_data(self, path, proxy, PointDataArrays, CellDataArrays, name=None) -> SaveDataFilter:
+        """
+        Writes a csv file.
+        Args:
+            filename: The path of the xdmf file.
+            name: A custom name to be given in the pipeline.
+        Returns:
+            The created SaveDataFilter object
+        """
+        pipeline_name = name if name else f"save_data_{SaveDataFilter.counter}"
+        pv_filter = SaveDataFilter(filename=str(path), proxy=self.process_input_filter(filter=proxy),
+                                   point_data_arrays=PointDataArrays, cell_data_arrays=CellDataArrays,
+                                   name=pipeline_name)
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added csv file based on {self.get_input_object_name(proxy)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
 
