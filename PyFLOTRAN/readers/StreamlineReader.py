@@ -49,15 +49,15 @@ class StreamlineReader(BaseReader):
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
         return temp_series
 
-    def compute_beta(self):
-        """
-        This method computes beta values for each streamline
-        Returns:
-            A pd.Series object containing the streamline info with the beta column added
-        """
-        logger.info("Computing beta values for the streamlines")
-        for stream in self.stream_data:
-            for
+    # def compute_beta(self):
+    #     """
+    #     This method computes beta values for each streamline
+    #     Returns:
+    #         A pd.Series object containing the streamline info with the beta column added
+    #     """
+    #     logger.info("Computing beta values for the streamlines")
+    #     for stream in self.stream_data:
+    #         for
 
 
     def get_data(self) -> np.ndarray:
