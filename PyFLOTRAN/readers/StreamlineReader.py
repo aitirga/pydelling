@@ -4,6 +4,8 @@ Centroid file reader
 import numpy as np
 from .BaseReader import BaseReader
 from PyFLOTRAN.config import config
+from PyFLOTRAN.utils.utils import aperture_from_a_xy_point
+from PyFLOTRAN.paraview_processor import ParaviewProcessor
 import logging
 import pandas as pd
 from pandas.core.groupby import DataFrameGroupBy
@@ -49,16 +51,33 @@ class StreamlineReader(BaseReader):
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
         return temp_series
 
-    # def compute_beta(self):
-    #     """
-    #     This method computes beta values for each streamline
-    #     Returns:
-    #         A pd.Series object containing the streamline info with the beta column added
-    #     """
-    #     logger.info("Computing beta values for the streamlines")
-    #     for stream in self.stream_data:
-    #         for
+    def compute_beta(self):
+        """
+        This method computes beta values for each streamline
+        Returns:
+            A pd.Series object containing the streamline info with the beta column added
+        """
+        logger.info("Computing beta values for the streamlines")
+        for stream in self.stream_data.groups:
+            stream_data = self.stream_data.get_group(stream)
+            stream_beta = self.integrate_beta(stream=stream_data)
+            print(f"Computed beta for stream {stream}")
 
+    def integrate_beta(self, stream: pd.DataFrame):
+        """
+        This method integrates a given streamline to compute the value of beta
+        Args:
+            stream: A pandas DataFrame containing the data of a given streamline
+
+        Returns:
+
+        """
+        beta = 0.0
+        for index, fragment in stream.iterrows():
+            # aperture = aperture_from_a_xy_point(x_point=)
+            aperture = 1.0
+            beta += 2 * fragment["IntegrationTime"] / aperture
+        return beta
 
     def get_data(self) -> np.ndarray:
         """
