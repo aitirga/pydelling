@@ -30,3 +30,4 @@ class ClipFilter(BaseFilter):
         self.filter.ClipType = 'Box'
         self.filter.ClipType.Position = box_position
         self.filter.ClipType.Length = box_length
+        self.filter.Exact = exact

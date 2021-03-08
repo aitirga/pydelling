@@ -56,6 +56,20 @@ class StreamlineReader(BaseReader):
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
         return temp_series
 
+    def compute_length_streamlines(self, reason_of_termination=None) -> pd.Series:
+        """
+        This method computes the length of the streamlines
+        Returns:
+             A pd.Series object containing the length of the streamlines
+        """
+        logger.info("Computing length of the streamlines")
+        reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
+        temp_df = self.stream_data
+        if reason_of_termination:
+            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
+        temp_series: pd.Series = temp_df.groupby("SeedIds").max()["arc_length"]
+        return temp_series
+
     def compute_beta(self, aperture_field: str = None):
         """
         This method computes beta values for each streamline
@@ -132,3 +146,4 @@ class StreamlineReader(BaseReader):
         # self.data.to_csv(output_file, delimiter=delimiter)
         self.data.to_csv(output_file)
         print(f"The data has been properly exported to the {output_file} file")
+
