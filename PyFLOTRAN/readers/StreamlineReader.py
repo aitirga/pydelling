@@ -108,6 +108,7 @@ class StreamlineReader(BaseReader):
         beta = 0.0
         aperture_field_nx = aperture_field.shape[1]
         aperture_field_ny = aperture_field.shape[0]
+        previous_integration_time = 0.0
         for index, fragment in stream.iterrows():
             # aperture = aperture_from_a_xy_point(x_point=)
             # Nearest neighbour
@@ -126,7 +127,9 @@ class StreamlineReader(BaseReader):
                 self.is_aperture_zero = True
                 logger.warning(f"Zero value aperture has been detected on point [{fragment['x']}, {fragment['y']}]")
                 continue
-            beta += 2 * fragment["IntegrationTime"] / aperture / (365 * 24 * 3600)
+            tau = fragment["IntegrationTime"] - previous_integration_time
+            beta += 2 * tau / aperture / (365 * 24 * 3600)
+            previous_integration_time = fragment["IntegrationTime"]
         return beta
 
     def get_data(self) -> np.ndarray:
