@@ -5,7 +5,7 @@ import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
-    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter
+    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -117,6 +117,19 @@ class ParaviewProcessor:
         logger.info(f"Added stream tracer filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
+    def add_append_arc_length(self, input_filter, name=None) -> AppendArcLengthFilter:
+        """
+        Adds an append arc-length filter to a dataset
+        Returns:
+            The AppendArcLengthFilter object
+        """
+        pipeline_name = name if name else f"append_arc_length_{AppendArcLengthFilter.counter}"
+        pv_filter = AppendArcLengthFilter(input_filter=self.process_input_filter(filter=input_filter),
+                                           name=pipeline_name
+                              )
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added append arc length filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
 
     def add_save_data(self, path, proxy, PointDataArrays, CellDataArrays, name=None) -> SaveDataFilter:
         """
