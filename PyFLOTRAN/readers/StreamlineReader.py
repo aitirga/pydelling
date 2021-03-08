@@ -49,15 +49,29 @@ class StreamlineReader(BaseReader):
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
         return temp_series
 
-    def compute_beta(self):
+    def compute_length_streamlines(self, reason_of_termination=None) -> pd.Series:
         """
-        This method computes beta values for each streamline
+        This method computes the length of the streamlines
         Returns:
-            A pd.Series object containing the streamline info with the beta column added
+             A pd.Series object containing the length of the streamlines
         """
-        logger.info("Computing beta values for the streamlines")
-        for stream in self.stream_data:
-            for
+        logger.info("Computing length of the streamlines")
+        reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
+        temp_df = self.stream_data
+        if reason_of_termination:
+            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
+        temp_series: pd.Series = temp_df.groupby("SeedIds").max()["arc_length"]
+        return temp_series
+
+    # def compute_beta(self):
+    #     """
+    #     This method computes beta values for each streamline
+    #     Returns:
+    #         A pd.Series object containing the streamline info with the beta column added
+    #     """
+    #     logger.info("Computing beta values for the streamlines")
+    #     for stream in self.stream_data:
+    #         for
 
 
     def get_data(self) -> np.ndarray:
