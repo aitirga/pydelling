@@ -71,26 +71,36 @@ class StreamlineReader(BaseReader):
         temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
         temp_series = temp_series.reset_index()
 
-        # dic = {}
-        # dic_group = {}
-        # for group in temp_series.groupby('Material ID').groups:
-        #     # print(temp_series.groupby('Material ID').get_group(group))
-        #     ngroup = temp_series.groupby('Material ID').get_group(group)['IntegrationTime']
-        #     dic[group] = ngroup
-        #     dic_group[group] = ''
-        #     print(dic_group)
-        #
-        # for key in dic.keys():
-        #     dic_group[key] =
+        # MANUAL
+        # group_2 = temp_series.groupby('Material ID').get_group(float(2.0))['IntegrationTime']
+        # group_3 = temp_series.groupby('Material ID').get_group(float(3.0))['IntegrationTime']
+        # group_4 = temp_series.groupby('Material ID').get_group(float(4.0))['IntegrationTime']
+        # group_5 = temp_series.groupby('Material ID').get_group(float(5.0))['IntegrationTime']
+        # group_54 = pd.concat([group_5, group_4])
+        # group_543 = pd.concat([group_5, group_4, group_3])
+        # group_5432 = pd.concat([group_5, group_4, group_3, group_2])
+        # return temp_series, group_5, group_54, group_543, group_5432
 
-        group_2 = temp_series.groupby('Material ID').get_group(float(2.0))['IntegrationTime']
-        group_3 = temp_series.groupby('Material ID').get_group(float(3.0))['IntegrationTime']
-        group_4 = temp_series.groupby('Material ID').get_group(float(4.0))['IntegrationTime']
-        group_5 = temp_series.groupby('Material ID').get_group(float(5.0))['IntegrationTime']
-        group_54 = pd.concat([group_5, group_4])
-        group_543 = pd.concat([group_5, group_4, group_3])
-        group_5432 = pd.concat([group_5, group_4, group_3, group_2])
-        return temp_series, group_5, group_54, group_543, group_5432
+        # AUTOMATIC
+        dic = {}
+        dic_group = {}
+        for group in temp_series.groupby('Material ID').groups:
+            # print(temp_series.groupby('Material ID').get_group(group))
+            ngroup = temp_series.groupby('Material ID').get_group(group)['IntegrationTime']
+            dic[group] = ngroup
+            dic_group[group] = ''
+
+        b = True
+        for key in sorted(dic.keys(), reverse=True):
+            if b:
+                add = dic[key]
+                dic_group[key] = add
+                b = False
+            else:
+                add = pd.concat([add, dic[key]])
+                dic_group[key] = add
+
+        return temp_series, dic_group
 
     def compute_length_streamlines(self, reason_of_termination=None) -> pd.Series:
         """
