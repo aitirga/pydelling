@@ -87,6 +87,8 @@ class StreamlineReader(BaseReader):
         for stream in tqdm(self.stream_data.groups):
             stream_data = self.stream_data.get_group(stream)
             stream_beta_value = self.integrate_beta(stream=stream_data, aperture_field=aperture_field)
+            if stream_beta_value == 0.0:
+                continue
             if self.is_aperture_zero:
                 self.is_aperture_zero = False
                 continue
@@ -124,8 +126,8 @@ class StreamlineReader(BaseReader):
             # print(index_row, index_column, index_x, index_y)
             aperture = aperture_field[index_row, index_column]
             if aperture == 0.0:
-                self.is_aperture_zero = True
-                logger.warning(f"Zero value aperture has been detected on point [{fragment['x']}, {fragment['y']}]")
+                # self.is_aperture_zero = True
+                # logger.warning(f"Zero value aperture has been detected on point [{fragment['x']}, {fragment['y']}]")
                 continue
             tau = fragment["IntegrationTime"] - previous_integration_time
             beta += 2 * tau / aperture / (365 * 24 * 3600)
