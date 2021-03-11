@@ -52,7 +52,7 @@ class StreamlineReader(BaseReader):
         reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
         temp_df = self.stream_data
         if reason_of_termination:
-            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
+            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() != reason_of_termination)
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
         return temp_series
 
@@ -76,6 +76,7 @@ class StreamlineReader(BaseReader):
         Returns:
             A pd.Series object containing the streamline info with the beta column added
         """
+        self.number_of_zero_apertures = 0
         aperture_field_file = aperture_field if aperture_field else config.beta_integrator.aperture_field_file if config.beta_integrator.aperture_field_file else None
         assert aperture_field_file, "Define a file containing an aperture field matrix"
         # Read aperture field
@@ -95,7 +96,7 @@ class StreamlineReader(BaseReader):
             else:
                 stream_beta.append(stream_beta_value)
             # print(f"Computed beta for stream {stream}")
-        print(stream_beta)
+        print(self.number_of_zero_apertures)
         return pd.DataFrame(np.array(stream_beta))
 
     def integrate_beta(self, stream: pd.DataFrame, aperture_field: np.ndarray):
@@ -111,6 +112,7 @@ class StreamlineReader(BaseReader):
         aperture_field_nx = aperture_field.shape[1]
         aperture_field_ny = aperture_field.shape[0]
         previous_integration_time = 0.0
+        previous_aperture = 0.0
         for index, fragment in stream.iterrows():
             # aperture = aperture_from_a_xy_point(x_point=)
             # Nearest neighbour
@@ -122,16 +124,23 @@ class StreamlineReader(BaseReader):
                 index_row -= 1
             if index_column == aperture_field_nx:
                 index_column -= 1
-            # print(fragment["x"], fragment["y"], index_x, index_y, index_row, index_column)
-            # print(index_row, index_column, index_x, index_y)
+
+            # Compute tau
+            tau = fragment["IntegrationTime"] - previous_integration_time
+            previous_integration_time_2 = previous_integration_time
+            current_time = fragment["IntegrationTime"]
+            # Calculate aperture
             aperture = aperture_field[index_row, index_column]
             if aperture == 0.0:
-                # self.is_aperture_zero = True
-                # logger.warning(f"Zero value aperture has been detected on point [{fragment['x']}, {fragment['y']}]")
+                aperture = previous_aperture
+
+                # continue
+            previous_aperture = aperture
+            try:
+                beta += 2 * tau / aperture / (365 * 24 * 3600)
+            except:
+                self.number_of_zero_apertures += 1
                 continue
-            tau = fragment["IntegrationTime"] - previous_integration_time
-            beta += 2 * tau / aperture / (365 * 24 * 3600)
-            previous_integration_time = fragment["IntegrationTime"]
         return beta
 
     def get_data(self) -> np.ndarray:
