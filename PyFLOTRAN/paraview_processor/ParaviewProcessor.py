@@ -5,7 +5,7 @@ import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
-    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter
+    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter, TableToPointsFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -99,6 +99,18 @@ class ParaviewProcessor:
                               )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added clip filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
+
+    def add_table_to_points(self, path, name=None) -> TableToPointsFilter:
+        """
+        Adds a table to points filter to a dataset
+        Returns:
+            The TableToPointsFilter object
+        """
+        pipeline_name = name if name else f"table_to_points_{TableToPointsFilter.counter}"
+        pv_filter = TableToPointsFilter(filename=str(path), name=pipeline_name)
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added table to points filter based on {path} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
 
