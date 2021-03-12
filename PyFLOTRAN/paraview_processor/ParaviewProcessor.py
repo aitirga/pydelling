@@ -54,7 +54,7 @@ class ParaviewProcessor:
         """
         pipeline_name = name if name else f"vtk_data_{VtkFilter.counter}"
         self.csv_data_counter += 1
-        csv_reader = CsvReaderFilter(filename=str(path), name=pipeline_name)
+        csv_reader = CsvReaderFilter(filename=str(path), name=pipeline_name, coordinate_labels=coordinate_labels)
         self.pipeline[pipeline_name] = csv_reader
         logger.info(f"Added CSV file {path} as {csv_reader.name} object to Paraview processor")
         return csv_reader
