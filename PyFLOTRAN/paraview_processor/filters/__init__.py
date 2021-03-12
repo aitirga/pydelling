@@ -10,3 +10,4 @@ from .StreamTracerWithCustomSourceFilter import StreamTracerWithCustomSourceFilt
 from .SaveDataFilter import SaveDataFilter
 from .AppendArcLengthFilter import AppendArcLengthFilter
 from .TableToPointsFilter import TableToPointsFilter
+from .CsvReaderFilter import CsvReaderFilter

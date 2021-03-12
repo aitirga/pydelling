@@ -5,7 +5,7 @@ import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
-    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter, TableToPointsFilter
+    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter, TableToPointsFilter, CsvReaderFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -24,6 +24,7 @@ class ParaviewProcessor:
     pipeline: Dict[str, BaseFilter] = {}
     vtk_data_counter: int = 0
     xdmf_data_counter: int = 0
+    csv_data_counter: int = 0
 
     def add_vtk_file(self, path, name=None) -> VtkFilter:
         """
@@ -41,6 +42,22 @@ class ParaviewProcessor:
         logger.info(f"Added VTK file {path} as {vtk_filter.name} object to Paraview processor")
         return vtk_filter
 
+    def add_csv_file(self, path, name=None) -> CsvReaderFilter:
+        """
+        Reads a given vtk file. This is done by adding an instance of the LegacyVTKReader class to the pipeline.
+        Args:
+            filename: The path of the vtk file.
+            name: A custom name to be given in the pipeline.
+        Returns:
+            The created LegacyVTKReader instance
+        """
+        pipeline_name = name if name else f"vtk_data_{VtkFilter.counter}"
+        self.csv_data_counter += 1
+        csv_reader = CsvReaderFilter(filename=str(path), name=pipeline_name)
+        self.pipeline[pipeline_name] = csv_reader
+        logger.info(f"Added CSV file {path} as {csv_reader.name} object to Paraview processor")
+        return csv_reader
+
     def add_xdmf_file(self, path, name=None) -> XDMFFilter:
         """
         Reads a given xdmf file.
@@ -52,7 +69,6 @@ class ParaviewProcessor:
         """
         pipeline_name = name if name else f"xdmf_data_{VtkFilter.counter}"
         self.vtk_data_counter += 1
-        print(str(path))
         pv_filter = XDMFFilter(filename=str(path), name=pipeline_name)
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added XDMF file {path} as {pv_filter.name} object to Paraview processor")
