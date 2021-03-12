@@ -42,14 +42,15 @@ class ParaviewProcessor:
         logger.info(f"Added VTK file {path} as {vtk_filter.name} object to Paraview processor")
         return vtk_filter
 
-    def add_csv_file(self, path, name=None) -> CsvReaderFilter:
+    def add_csv_file(self, path, name=None, coordinate_labels=("x", "y", "z")) -> CsvReaderFilter:
         """
-        Reads a given vtk file. This is done by adding an instance of the LegacyVTKReader class to the pipeline.
+        Reads a given csv file. A TableToPoints filter is applied to the read csv file
         Args:
             filename: The path of the vtk file.
             name: A custom name to be given in the pipeline.
+            coordinate_labels: The names of the x, y and z variables used on the csv file
         Returns:
-            The created LegacyVTKReader instance
+            The TableToPoints filter containing the csv data
         """
         pipeline_name = name if name else f"vtk_data_{VtkFilter.counter}"
         self.csv_data_counter += 1

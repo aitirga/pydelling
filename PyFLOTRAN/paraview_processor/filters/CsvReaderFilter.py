@@ -15,6 +15,7 @@ def convert_to_table(func):
         func()
     return wrapper
 
+
 class CsvReaderFilter(BaseFilter):
     filter_type: str = "VTK_reader"
     counter: int = 0
