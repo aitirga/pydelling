@@ -3,7 +3,17 @@ try:
     from paraview.simple import *
 except:
     pass
+import pandas as pd
+from vtk.util.numpy_support import vtk_to_numpy
+from functools import wraps
 
+
+def convert_to_table(func):
+    @wraps(func)
+    def wrapper():
+
+        func()
+    return wrapper
 
 class CsvReaderFilter(BaseFilter):
     filter_type: str = "VTK_reader"
@@ -15,10 +25,12 @@ class CsvReaderFilter(BaseFilter):
     z_min: float
     z_max: float
 
-    def __init__(self, filename, name):
+    def __init__(self, filename, name, coordinate_labels=("x", "y", "z")):
         super().__init__(name=name)
-        self.filter = LegacyVTKReader(FileNames=str(filename))
+        self.filter = CSVReader(FileName=str(filename))
         CsvReaderFilter.counter += 1
+        self.coordinate_labels = coordinate_labels
+        self.filter = self.convert_table_to_points()
         self.set_ranges()
 
     def set_ranges(self):
@@ -28,3 +40,10 @@ class CsvReaderFilter(BaseFilter):
         self.y_max = self.mesh_points.max()["y"]
         self.z_min = self.mesh_points.min()["z"]
         self.z_max = self.mesh_points.max()["z"]
+
+    def convert_table_to_points(self):
+        _table_to_points = TableToPoints(Input=self.filter)
+        _table_to_points.XColumn = self.coordinate_labels[0]
+        _table_to_points.YColumn = self.coordinate_labels[1]
+        _table_to_points.ZColumn = self.coordinate_labels[2]
+        return _table_to_points
