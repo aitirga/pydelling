@@ -67,7 +67,7 @@ class ParaviewProcessor:
         Returns:
             The created XDMFReader instance
         """
-        pipeline_name = name if name else f"xdmf_data_{VtkFilter.counter}"
+        pipeline_name = name if name else f"xdmf_data_{XDMFFilter.counter}"
         self.vtk_data_counter += 1
         pv_filter = XDMFFilter(filename=str(path), name=pipeline_name)
         self.pipeline[pipeline_name] = pv_filter
