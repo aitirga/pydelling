@@ -40,6 +40,7 @@ class StreamlineReader(BaseReader):
                                               "Points:2": "z",
                                               }
                                      )
+        self.data.dropna()
         self.stream_data: DataFrameGroupBy = self.data.groupby("SeedIds")
 
     def compute_arrival_times(self, reason_of_termination=None) -> pd.Series:
@@ -52,7 +53,7 @@ class StreamlineReader(BaseReader):
         reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
         temp_df = self.stream_data
         if reason_of_termination:
-            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() != reason_of_termination)
+            temp_df = temp_df.filter(lambda x: x.max()["ReasonForTermination"] == float(reason_of_termination))
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
         return temp_series
 
@@ -66,7 +67,7 @@ class StreamlineReader(BaseReader):
         reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
         temp_df = self.stream_data
         if reason_of_termination:
-            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() != reason_of_termination)
+            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
         temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
         temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
         temp_series = temp_series.reset_index()
@@ -101,6 +102,32 @@ class StreamlineReader(BaseReader):
                 dic_group[key] = add
 
         return temp_series, dic_group
+
+    def compute_initial_velocities(self,
+                                   reason_of_termination = None,
+                                   normalize=True,
+                                   index_df: pd.Series=None,
+                                   ):
+        """
+        This method computes the initial velocities each streamlines 'sees' at the beginning, it can be used to normalize them later on
+
+        Args:
+            normalized: Parameter controlling weather the output vector should be normalized by dividing by the maximum velocity valuefdh
+
+        Returns: a vector containing the initial velocities of the streamlines
+        """
+        logger.info("Computing initial velocities of the streamlines")
+        temp_df = self.stream_data
+        if index_df:
+            seed_ids = index_df.reset_index()["SeedIds"]
+            temp_df = self.data[self.data["SeedIds"].isin(seed_ids)]
+        temp_df = temp_df.groupby("SeedIds").first()
+        temp_series = temp_df["U:0"]
+        if normalize:
+            temp_series /= temp_series.max()
+        temp_series[temp_series < 0.0] = 0.0
+        return temp_series
+
 
     def compute_length_streamlines(self, reason_of_termination=None) -> pd.Series:
         """
