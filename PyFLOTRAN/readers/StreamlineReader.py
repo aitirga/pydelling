@@ -67,7 +67,8 @@ class StreamlineReader(BaseReader):
         temp_df = self.stream_data
         if reason_of_termination:
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
-        temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
+        # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
+        temp_df['Material ID'] = temp_df['Material ID'].apply(np.floor)
         temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
         temp_series = temp_series.reset_index()
 
@@ -85,7 +86,6 @@ class StreamlineReader(BaseReader):
         dic = {}
         dic_group = {}
         for group in temp_series.groupby('Material ID').groups:
-            # print(temp_series.groupby('Material ID').get_group(group))
             ngroup = temp_series.groupby('Material ID').get_group(group)['IntegrationTime']
             dic[group] = ngroup
             dic_group[group] = ''
@@ -115,6 +115,32 @@ class StreamlineReader(BaseReader):
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["arc_length"]
         return temp_series
+
+    def compute_length_streamlines_per_material(self, reason_of_termination=None) -> pd.Series:
+        """
+        This method computes the length of the streamlines for a particular material
+        Returns:
+             A pd.Series object containing the length of the streamlines
+        """
+        logger.info("Computing length of the streamlines per material")
+        reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
+        temp_df = self.stream_data
+        if reason_of_termination:
+            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
+        # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
+        temp_df['Material ID'] = temp_df['Material ID'].apply(np.floor)
+        temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
+        temp_series = temp_series.reset_index()
+
+        # AUTOMATIC
+        # dic = {}
+        # for group in temp_series.groupby('Material ID').groups:
+        #     ngroup_series = temp_series.groupby('Material ID').get_group(group)['arc_length']
+            # temp_series = temp_series.groupby('Material ID').get_group(group)['arc_length']
+            # dic[group] = ngroup
+
+        return temp_series #, dic
+        # return ngroup_series
 
     def compute_beta(self, aperture_field: str = None):
         """
