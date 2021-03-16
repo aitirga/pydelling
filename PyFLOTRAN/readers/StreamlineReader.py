@@ -117,10 +117,10 @@ class StreamlineReader(BaseReader):
         Returns: a vector containing the initial velocities of the streamlines
         """
         logger.info("Computing initial velocities of the streamlines")
-        temp_df = self.stream_data
-        if index_df:
+        temp_df = self.data
+        if index_df is not None:
             seed_ids = index_df.reset_index()["SeedIds"]
-            temp_df = self.data[self.data["SeedIds"].isin(seed_ids)]
+            temp_df = temp_df[temp_df["SeedIds"].isin(seed_ids)]
         temp_df = temp_df.groupby("SeedIds").first()
         temp_series = temp_df["U:0"]
         if normalize:
@@ -149,24 +149,28 @@ class StreamlineReader(BaseReader):
         Returns:
             A pd.Series object containing the streamline info with the beta column added
         """
+        self.number_of_zero_apertures = 0
         aperture_field_file = aperture_field if aperture_field else config.beta_integrator.aperture_field_file if config.beta_integrator.aperture_field_file else None
         assert aperture_field_file, "Define a file containing an aperture field matrix"
         # Read aperture field
         with open(aperture_field_file, "rb") as opened_file:
             aperture_field = pickle.load(opened_file)
+        aperture_field = self.fix_aperture_field(aperture_field)
         logger.info(f"Aperture field has been loaded from {aperture_field_file}")
         logger.info("Computing beta values for the streamlines")
         stream_beta = []
         for stream in tqdm(self.stream_data.groups):
             stream_data = self.stream_data.get_group(stream)
             stream_beta_value = self.integrate_beta(stream=stream_data, aperture_field=aperture_field)
+            if stream_beta_value == 0.0:
+                continue
             if self.is_aperture_zero:
                 self.is_aperture_zero = False
                 continue
             else:
                 stream_beta.append(stream_beta_value)
             # print(f"Computed beta for stream {stream}")
-        print(stream_beta)
+        print(self.number_of_zero_apertures)
         return pd.DataFrame(np.array(stream_beta))
 
     def integrate_beta(self, stream: pd.DataFrame, aperture_field: np.ndarray):
@@ -181,25 +185,35 @@ class StreamlineReader(BaseReader):
         beta = 0.0
         aperture_field_nx = aperture_field.shape[1]
         aperture_field_ny = aperture_field.shape[0]
+        previous_integration_time = 0.0
+        previous_aperture = 0.0
         for index, fragment in stream.iterrows():
             # aperture = aperture_from_a_xy_point(x_point=)
             # Nearest neighbour
             index_x = int(np.floor(fragment["x"] / config.beta_integrator.dimension_x * aperture_field_nx))
             index_y = int(np.floor(fragment["y"] / config.beta_integrator.dimension_y * aperture_field_ny))
-            index_row = aperture_field_ny - index_y - 1
+            index_row = index_y
             index_column = index_x
             if index_row == aperture_field_ny:
                 index_row -= 1
             if index_column == aperture_field_nx:
                 index_column -= 1
-            # print(fragment["x"], fragment["y"], index_x, index_y, index_row, index_column)
-            # print(index_row, index_column, index_x, index_y)
+
+            # Compute tau
+            tau = fragment["IntegrationTime"] - previous_integration_time
+            # Calculate aperture
             aperture = aperture_field[index_row, index_column]
+            if fragment["x"] < 0.001:
+                print(f"Aperture: {aperture}, x: {fragment['x']} y: {fragment['y']} index_x: {index_x}, index_y: {index_y}")
             if aperture == 0.0:
-                self.is_aperture_zero = True
-                logger.warning(f"Zero value aperture has been detected on point [{fragment['x']}, {fragment['y']}]")
+                aperture = previous_aperture
+                # continue
+            previous_aperture = aperture
+            try:
+                beta += 2 * tau / aperture / (365 * 24 * 3600)
+            except:
+                self.number_of_zero_apertures += 1
                 continue
-            beta += 2 * fragment["IntegrationTime"] / aperture / (365 * 24 * 3600)
         return beta
 
     def get_data(self) -> np.ndarray:
@@ -220,3 +234,10 @@ class StreamlineReader(BaseReader):
         self.data.to_csv(output_file)
         print(f"The data has been properly exported to the {output_file} file")
 
+    @staticmethod
+    def fix_aperture_field(aperture_matrix):
+        aperture_matrix[0, :] = aperture_matrix[1, :]
+        aperture_matrix[:, 0] = aperture_matrix[:, 1]
+        aperture_matrix[aperture_matrix.shape[0] - 1, :] = aperture_matrix[aperture_matrix.shape[0] - 2, :]
+        aperture_matrix[:, aperture_matrix.shape[1] - 1] = aperture_matrix[:, aperture_matrix.shape[1] - 2]
+        return aperture_matrix
