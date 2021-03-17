@@ -41,19 +41,31 @@ class StreamlineReader(BaseReader):
                                               "Points:2": "z",
                                               }
                                      )
+        self.data = self.data.apply(pd.to_numeric, args=("coerce",))
         self.stream_data: DataFrameGroupBy = self.data.groupby("SeedIds")
 
-    def compute_arrival_times(self, reason_of_termination=None) -> pd.Series:
+    def compute_arrival_times(self,
+                              reason_of_termination=None,
+                              min_x=None,
+                              ) -> pd.Series:
         """
         This method computes the arrival times of the streamlines
+
+        Args:
+            reason_of_termination: Filter by the Paraview tag that defines the status of the streamlines
+            min_x: Filters the streamlines with their max x < min_x
+
         Returns:
              A pd.Series object containing the arrival times of the streamlines
+
         """
         logger.info("Computing arrival times of the streamlines")
         reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
         temp_df = self.stream_data
         if reason_of_termination:
             temp_df = temp_df.filter(lambda x: x.max()["ReasonForTermination"] == float(reason_of_termination))
+        if min_x:
+            temp_df = temp_df.filter(lambda x: x.max()["x"] > min_x)
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
         return temp_series
 
@@ -142,7 +154,7 @@ class StreamlineReader(BaseReader):
         temp_series: pd.Series = temp_df.groupby("SeedIds").max()["arc_length"]
         return temp_series
 
-    def compute_beta(self, aperture_field: str = None):
+    def compute_beta(self, aperture_field: str = None) -> pd.Series:
         """
         This method computes beta values for each streamline
         Returns:
@@ -159,6 +171,8 @@ class StreamlineReader(BaseReader):
         logger.info("Computing beta values for the streamlines")
         self.data["beta"] = 0.0
         for stream in tqdm(self.stream_data.groups):
+            # if random.random() > 0.01:
+            #     continue
             stream_data = self.stream_data.get_group(stream)
             index_group = stream_data.index
             stream_beta_value = self.integrate_beta(stream=stream_data, aperture_field=aperture_field)
@@ -206,7 +220,7 @@ class StreamlineReader(BaseReader):
             #     print(f"Aperture: {aperture}, x: {fragment['x']} y: {fragment['y']} index_x: {index_x}, index_y: {index_y}")
             if aperture == 0.0:
                 aperture = previous_aperture
-                # continue
+                continue
             previous_aperture = aperture
             try:
                 beta += 2 * tau / aperture / (365 * 24 * 3600)
@@ -240,3 +254,4 @@ class StreamlineReader(BaseReader):
         aperture_matrix[aperture_matrix.shape[0] - 1, :] = aperture_matrix[aperture_matrix.shape[0] - 2, :]
         aperture_matrix[:, aperture_matrix.shape[1] - 1] = aperture_matrix[:, aperture_matrix.shape[1] - 2]
         return aperture_matrix
+
