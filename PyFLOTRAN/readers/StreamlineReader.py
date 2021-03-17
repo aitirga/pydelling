@@ -60,13 +60,8 @@ class StreamlineReader(BaseReader):
 
         """
         logger.info("Computing arrival times of the streamlines")
-        reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
-        temp_df = self.stream_data
-        if reason_of_termination:
-            temp_df = temp_df.filter(lambda x: x.max()["ReasonForTermination"] == float(reason_of_termination))
-        if min_x:
-            temp_df = temp_df.filter(lambda x: x.max()["x"] > min_x)
-        temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
+        filtered_streamlines = self.filter_streamlines(reason_of_termination=reason_of_termination, min_x=min_x)
+        temp_series: pd.Series = filtered_streamlines.max()["IntegrationTime"]
         return temp_series
 
     def compute_arrival_times_per_material(self, reason_of_termination=None) -> pd.Series:
@@ -170,6 +165,8 @@ class StreamlineReader(BaseReader):
         logger.info(f"Aperture field has been loaded from {aperture_field_file}")
         logger.info("Computing beta values for the streamlines")
         self.data["beta"] = 0.0
+        # Filter streamlines
+
         for stream in tqdm(self.stream_data.groups):
             # if random.random() > 0.01:
             #     continue
@@ -246,6 +243,27 @@ class StreamlineReader(BaseReader):
         # self.data.to_csv(output_file, delimiter=delimiter)
         self.data.to_csv(output_file)
         print(f"The data has been properly exported to the {output_file} file")
+
+    def filter_streamlines(self,
+                           reason_of_termination=None,
+                           min_x=None,
+                           ) -> DataFrameGroupBy:
+
+        reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.filter.reason_of_termination if config.streamline_reader.filter.reason_of_termination else None
+        min_x = min_x if min_x else config.streamline_reader.filter.min_x if config.streamline_reader.filter.min_x else None
+
+        temp_df = self.data.groupby("SeedIds")
+        initial_number_of_streamlines = len(temp_df.groups)
+        if reason_of_termination:
+            temp_df = temp_df.filter(lambda x: x.max()["ReasonForTermination"] == float(reason_of_termination))
+            temp_df = temp_df.groupby("SeedIds")
+            logger.info(f"{initial_number_of_streamlines - len(temp_df.groups)} streamlines have been filtered due to 'Reason of termination' filtering (Keeping {len(temp_df.groups) / initial_number_of_streamlines * 100: 2.1f}% of total)")
+            # initial_number_of_streamlines = temp_df.shape[0]
+        if min_x:
+            temp_df = temp_df.filter(lambda x: x.max()["x"] > min_x)
+            temp_df = temp_df.groupby("SeedIds")
+            logger.info(f"{initial_number_of_streamlines - len(temp_df.groups)} streamlines have been filtered due to 'min_x' filtering (Keeping {len(temp_df.groups) / initial_number_of_streamlines * 100:2.1f}% of total)")
+        return temp_df
 
     @staticmethod
     def fix_aperture_field(aperture_matrix):
