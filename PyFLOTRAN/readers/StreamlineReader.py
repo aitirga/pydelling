@@ -11,6 +11,7 @@ import pandas as pd
 import pickle
 from pandas.core.groupby import DataFrameGroupBy
 from tqdm import tqdm
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,6 @@ class StreamlineReader(BaseReader):
                                               "Points:2": "z",
                                               }
                                      )
-        self.data.dropna()
         self.stream_data: DataFrameGroupBy = self.data.groupby("SeedIds")
 
     def compute_arrival_times(self, reason_of_termination=None) -> pd.Series:
@@ -119,15 +119,14 @@ class StreamlineReader(BaseReader):
         logger.info("Computing initial velocities of the streamlines")
         temp_df = self.data
         if index_df is not None:
-            seed_ids = index_df.reset_index()["SeedIds"]
+            seed_ids = index_df["SeedIds"]
             temp_df = temp_df[temp_df["SeedIds"].isin(seed_ids)]
         temp_df = temp_df.groupby("SeedIds").first()
         temp_series = temp_df["U:0"]
         if normalize:
-            temp_series /= temp_series.max()
+            temp_series /= temp_series.sum()
         temp_series[temp_series < 0.0] = 0.0
         return temp_series
-
 
     def compute_length_streamlines(self, reason_of_termination=None) -> pd.Series:
         """
@@ -158,9 +157,10 @@ class StreamlineReader(BaseReader):
         aperture_field = self.fix_aperture_field(aperture_field)
         logger.info(f"Aperture field has been loaded from {aperture_field_file}")
         logger.info("Computing beta values for the streamlines")
-        stream_beta = []
+        self.data["beta"] = 0.0
         for stream in tqdm(self.stream_data.groups):
             stream_data = self.stream_data.get_group(stream)
+            index_group = stream_data.index
             stream_beta_value = self.integrate_beta(stream=stream_data, aperture_field=aperture_field)
             if stream_beta_value == 0.0:
                 continue
@@ -168,10 +168,9 @@ class StreamlineReader(BaseReader):
                 self.is_aperture_zero = False
                 continue
             else:
-                stream_beta.append(stream_beta_value)
-            # print(f"Computed beta for stream {stream}")
-        print(self.number_of_zero_apertures)
-        return pd.DataFrame(np.array(stream_beta))
+                self.data.loc[index_group, "beta"] = stream_beta_value
+
+        return self.data.groupby('SeedIds').max()["beta"]
 
     def integrate_beta(self, stream: pd.DataFrame, aperture_field: np.ndarray):
         """
@@ -203,8 +202,8 @@ class StreamlineReader(BaseReader):
             tau = fragment["IntegrationTime"] - previous_integration_time
             # Calculate aperture
             aperture = aperture_field[index_row, index_column]
-            if fragment["x"] < 0.001:
-                print(f"Aperture: {aperture}, x: {fragment['x']} y: {fragment['y']} index_x: {index_x}, index_y: {index_y}")
+            # if fragment["x"] < 0.001:
+            #     print(f"Aperture: {aperture}, x: {fragment['x']} y: {fragment['y']} index_x: {index_x}, index_y: {index_y}")
             if aperture == 0.0:
                 aperture = previous_aperture
                 # continue
