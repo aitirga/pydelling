@@ -166,8 +166,9 @@ class StreamlineReader(BaseReader):
         logger.info("Computing beta values for the streamlines")
         self.data["beta"] = 0.0
         # Filter streamlines
+        temp_df = self.filter_streamlines()
 
-        for stream in tqdm(self.stream_data.groups):
+        for stream in tqdm(temp_df.groups):
             # if random.random() > 0.01:
             #     continue
             stream_data = self.stream_data.get_group(stream)
@@ -197,6 +198,7 @@ class StreamlineReader(BaseReader):
         aperture_field_ny = aperture_field.shape[0]
         previous_integration_time = 0.0
         previous_aperture = 0.0
+        # print(f"Stream starts")
         for index, fragment in stream.iterrows():
             # aperture = aperture_from_a_xy_point(x_point=)
             # Nearest neighbour
@@ -211,6 +213,8 @@ class StreamlineReader(BaseReader):
 
             # Compute tau
             tau = fragment["IntegrationTime"] - previous_integration_time
+            previous_integration_time = fragment["IntegrationTime"]
+
             # Calculate aperture
             aperture = aperture_field[index_row, index_column]
             # if fragment["x"] < 0.001:
@@ -219,11 +223,10 @@ class StreamlineReader(BaseReader):
                 aperture = previous_aperture
                 continue
             previous_aperture = aperture
-            try:
-                beta += 2 * tau / aperture / (365 * 24 * 3600)
-            except:
-                self.number_of_zero_apertures += 1
-                continue
+            # print(f"Tau: {tau / (365 * 24)} h, Aperture: {aperture} m, Fragment beta: {2 * tau / aperture / (365 * 24 * 3600)}, Cummulated beta: {beta}")
+            beta += 2 * tau / aperture / (365 * 24 * 3600)
+        # print(f"Stream Finishes")
+        # print(f"Computed beta: {beta}")
         return beta
 
     def get_data(self) -> np.ndarray:
@@ -251,7 +254,7 @@ class StreamlineReader(BaseReader):
 
         reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.filter.reason_of_termination if config.streamline_reader.filter.reason_of_termination else None
         min_x = min_x if min_x else config.streamline_reader.filter.min_x if config.streamline_reader.filter.min_x else None
-
+        logger.info("Filtering streamlines")
         temp_df = self.data.groupby("SeedIds")
         initial_number_of_streamlines = len(temp_df.groups)
         if reason_of_termination:
