@@ -5,7 +5,7 @@ import pandas as pd
 
 from PyFLOTRAN.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
-    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter
+    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter, TableToPointsFilter, CsvReaderFilter
 
 logger = logging.getLogger(__name__)
 try:
@@ -24,6 +24,7 @@ class ParaviewProcessor:
     pipeline: Dict[str, BaseFilter] = {}
     vtk_data_counter: int = 0
     xdmf_data_counter: int = 0
+    csv_data_counter: int = 0
 
     def add_vtk_file(self, path, name=None) -> VtkFilter:
         """
@@ -41,6 +42,23 @@ class ParaviewProcessor:
         logger.info(f"Added VTK file {path} as {vtk_filter.name} object to Paraview processor")
         return vtk_filter
 
+    def add_csv_file(self, path, name=None, coordinate_labels=("x", "y", "z")) -> CsvReaderFilter:
+        """
+        Reads a given csv file. A TableToPoints filter is applied to the read csv file
+        Args:
+            filename: The path of the vtk file.
+            name: A custom name to be given in the pipeline.
+            coordinate_labels: The names of the x, y and z variables used on the csv file
+        Returns:
+            The TableToPoints filter containing the csv data
+        """
+        pipeline_name = name if name else f"vtk_data_{VtkFilter.counter}"
+        self.csv_data_counter += 1
+        csv_reader = CsvReaderFilter(filename=str(path), name=pipeline_name, coordinate_labels=coordinate_labels)
+        self.pipeline[pipeline_name] = csv_reader
+        logger.info(f"Added CSV file {path} as {csv_reader.name} object to Paraview processor")
+        return csv_reader
+
     def add_xdmf_file(self, path, name=None) -> XDMFFilter:
         """
         Reads a given xdmf file.
@@ -50,9 +68,8 @@ class ParaviewProcessor:
         Returns:
             The created XDMFReader instance
         """
-        pipeline_name = name if name else f"xdmf_data_{VtkFilter.counter}"
+        pipeline_name = name if name else f"xdmf_data_{XDMFFilter.counter}"
         self.vtk_data_counter += 1
-        print(str(path))
         pv_filter = XDMFFilter(filename=str(path), name=pipeline_name)
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added XDMF file {path} as {pv_filter.name} object to Paraview processor")
@@ -99,6 +116,18 @@ class ParaviewProcessor:
                               )
         self.pipeline[pipeline_name] = pv_filter
         logger.info(f"Added clip filter based on {self.get_input_object_name(input_filter)} as {pv_filter.name} object to Paraview processor")
+        return pv_filter
+
+    def add_table_to_points(self, path, name=None) -> TableToPointsFilter:
+        """
+        Adds a table to points filter to a dataset
+        Returns:
+            The TableToPointsFilter object
+        """
+        pipeline_name = name if name else f"table_to_points_{TableToPointsFilter.counter}"
+        pv_filter = TableToPointsFilter(filename=str(path), name=pipeline_name)
+        self.pipeline[pipeline_name] = pv_filter
+        logger.info(f"Added table to points filter based on {path} as {pv_filter.name} object to Paraview processor")
         return pv_filter
 
 
