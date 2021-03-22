@@ -11,6 +11,7 @@ import pandas as pd
 import pickle
 from pandas.core.groupby import DataFrameGroupBy
 from tqdm import tqdm
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -40,20 +41,27 @@ class StreamlineReader(BaseReader):
                                               "Points:2": "z",
                                               }
                                      )
+        self.data = self.data.apply(pd.to_numeric, args=("coerce",))
         self.stream_data: DataFrameGroupBy = self.data.groupby("SeedIds")
 
-    def compute_arrival_times(self, reason_of_termination=None) -> pd.Series:
+    def compute_arrival_times(self,
+                              reason_of_termination=None,
+                              min_x=None,
+                              ) -> pd.Series:
         """
         This method computes the arrival times of the streamlines
+
+        Args:
+            reason_of_termination: Filter by the Paraview tag that defines the status of the streamlines
+            min_x: Filters the streamlines with their max x < min_x
+
         Returns:
              A pd.Series object containing the arrival times of the streamlines
+
         """
         logger.info("Computing arrival times of the streamlines")
-        reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
-        temp_df = self.stream_data
-        if reason_of_termination:
-            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() != reason_of_termination)
-        temp_series: pd.Series = temp_df.groupby("SeedIds").max()["IntegrationTime"]
+        filtered_streamlines = self.filter_streamlines(reason_of_termination=reason_of_termination, min_x=min_x)
+        temp_series: pd.Series = filtered_streamlines.max()["IntegrationTime"]
         return temp_series
 
     def compute_arrival_times_per_material(self, reason_of_termination=None) -> pd.Series:
@@ -102,6 +110,31 @@ class StreamlineReader(BaseReader):
 
         return temp_series, dic_group
 
+    def compute_initial_velocities(self,
+                                   reason_of_termination = None,
+                                   normalize=True,
+                                   index_df: pd.Series=None,
+                                   ):
+        """
+        This method computes the initial velocities each streamlines 'sees' at the beginning, it can be used to normalize them later on
+
+        Args:
+            normalized: Parameter controlling weather the output vector should be normalized by dividing by the maximum velocity valuefdh
+
+        Returns: a vector containing the initial velocities of the streamlines
+        """
+        logger.info("Computing initial velocities of the streamlines")
+        temp_df = self.data
+        if index_df is not None:
+            seed_ids = index_df["SeedIds"]
+            temp_df = temp_df[temp_df["SeedIds"].isin(seed_ids)]
+        temp_df = temp_df.groupby("SeedIds").first()
+        temp_series = temp_df["U:0"]
+        if normalize:
+            temp_series /= temp_series.sum()
+        temp_series[temp_series < 0.0] = 0.0
+        return temp_series
+
     def compute_length_streamlines(self, reason_of_termination=None) -> pd.Series:
         """
         This method computes the length of the streamlines
@@ -142,7 +175,7 @@ class StreamlineReader(BaseReader):
         return temp_series #, dic
         # return ngroup_series
 
-    def compute_beta(self, aperture_field: str = None):
+    def compute_beta(self, aperture_field: str = None) -> pd.Series:
         """
         This method computes beta values for each streamline
         Returns:
@@ -154,11 +187,18 @@ class StreamlineReader(BaseReader):
         # Read aperture field
         with open(aperture_field_file, "rb") as opened_file:
             aperture_field = pickle.load(opened_file)
+        aperture_field = self.fix_aperture_field(aperture_field)
         logger.info(f"Aperture field has been loaded from {aperture_field_file}")
         logger.info("Computing beta values for the streamlines")
-        stream_beta = []
-        for stream in tqdm(self.stream_data.groups):
+        self.data["beta"] = 0.0
+        # Filter streamlines
+        temp_df = self.filter_streamlines()
+
+        for stream in tqdm(temp_df.groups):
+            # if random.random() > 0.01:
+            #     continue
             stream_data = self.stream_data.get_group(stream)
+            index_group = stream_data.index
             stream_beta_value = self.integrate_beta(stream=stream_data, aperture_field=aperture_field)
             if stream_beta_value == 0.0:
                 continue
@@ -166,10 +206,9 @@ class StreamlineReader(BaseReader):
                 self.is_aperture_zero = False
                 continue
             else:
-                stream_beta.append(stream_beta_value)
-            # print(f"Computed beta for stream {stream}")
-        print(self.number_of_zero_apertures)
-        return pd.DataFrame(np.array(stream_beta))
+                self.data.loc[index_group, "beta"] = stream_beta_value
+
+        return self.data.groupby('SeedIds').max()["beta"]
 
     def integrate_beta(self, stream: pd.DataFrame, aperture_field: np.ndarray):
         """
@@ -190,7 +229,7 @@ class StreamlineReader(BaseReader):
             # Nearest neighbour
             index_x = int(np.floor(fragment["x"] / config.beta_integrator.dimension_x * aperture_field_nx))
             index_y = int(np.floor(fragment["y"] / config.beta_integrator.dimension_y * aperture_field_ny))
-            index_row = aperture_field_ny - index_y - 1
+            index_row = index_y
             index_column = index_x
             if index_row == aperture_field_ny:
                 index_row -= 1
@@ -199,20 +238,20 @@ class StreamlineReader(BaseReader):
 
             # Compute tau
             tau = fragment["IntegrationTime"] - previous_integration_time
-            previous_integration_time_2 = previous_integration_time
-            current_time = fragment["IntegrationTime"]
+            previous_integration_time = fragment["IntegrationTime"]
+
             # Calculate aperture
             aperture = aperture_field[index_row, index_column]
+            # if fragment["x"] < 0.001:
+            #     print(f"Aperture: {aperture}, x: {fragment['x']} y: {fragment['y']} index_x: {index_x}, index_y: {index_y}")
             if aperture == 0.0:
                 aperture = previous_aperture
-
-                # continue
-            previous_aperture = aperture
-            try:
-                beta += 2 * tau / aperture / (365 * 24 * 3600)
-            except:
-                self.number_of_zero_apertures += 1
                 continue
+            previous_aperture = aperture
+            # print(f"Tau: {tau / (365 * 24)} h, Aperture: {aperture} m, Fragment beta: {2 * tau / aperture / (365 * 24 * 3600)}, Cummulated beta: {beta}")
+            beta += 2 * tau / aperture / (365 * 24 * 3600)
+        # print(f"Stream Finishes")
+        # print(f"Computed beta: {beta}")
         return beta
 
     def get_data(self) -> np.ndarray:
@@ -232,4 +271,34 @@ class StreamlineReader(BaseReader):
         # self.data.to_csv(output_file, delimiter=delimiter)
         self.data.to_csv(output_file)
         print(f"The data has been properly exported to the {output_file} file")
+
+    def filter_streamlines(self,
+                           reason_of_termination=None,
+                           min_x=None,
+                           ) -> DataFrameGroupBy:
+
+
+        reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.filter.reason_of_termination if config.streamline_reader.filter.reason_of_termination else None
+        min_x = min_x if min_x else config.streamline_reader.filter.min_x if config.streamline_reader.filter.min_x else None
+        logger.info("Filtering streamlines")
+        temp_df = self.data.groupby("SeedIds")
+        initial_number_of_streamlines = len(temp_df.groups)
+        if reason_of_termination:
+            temp_df = temp_df.filter(lambda x: x.max()["ReasonForTermination"] == float(reason_of_termination))
+            temp_df = temp_df.groupby("SeedIds")
+            logger.info(f"{initial_number_of_streamlines - len(temp_df.groups)} streamlines have been filtered due to 'Reason of termination' filtering (Keeping {len(temp_df.groups) / initial_number_of_streamlines * 100: 2.1f}% of total)")
+            # initial_number_of_streamlines = temp_df.shape[0]
+        if min_x:
+            temp_df = temp_df.filter(lambda x: x.max()["x"] > min_x)
+            temp_df = temp_df.groupby("SeedIds")
+            logger.info(f"{initial_number_of_streamlines - len(temp_df.groups)} streamlines have been filtered due to 'min_x' filtering (Keeping {len(temp_df.groups) / initial_number_of_streamlines * 100:2.1f}% of total)")
+        return temp_df
+
+    @staticmethod
+    def fix_aperture_field(aperture_matrix):
+        aperture_matrix[0, :] = aperture_matrix[1, :]
+        aperture_matrix[:, 0] = aperture_matrix[:, 1]
+        aperture_matrix[aperture_matrix.shape[0] - 1, :] = aperture_matrix[aperture_matrix.shape[0] - 2, :]
+        aperture_matrix[:, aperture_matrix.shape[1] - 1] = aperture_matrix[:, aperture_matrix.shape[1] - 2]
+        return aperture_matrix
 
