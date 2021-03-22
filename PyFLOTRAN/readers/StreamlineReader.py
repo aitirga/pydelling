@@ -252,6 +252,7 @@ class StreamlineReader(BaseReader):
                            min_x=None,
                            ) -> DataFrameGroupBy:
 
+
         reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.filter.reason_of_termination if config.streamline_reader.filter.reason_of_termination else None
         min_x = min_x if min_x else config.streamline_reader.filter.min_x if config.streamline_reader.filter.min_x else None
         logger.info("Filtering streamlines")
