@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 
 
-class iGPReaderCase(unittest.TestCase):
+class CentroidReaderCase(unittest.TestCase):
     """
     This class tests the iGPReader[PyFLOTRAN.readers.iGPReader.io.iGPReader.iGPReader] class implementation
     """
