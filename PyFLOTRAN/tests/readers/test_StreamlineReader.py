@@ -2,6 +2,7 @@ import unittest
 from PyFLOTRAN.readers import StreamlineReader
 from PyFLOTRAN.config import config
 from PyFLOTRAN.utils import test_data_path
+from pathlib import Path
 
 
 class StreamlineReaderCase(unittest.TestCase):
@@ -13,6 +14,15 @@ class StreamlineReaderCase(unittest.TestCase):
 
     def test_generate_streams(self):
         self.assertEqual(self.stream_line_reader.stream_data.get_group(0).iloc[1, 0], 1.0)
+
+    def test_compute_arrival_times(self):
+        arrival_times = self.stream_line_reader.compute_arrival_times()
+        self.assertEqual(arrival_times[10], 14114.0)
+
+    def test_write_csv(self):
+        write_path = Path.cwd() / "test_streamlines.csv"
+        self.stream_line_reader.dump_to_csv(write_path)
+        write_path.unlink()
 
 
 
