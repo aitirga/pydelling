@@ -686,6 +686,9 @@ class iGPReader(BaseReader):
             node_coordinates_df: pd.DataFrame = pd.DataFrame(self.nodes[id_list], columns=["x", "y", "z"])
             node_coordinates_df.to_csv(get_output_path() / f"{region}_nodes.csv", index=False)
 
+    def get_mesh(self):
+        return self.centroids
+
     @property
     def materials(self) -> pd.DataFrame:
         """
@@ -723,6 +726,7 @@ class iGPReader(BaseReader):
             for property in self.material_info[material]:
                 step = 1
                 print(f"{step * '  '}{property} = {self.material_info[material][property]}")
+
 
 
 def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_size, centroids):
