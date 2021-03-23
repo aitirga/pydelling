@@ -53,10 +53,12 @@ class BaseInterpolator:
 
     def interpolate(self):
         """
-        Runs the interpolation algorithm.
-        :return:
+        Runs the interpolation algorithm
+        Returns:
+            A numpy array containing the values of the interpolated variable on the mesh centroids
         """
-        self.interpolated_data = self.data[:, 3]
+        self.interpolated_data = self.mesh[:, 0]
+        return self.interpolated_data
 
     def get_data(self):
         """
