@@ -2,8 +2,6 @@ import unittest
 from PyFLOTRAN.readers import StreamlineReader
 from PyFLOTRAN.config import config
 from PyFLOTRAN.utils import test_data_path
-import logging
-logging.getLogger().setLevel("CRITICAL")
 
 
 class StreamlineReaderCase(unittest.TestCase):
