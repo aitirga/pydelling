@@ -5,11 +5,15 @@ import numpy as np
 from scipy.interpolate import griddata
 from .BaseInterpolator import BaseInterpolator
 import logging
+from PyFLOTRAN.utils.decorators import set_run
+
+
 
 logger = logging.getLogger(__name__)
 
 
 class SparseDataInterpolator(BaseInterpolator):
+    @set_run
     def interpolate(self, **kwargs):
         logger.info(f"Interpolating data based on {self.info}")
         self.interpolated_data = griddata(self.data[:, 0:-1], self.data[:, -1], self.mesh, **kwargs)

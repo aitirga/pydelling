@@ -5,7 +5,7 @@ import numpy as np
 
 
 class HDF5CentroidWriter(BaseWriter):
-    def run(self, filename=None, remove_if_exists=False, include_cell_id=True):
+    def run(self, filename=None, remove_if_exists=True, include_cell_id=True):
         if filename is not None:
             self.filename = filename
         if remove_if_exists:

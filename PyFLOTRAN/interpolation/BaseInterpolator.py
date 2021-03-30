@@ -5,9 +5,17 @@ import numpy as np
 import h5py
 import os
 from ..writers.BaseWriter import BaseWriter
+import seaborn as sns
+import pandas as pd
+import logging
+from PyFLOTRAN.utils.decorators import set_run
+
+logger = logging.getLogger(__name__)
 
 
 class BaseInterpolator:
+    is_run: bool = False
+
     def __init__(self,
                  interpolation_data=None,
                  mesh_data=None):
@@ -51,6 +59,7 @@ class BaseInterpolator:
             if data.shape[1] > 3:
                 self.id_data = np.vstack((self.id_data, temp_id_data))
 
+    @set_run
     def interpolate(self):
         """
         Runs the interpolation algorithm
@@ -140,3 +149,23 @@ class BaseInterpolator:
         linspace_y = np.linspace(self.data_ymin - dy_correction, self.data_ymax + dy_correction, n_y)
         grid_x, grid_y = np.meshgrid(linspace_x, linspace_y)
         self.mesh = np.hstack((grid_x.reshape((grid_x.size, 1)), grid_y.reshape((grid_y.size, 1))))
+
+    def describe(self, write_to_file=None, plots=True):
+        assert self.is_run, "The interpolator has not been run"
+        temp_df = pd.DataFrame(self.interpolated_data)
+        logger.info("Describing the interpolated data")
+        print(temp_df.describe())
+        if write_to_file:
+            if type(write_to_file) is str:
+                temp_df.describe().to_csv(write_to_file)
+            else:
+                temp_df.describe().to_csv("interpolated_data-description.csv")
+            logger.info("Writing the description to file")
+        if plots:
+            logger.info("Plotting data")
+            import matplotlib.pyplot as plt
+            histogram_plot = sns.kdeplot(x=self.interpolated_data)
+            plt.show()
+
+
+
