@@ -239,6 +239,8 @@ class StreamlineReader(BaseReader):
             # Compute tau
             tau = fragment["IntegrationTime"] - previous_integration_time
             previous_integration_time = fragment["IntegrationTime"]
+            # if tau < 0.0:
+            #     print(tau)
 
             # Calculate aperture
             aperture = aperture_field[index_row, index_column]
