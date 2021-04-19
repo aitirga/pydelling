@@ -29,7 +29,7 @@ class ConnectFlowReader(BaseReader):
             _nodes = [line.rstrip().split() for line in opened_file.readlines()[2: 2 + self.n_nodes - 1]]
             self._mesh_nodes = pd.DataFrame(np.array(_nodes).astype(np.float), columns=["index", "x", "y", "z"])
             self._mesh_nodes = self.mesh_nodes.set_index("index")
-
+        self.build_info()
 
     @property
     def mesh_nodes(self) -> pd.DataFrame:
@@ -43,6 +43,7 @@ class ConnectFlowReader(BaseReader):
         :return:
         """
         return np.array(0)
+
 
     def build_info(self):
         """
@@ -62,6 +63,27 @@ class ConnectFlowReader(BaseReader):
                 "z": [min_z, max_z],
             }
         }
+        self.info.update({
+            "span": {
+                "x": self.info["bounds"]["x"][1] - self.info["bounds"]["x"][0],
+                "y": self.info["bounds"]["y"][1] - self.info["bounds"]["y"][0],
+                "z": self.info["bounds"]["z"][1] - self.info["bounds"]["z"][0],
+            }
+        })
 
     def get_bounds(self):
+        """
+        Returns the x, y and z axis bounds
+        Returns:
+            A list containing the bounds
+        """
         return self.info["bounds"]
+
+
+    def get_span(self):
+        """
+        Returns the x, y and z axis span
+        Returns:
+            A list containing the span
+        """
+        return self.info["span"]
