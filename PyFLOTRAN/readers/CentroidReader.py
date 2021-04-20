@@ -66,7 +66,7 @@ class CentroidReader(BaseReader):
                      "var_name": self.var_name,
                      "var_position": self.var_pos}
 
-    def dump_to_csv(self, output_file, delimiter=","):
+    def to_csv(self, output_file, delimiter=","):
         """
         Writes the data into a csv file
         :param output_file:
