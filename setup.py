@@ -1,23 +1,24 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name='PyFLOTRAN',  # How you named your package folder (MyLib)
-    packages=['PyFLOTRAN'],  # Chose the same as "name"
-    version='1.2',  # Start with a small number and increase it with every change you make
+    packages=find_packages(),  # Chose the same as "name"
+    version='1.2.1',  # Start with a small number and increase it with every change you make
     license='MIT',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description='Package to pre-process PFLOTRAN (and other software) files',
     # Give a short description about your library
     author='Aitor Iraola Galarza',  # Type in your name
     author_email='aitor.iraola@amphos21.com',  # Type in your E-Mail
-    url='github.com/aitirga/PyFLOTRAN',  # Provide either the link to your github or to your website
+    url='https://github.com/aitirga/PyFLOTRAN',  # Provide either the link to your github or to your website
     download_url='https://github.com/aitirga/PyFLOTRAN/archive/refs/tags/v_1.2.tar.gz',  # I explain this later on
     keywords=['PFLOTRAN', 'Preprocessing', 'python', 'modelling'],  # Keywords that define your package best
+    include_package_data=True,
     install_requires=[  # I get to this in a second
         'ofpp',
         'numpy',
         'pandas==1.0.5',
         'h5py==2.10.0',
-        'vtk==8.1.2',
+        'vtk>=8.1.2',
         'matplotlib==3.3.0',
         'scipy==1.5.2',
         'python-box==5.1.0',
