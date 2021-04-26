@@ -2,7 +2,10 @@ import os
 import h5py
 from .BaseWriter import BaseWriter
 import numpy as np
+from pathlib import Path
+import logging
 
+logger = logging.getLogger(__file__)
 
 class HDF5CentroidWriter(BaseWriter):
     def run(self, filename=None, remove_if_exists=True, include_cell_id=True):
@@ -25,3 +28,32 @@ class HDF5CentroidWriter(BaseWriter):
                     h5temp.create_dataset("Cell Ids", data=cell_id)
         else:
             print("Couldn't find data to dump!")
+
+    def write_anisotropic_dataset(self,
+                                  dataset_x,
+                                  dataset_y,
+                                  dataset_z,
+                                  filename=None,
+                                  remove_if_exists=True,
+                                  var_name=None,
+                                  ):
+        """
+        Writes anisotropic dataset to HDF5
+        Args:
+            filename: name of the file
+            dataset_x: dataset containing data in the x-direction
+            dataset_y: dataset containing data in the y-direction
+            dataset_z: dataset containing data in the z-direction
+            remove_if_exists: removes file if exists
+        """
+        filename_path = Path(filename if filename else self.filename)
+        logger.info(f"Writing anisotropic permeability to {filename_path}")
+        if remove_if_exists:
+            filename_path.unlink()
+        with h5py.File(filename_path, "w") as h5_temp:
+            var_name_write = var_name if var_name else self.var_name
+            h5_temp.create_dataset(f"{var_name_write}X", data=dataset_x)
+            h5_temp.create_dataset(f"{var_name_write}Y", data=dataset_y)
+            h5_temp.create_dataset(f"{var_name_write}Z", data=dataset_z)
+            cell_id = np.array([index + 1 for index in range(len(dataset_x))])
+            h5_temp.create_dataset("Cell Ids", data=cell_id)
