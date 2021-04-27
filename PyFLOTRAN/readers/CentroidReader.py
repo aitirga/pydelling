@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class CentroidReader(BaseReader):
     """This class reads a data file described by a set of centroids"""
-    def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False, split_key=" "):
+    def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False, split_key=None):
         self.var_pos = None
         self.var = None
         self.var_name = None
@@ -32,8 +32,11 @@ class CentroidReader(BaseReader):
         temp_centroid = []
         temp_id = []
         for line in opened_file.readlines():
-            data_row = line.split(self.split_key)
-            temp_centroid.append(data_row[self.centroid_pos[0]:self.centroid_pos[1]])
+            if self.split_key:
+                data_row = line.split(self.split_key)
+            else:
+                data_row = line.split()
+            temp_centroid.append(data_row[self.centroid_pos[0]:self.centroid_pos[1] + 1])
             temp_id.append([data_row[self.var_pos]])
         self.data = np.array(temp_centroid, dtype=np.float32)
         self.var = np.array(temp_id, dtype=self.var_type)
@@ -63,7 +66,7 @@ class CentroidReader(BaseReader):
                      "var_name": self.var_name,
                      "var_position": self.var_pos}
 
-    def dump_to_csv(self, output_file, delimiter=","):
+    def to_csv(self, output_file, delimiter=","):
         """
         Writes the data into a csv file
         :param output_file:
