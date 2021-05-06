@@ -57,3 +57,27 @@ class HDF5CentroidWriter(BaseWriter):
             h5_temp.create_dataset(f"{var_name_write}Z", data=dataset_z)
             cell_id = np.array([index + 1 for index in range(len(dataset_x))])
             h5_temp.create_dataset("Cell Ids", data=cell_id)
+
+
+    def write_dataset(self,
+                      dataset,
+                      filename=None,
+                      remove_if_exists=True,
+                      var_name=None,
+                      ):
+        """
+        Writes isotropic dataset to HDF5
+        Args:
+            filename: name of the file
+            dataset_x: output dataset
+            remove_if_exists: removes file if exists
+        """
+        filename_path = Path(filename if filename else self.filename)
+        logger.info(f"Writing anisotropic permeability to {filename_path}")
+        if remove_if_exists:
+            filename_path.unlink()
+        with h5py.File(filename_path, "w") as h5_temp:
+            var_name_write = var_name if var_name else self.var_name
+            h5_temp.create_dataset(f"{var_name_write}", data=dataset)
+            cell_id = np.array([index + 1 for index in range(len(dataset))])
+            h5_temp.create_dataset("Cell Ids", data=cell_id)
