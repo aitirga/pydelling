@@ -49,7 +49,8 @@ class HDF5CentroidWriter(BaseWriter):
         filename_path = Path(filename if filename else self.filename)
         logger.info(f"Writing anisotropic permeability to {filename_path}")
         if remove_if_exists:
-            filename_path.unlink()
+            if filename_path.exists():
+                filename_path.unlink()
         with h5py.File(filename_path, "w") as h5_temp:
             var_name_write = var_name if var_name else self.var_name
             h5_temp.create_dataset(f"{var_name_write}X", data=dataset_x)
