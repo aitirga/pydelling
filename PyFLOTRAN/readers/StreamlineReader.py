@@ -75,8 +75,15 @@ class StreamlineReader(BaseReader):
         temp_df = self.stream_data
         if reason_of_termination:
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
+
         # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
-        temp_df['Material ID'] = temp_df['Material ID'].apply(np.floor)
+        # temp_df['Material ID'] = temp_df['Material ID'].apply(np.floor)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1, 1.5), 1)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1.5, 2.5), 2)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(2.5, 3.5), 3)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(3.5, 4.5), 4)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(4.5, 5), 5)
+
         temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
         temp_series = temp_series.reset_index()
 
@@ -160,8 +167,15 @@ class StreamlineReader(BaseReader):
         temp_df = self.stream_data
         if reason_of_termination:
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
+
         # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
-        temp_df['Material ID'] = temp_df['Material ID'].apply(np.floor)
+        # temp_df['Material ID'] = temp_df['Material ID'].apply(np.floor)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1, 1.5), 1)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1.5, 2.5), 2)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(2.5, 3.5), 3)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(3.5, 4.5), 4)
+        temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(4.5, 5), 5)
+
         temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
         temp_series = temp_series.reset_index()
 
