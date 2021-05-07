@@ -15,7 +15,7 @@ class PflotranExplicitWriter(iGPReader):
         export_file.write(f"CELLS {len(self.elements)}\n")
         for element in self.elements:
             export_file.write(
-                f"{element.local_id + 1} {element.centroid[0]:1.4e} {element.centroid[1]:1.4e} {element.centroid[2]:1.4e} {element.volume:1.4e}\n")
+                f"{element.local_id + 1} {element.centroid[0]:1.8e} {element.centroid[1]:1.8e} {element.centroid[2]:1.8e} {element.volume:1.8e}\n")
 
     def write_connections(self, export_file):
         # compute number of connection elements
@@ -40,7 +40,7 @@ class PflotranExplicitWriter(iGPReader):
                 conn_area = face_obj.area
                 # export_file.write(f"{prime_element + 1} {connected_element + 1} {conn_centroid[0]:1.4e} {conn_centroid[1]:1.4e} {conn_centroid[2]:1.4e} {conn_area:1.4e}\n")
                 export_file.write(
-                    f"{prime_element + 1} {connected_element + 1} {intersection_point[0]:1.4e} {intersection_point[1]:1.4e} {intersection_point[2]:1.4e} {conn_area:1.4e}\n")
+                    f"{prime_element + 1} {connected_element + 1} {intersection_point[0]:1.8e} {intersection_point[1]:1.8e} {intersection_point[2]:1.8e} {conn_area:1.8e}\n")
 
     def write_condition_data(self):
         for condition in self.region_dict:
@@ -65,7 +65,7 @@ class PflotranExplicitWriter(iGPReader):
                 intersection_point = line_plane_perpendicular_intersection(line_point=line_point,
                                                                            plane_points=conn_coords)
                 file_cond.write(
-                    f"{conn_element_id + 1} {intersection_point[0]:1.4e} {intersection_point[1]:1.4e} {intersection_point[2]:1.4e} {conn_area:1.4e}\n")
+                    f"{conn_element_id + 1} {intersection_point[0]:1.8e} {intersection_point[1]:1.8e} {intersection_point[2]:1.8e} {conn_area:1.8e}\n")
             file_cond.close()
 
     def write_domain_postprocess_hdf5(self, export_file):
