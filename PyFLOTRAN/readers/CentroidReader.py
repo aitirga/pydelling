@@ -58,21 +58,19 @@ class CentroidReader(BaseReader):
         """
         pass
 
-    def get_data(self, as_dataframe=True) -> pd.DataFrame:
+    def get_data(self, as_dataframe=False) -> pd.DataFrame:
         """
         Outputs the data
         :return: np.ndarray object containing centroid information and variable output
         """
         if as_dataframe:
             if self.var_pos:
-                return pd.DataFrame(np.hstack((self.data, self.var)), columns=['x', 'y', 'z', f"{self.var_name}"])
+                return pd.DataFrame(self.data, columns=['x', 'y', 'z', f"{self.var_name}"])
             else:
                 return pd.DataFrame(self.data, columns=['x', 'y', 'z'])
         else:
-            if self.var_pos:
-                return np.hstack((self.data, self.var))
-            else:
-                return self.data
+            return self.data
+
 
     def build_info(self):
         """
