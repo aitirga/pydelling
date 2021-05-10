@@ -4,6 +4,7 @@ Centroid file reader
 import numpy as np
 from .BaseReader import BaseReader
 import logging
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +38,12 @@ class CentroidReader(BaseReader):
             else:
                 data_row = line.split()
             temp_centroid.append(data_row[self.centroid_pos[0]:self.centroid_pos[1] + 1])
-            temp_id.append([data_row[self.var_pos]])
+            if self.var_pos:
+                temp_id.append([data_row[self.var_pos]])
         self.data = np.array(temp_centroid, dtype=np.float32)
-        self.var = np.array(temp_id, dtype=self.var_type)
+        if self.var_pos:
+            self.var = np.array(temp_id, dtype=self.var_type)
+
 
     def read_header(self):
         """
@@ -49,12 +53,21 @@ class CentroidReader(BaseReader):
         """
         pass
 
-    def get_data(self) -> np.ndarray:
+    def get_data(self, as_dataframe=True) -> pd.DataFrame:
         """
         Outputs the data
         :return: np.ndarray object containing centroid information and variable output
         """
-        return np.hstack((self.data, self.var))
+        if as_dataframe:
+            if self.var_pos:
+                return pd.DataFrame(np.hstack((self.data, self.var)), columns=['x', 'y', 'z', f"{self.var_name}"])
+            else:
+                return pd.DataFrame(self.data, columns=['x', 'y', 'z'])
+        else:
+            if self.var_pos:
+                return np.hstack((self.data, self.var))
+            else:
+                return self.data
 
     def build_info(self):
         """
