@@ -12,13 +12,18 @@ logger = logging.getLogger(__name__)
 class CentroidReader(BaseReader):
     """This class reads a data file described by a set of centroids"""
     def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False, separator=None):
-        self.var_pos = None
+        self.var_pos = var_pos
         self.var = None
-        self.var_name = None
-        self.var_type = None
-        self.centroid_pos = None
-        self.header = None
+        self.var_name = var_name
+        self.var_type = var_type
+        self.centroid_pos = centroid_pos
+        self.header = header
         self.split_key = separator
+        if self.var_pos:
+            logger.info(f"Reading data using centroids in positions [{self.centroid_pos[0]}, {self.centroid_pos[1] - 1}] and data in position {self.var_pos}")
+        else:
+            logger.info(f"Reading data using centroids in positions [{self.centroid_pos[0]}, {self.centroid_pos[1] - 1}]")
+
         super().__init__(filename, var_pos=var_pos,
                          var_name=var_name,
                          var_type=var_type,
