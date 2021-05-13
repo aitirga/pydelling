@@ -9,6 +9,7 @@ import seaborn as sns
 import pandas as pd
 import logging
 from PyFLOTRAN.utils.decorators import set_run
+from PyFLOTRAN.config import config
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ class BaseInterpolator:
         temp_array = np.reshape(self.interpolated_data, (self.interpolated_data.shape[0], 1))
         temp_array = np.concatenate((self.mesh, temp_array), axis=1)
         np.savetxt(filename, temp_array, **kwargs)
-        if globals.config.general.verbose:
+        if config.general.verbose:
             print(f"Data has been dumped into {filename}")
 
         # return np.concatenate((self.mesh, temp_array), axis=1)
