@@ -28,7 +28,6 @@ class HDF5RasterWriter(BaseWriter):
                 self.data = np.swapaxes(self.data, 1, 2)
         if self.data is not None:
             self.data_loaded = True
-        print(self.data.shape)
         self.region_name = region_name
         self.times = times
         self.attributes = attributes
