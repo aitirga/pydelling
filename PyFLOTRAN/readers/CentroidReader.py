@@ -4,20 +4,26 @@ Centroid file reader
 import numpy as np
 from .BaseReader import BaseReader
 import logging
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
 
 class CentroidReader(BaseReader):
     """This class reads a data file described by a set of centroids"""
-    def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False, split_key=None):
-        self.var_pos = None
+    def __init__(self, filename, var_pos=3, var_name="var", var_type=np.float32, centroid_pos=(0, 3), header=False, separator=None):
+        self.var_pos = var_pos
         self.var = None
-        self.var_name = None
-        self.var_type = None
-        self.centroid_pos = None
-        self.header = None
-        self.split_key = split_key
+        self.var_name = var_name
+        self.var_type = var_type
+        self.centroid_pos = centroid_pos
+        self.header = header
+        self.split_key = separator
+        if self.var_pos:
+            logger.info(f"Reading data using centroids in positions [{self.centroid_pos[0]}, {self.centroid_pos[1] - 1}] and data in position {self.var_pos}")
+        else:
+            logger.info(f"Reading data using centroids in positions [{self.centroid_pos[0]}, {self.centroid_pos[1] - 1}]")
+
         super().__init__(filename, var_pos=var_pos,
                          var_name=var_name,
                          var_type=var_type,
@@ -37,9 +43,12 @@ class CentroidReader(BaseReader):
             else:
                 data_row = line.split()
             temp_centroid.append(data_row[self.centroid_pos[0]:self.centroid_pos[1] + 1])
-            temp_id.append([data_row[self.var_pos]])
+            if self.var_pos:
+                temp_id.append([data_row[self.var_pos]])
         self.data = np.array(temp_centroid, dtype=np.float32)
-        self.var = np.array(temp_id, dtype=self.var_type)
+        if self.var_pos:
+            self.var = np.array(temp_id, dtype=self.var_type)
+
 
     def read_header(self):
         """
@@ -49,12 +58,19 @@ class CentroidReader(BaseReader):
         """
         pass
 
-    def get_data(self) -> np.ndarray:
+    def get_data(self, as_dataframe=False) -> pd.DataFrame:
         """
         Outputs the data
         :return: np.ndarray object containing centroid information and variable output
         """
-        return np.hstack((self.data, self.var))
+        if as_dataframe:
+            if self.var_pos:
+                return pd.DataFrame(self.data, columns=['x', 'y', 'z', f"{self.var_name}"])
+            else:
+                return pd.DataFrame(self.data, columns=['x', 'y', 'z'])
+        else:
+            return self.data
+
 
     def build_info(self):
         """

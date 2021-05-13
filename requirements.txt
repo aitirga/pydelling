@@ -12,3 +12,4 @@ xlrd==1.2.0
 openpyxl
 tqdm
 seaborn
+open3d

@@ -3,15 +3,23 @@ import h5py
 import numpy as np
 from .BaseWriter import BaseWriter
 from PyFLOTRAN.config import config
-
+import matplotlib.pyplot as plt
 
 class HDF5RasterWriter(BaseWriter):
     def __init__(self, filename, data=None, region_name="region", times=0.0, attributes={}, **kwargs):
         super().__init__(self, data=data, **kwargs)
         if self.info["interpolation"]["type"] == "regular_mesh":
             if len(self.data.shape) == 2:
-                self.data = self.centroid_transform_to_mesh()
-            if len(self.data.shape) == 3:
+                if self.data.shape[1] == 3:
+                    self.data = self.centroid_transform_to_mesh()
+                else:
+                    self.data = self.transform_flatten_to_regular_mesh(data=self.data)
+                    self.data = np.array(self.data)
+                    plt.imshow(self.data[0, :, :])
+                    plt.show()
+                    self.data = np.swapaxes(np.array(self.data), 0, 1)
+                    self.data = np.swapaxes(self.data, 1, 2)
+            elif len(self.data.shape) == 3:
                 _data = []
                 for layer in self.data:
                     _data.append(np.array(self._centroid_transform_to_mesh(layer)))
@@ -24,8 +32,15 @@ class HDF5RasterWriter(BaseWriter):
         self.times = times
         self.attributes = attributes
 
+    def transform_flatten_to_regular_mesh(self, data):
+        assert len(self.data[1].shape) == 1, "A flatten data array needs to be given"
+        aux_array = []
+        if len(data.shape) == 2:
+            for case in data:
+                aux_array.append(np.reshape(case, (self.info["interpolation"]["n_y"], self.info["interpolation"]["n_x"])).T)
+        return np.array(aux_array)
+
     def centroid_transform_to_mesh(self):
-        print(self.data)
         assert len(self.data.shape) >= 2 and self.data.shape[1] == 3
         _data = self.data[:, 2]
         _data = np.reshape(_data, (self.info["interpolation"]["n_x"], self.info["interpolation"]["n_y"]))
@@ -36,7 +51,6 @@ class HDF5RasterWriter(BaseWriter):
         _data = data[:, 2]
         _data = np.reshape(_data, (self.info["interpolation"]["n_x"], self.info["interpolation"]["n_y"]))
         return _data
-
 
     def add_default_attributes(self, hdf5_group: h5py.Dataset):
         dilatation_factor = float(config.general.dilatation_factor)
