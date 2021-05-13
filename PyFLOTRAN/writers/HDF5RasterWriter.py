@@ -14,6 +14,9 @@ class HDF5RasterWriter(BaseWriter):
                     self.data = self.centroid_transform_to_mesh()
                 else:
                     self.data = self.transform_flatten_to_regular_mesh(data=self.data)
+                    self.data = np.array(self.data)
+                    self.data = np.swapaxes(np.array(self.data), 0, 1)
+                    self.data = np.swapaxes(self.data, 1, 2)
             elif len(self.data.shape) == 3:
                 _data = []
                 for layer in self.data:
@@ -23,6 +26,7 @@ class HDF5RasterWriter(BaseWriter):
                 self.data = np.swapaxes(self.data, 1, 2)
         if self.data is not None:
             self.data_loaded = True
+        print(self.data.shape)
         self.region_name = region_name
         self.times = times
         self.attributes = attributes
