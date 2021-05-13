@@ -38,7 +38,7 @@ class HDF5RasterWriter(BaseWriter):
         aux_array = []
         if len(data.shape) == 2:
             for case in data:
-                aux_array.append(np.reshape(case, (self.info["interpolation"]["n_x"], self.info["interpolation"]["n_y"])))
+                aux_array.append(np.reshape(case, (self.info["interpolation"]["n_y"], self.info["interpolation"]["n_x"])).T)
         return np.array(aux_array)
 
     def centroid_transform_to_mesh(self):
