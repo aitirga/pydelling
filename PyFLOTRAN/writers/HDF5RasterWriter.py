@@ -3,7 +3,7 @@ import h5py
 import numpy as np
 from .BaseWriter import BaseWriter
 from PyFLOTRAN.config import config
-
+import matplotlib.pyplot as plt
 
 class HDF5RasterWriter(BaseWriter):
     def __init__(self, filename, data=None, region_name="region", times=0.0, attributes={}, **kwargs):
@@ -15,6 +15,8 @@ class HDF5RasterWriter(BaseWriter):
                 else:
                     self.data = self.transform_flatten_to_regular_mesh(data=self.data)
                     self.data = np.array(self.data)
+                    plt.imshow(self.data[0, :, :])
+                    plt.show()
                     self.data = np.swapaxes(np.array(self.data), 0, 1)
                     self.data = np.swapaxes(self.data, 1, 2)
             elif len(self.data.shape) == 3:
