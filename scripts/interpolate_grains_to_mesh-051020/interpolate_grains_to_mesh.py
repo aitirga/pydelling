@@ -10,7 +10,6 @@ from PyFLOTRAN.readers import StructuredListReader, OpenFoamReader
 from PyFLOTRAN.interpolation import SparseDataInterpolator
 from PyFLOTRAN.writers import HDF5CentroidWriter, OpenFoamVariableWriter
 
-
 def main(argv):
     # Read grain files with the list reader
     grain_reader = StructuredListReader()
