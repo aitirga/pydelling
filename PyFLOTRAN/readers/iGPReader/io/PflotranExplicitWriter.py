@@ -10,7 +10,6 @@ class PflotranExplicitWriter(iGPReader):
     """
     This class contains the functions to write a mesh file in PFLOTRAN unstructured explicit format
     """
-
     def write_cells(self, export_file):
         export_file.write(f"CELLS {len(self.elements)}\n")
         for element in self.elements:
