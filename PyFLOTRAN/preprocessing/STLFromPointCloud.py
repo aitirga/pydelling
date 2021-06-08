@@ -1,3 +1,5 @@
+import vtkmodules.vtkCommonDataModel
+
 from PyFLOTRAN.preprocessing import BasePreprocessing
 from PyFLOTRAN.config import config
 from PyFLOTRAN.utils.decorators import set_run
@@ -5,12 +7,14 @@ import open3d as o3d
 import pandas as pd
 import numpy as np
 import logging
+import vtk
 
 logger = logging.getLogger(__file__)
 
 class STLFromPointCloud(BasePreprocessing):
     preprocessed_data: np.ndarray
     is_run: bool = False
+    stl_mesh: o3d.geometry.TriangleMesh
 
     def __init__(self, data: pd.DataFrame = None, filename: str = None):
         super().__init__(data, filename)
@@ -73,6 +77,29 @@ class STLFromPointCloud(BasePreprocessing):
         if simplify_mesh or config.stl_from_point_cloud.simplify_mesh:
             self.simplify_mesh()
 
+    def make_mesh_watertight(self,
+                             hole_size=1,
+                             filename="reconstructed_mesh.ply",
+                             write=True):
+        """This method reads a ply mesh from an external file and converts it into a watertight mesh
+        """
+
+        reader = vtk.vtkPLYReader()
+        reader.SetFileName(filename)
+        reader.Update()
+        polydata = reader.GetOutput()
+        fill = vtk.vtkFillHolesFilter()
+        fill.SetInputData(polydata)
+        fill.SetHoleSize(hole_size)
+        fill.Update()
+        self.vtk_filled = fill.GetOutput()
+        if write:
+            writer = vtk.vtkPLYWriter()
+            writer.SetInputData(self.vtk_filled)
+            writer.SetFileName(f"{filename}-watertight.ply")
+            writer.Write()
+        return fill.GetOutput()
+
     def reduce_mesh(self, target_value=100000):
         self.stl_mesh = self.stl_mesh.reduce_mesh(target_value)
 
@@ -94,3 +121,9 @@ class STLFromPointCloud(BasePreprocessing):
                                                                                   )[0]
         # bbox = self.point_cloud.get_axis_aligned_bounding_box()
         # self.stl_mesh = self.stl_mesh.crop(bbox)
+
+    def to_ply(self, filename="reconstructed_mesh.ply"):
+        """Writes the mesh in ply format
+        """
+        assert self.is_run, "a mesh reconstruction technique needs to be run first"
+        o3d.io.write_triangle_mesh(filename, self.stl_mesh)
