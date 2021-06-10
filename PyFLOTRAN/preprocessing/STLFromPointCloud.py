@@ -65,7 +65,7 @@ class STLFromPointCloud(BasePreprocessing):
         if not ball_radius and not config.stl_from_point_cloud.ball_radius:
             distances = self.point_cloud.compute_nearest_neighbor_distance()
             self.avg_distance = np.mean(distances)
-            self.ball_radius = 3 * self.avg_distance
+            self.ball_radius = 3 * self.avg_distance * config.stl_from_point_cloud.buff if config.stl_from_point_cloud.buff else 1.0
             self.stl_mesh: o3d.geometry.TriangleMesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(
                 pcd=self.point_cloud,
                 radii=o3d.utility.DoubleVector([self.ball_radius, self.ball_radius * 2]),
@@ -84,7 +84,7 @@ class STLFromPointCloud(BasePreprocessing):
 
 
     def make_mesh_watertight(self,
-                             hole_size=1,
+                             hole_size=None,
                              filename=None,
                              write=True):
         """This method reads a ply mesh from an external file and converts it into a watertight mesh
@@ -99,6 +99,7 @@ class STLFromPointCloud(BasePreprocessing):
         polydata = reader.GetOutput()
         fill = vtk.vtkFillHolesFilter()
         fill.SetInputData(polydata)
+        hole_size = hole_size if hole_size else config.stl_from_point_cloud.watertight_mesh.hole_size if config.stl_from_point_cloud.watertight_mesh.hole_size else 1.0
         fill.SetHoleSize(hole_size)
         fill.Update()
         self.vtk_filled = fill.GetOutput()
