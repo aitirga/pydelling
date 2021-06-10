@@ -126,7 +126,6 @@ def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpo
         aperture = len(z_points) * line_interpolator_resolution
         return aperture
 
-
     if not variable:
         # Calculate directly the aperture
         z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation_point_data.index]["z"]
