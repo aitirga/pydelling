@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import logging
 import vtk
+from pathlib import Path
 
 logger = logging.getLogger(__file__)
 
@@ -51,9 +52,12 @@ class STLFromPointCloud(BasePreprocessing):
     def visualize_point_cloud(self):
         o3d.visualization.draw_geometries([self.point_cloud])
 
-    def visualize_stl_mesh(self):
-        assert self.is_run, "Run the self.run() method before visualizing the results"
-        o3d.visualization.draw_geometries([self.stl_mesh])
+    def visualize_stl_mesh(self, stl_mesh=None):
+        if stl_mesh is not None:
+            o3d.visualization.draw_geometries([stl_mesh])
+        else:
+            assert self.is_run, "Run the self.run() method before visualizing the results"
+            o3d.visualization.draw_geometries([self.stl_mesh])
 
     @set_run
     def run_ball_pivoting(self, ball_radius=None, simplify_mesh=False, **kwargs):
@@ -76,16 +80,21 @@ class STLFromPointCloud(BasePreprocessing):
             )
         if simplify_mesh or config.stl_from_point_cloud.simplify_mesh:
             self.simplify_mesh()
+        return self.stl_mesh
+
 
     def make_mesh_watertight(self,
                              hole_size=1,
-                             filename="reconstructed_mesh.ply",
+                             filename=None,
                              write=True):
         """This method reads a ply mesh from an external file and converts it into a watertight mesh
         """
-
+        self.to_ply(filename="temp.ply")
+        logger.info(f"Making the mesh read from {filename} watertight")
         reader = vtk.vtkPLYReader()
-        reader.SetFileName(filename)
+        if filename is None:
+            filename = Path.cwd() / "output/temp.ply"
+        reader.SetFileName(str(filename))
         reader.Update()
         polydata = reader.GetOutput()
         fill = vtk.vtkFillHolesFilter()
@@ -96,18 +105,26 @@ class STLFromPointCloud(BasePreprocessing):
         if write:
             writer = vtk.vtkPLYWriter()
             writer.SetInputData(self.vtk_filled)
-            writer.SetFileName(f"{filename}-watertight.ply")
+            writer.SetFileName(f"temp-watertight.ply")
             writer.Write()
+        self.stl_mesh = o3d.io.read_triangle_mesh("temp-watertight.ply")
+        Path.unlink(Path("temp-watertight.ply"))
+        Path.unlink(filename)
+
         return fill.GetOutput()
 
     def reduce_mesh(self, target_value=100000):
         self.stl_mesh = self.stl_mesh.reduce_mesh(target_value)
+        return self.stl_mesh
+
 
     def simplify_mesh(self, target_value=100000):
         self.stl_mesh.remove_degenerate_triangles()
         self.stl_mesh.remove_duplicated_triangles()
         self.stl_mesh.remove_duplicated_vertices()
         self.stl_mesh.remove_non_manifold_edges()
+        return self.stl_mesh
+
 
     @set_run
     def run_poisson_reconstruction(self, depth=8, **kwargs):
@@ -119,11 +136,35 @@ class STLFromPointCloud(BasePreprocessing):
                                                                                   **kwargs if kwargs else {},
                                                                                   **config.stl_from_point_cloud.arguments,
                                                                                   )[0]
-        # bbox = self.point_cloud.get_axis_aligned_bounding_box()
-        # self.stl_mesh = self.stl_mesh.crop(bbox)
+        return self.stl_mesh
 
     def to_ply(self, filename="reconstructed_mesh.ply"):
         """Writes the mesh in ply format
         """
         assert self.is_run, "a mesh reconstruction technique needs to be run first"
-        o3d.io.write_triangle_mesh(filename, self.stl_mesh)
+        o3d.io.write_triangle_mesh(str(self.output_directory / filename), self.stl_mesh)
+
+    def crop_bounding_box(self, bbox=None):
+        """
+        Uses original cloud of point bounding box to crop the STL mesh
+        """
+        if bbox is None:
+            logger.info("Computing bounding box and cropping the mesh")
+            bbox = self.point_cloud.get_axis_aligned_bounding_box()
+        else:
+            logger.info(f"Computing bounding box at {bbox} and cropping the mesh")
+            bbox = o3d.geometry.AxisAlignedBoundingBox(min_bound=bbox[0], max_bound=bbox[1])
+
+        self.stl_mesh = self.stl_mesh.crop(bbox)
+        return self.stl_mesh
+
+    @staticmethod
+    def create_output_directory():
+        """Creates an ./output folder on the working directory
+        """
+        Path(Path.cwd() / "output").mkdir(parents=True, exist_ok=True)
+
+    @property
+    def output_directory(self):
+        self.create_output_directory()
+        return Path.cwd() / "output"
