@@ -92,3 +92,12 @@ class CentroidReader(BaseReader):
         np.savetxt(output_file, self.get_data(), delimiter=delimiter)
         logger.info(f"The data has been properly exported to the {output_file} file")
 
+    def shift(self, direction=np.array([0.0, 0.0, 0.0])):
+        """Shifts the data coordinates on the given direction
+        Args:
+            direction: direction vector
+        """
+        if type(direction) is list:
+            direction = np.array(direction)
+        self.data[:, 0:3] += direction
+
