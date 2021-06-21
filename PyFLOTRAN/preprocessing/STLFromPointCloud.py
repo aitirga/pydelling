@@ -144,6 +144,15 @@ class STLFromPointCloud(BasePreprocessing):
         """
         assert self.is_run, "a mesh reconstruction technique needs to be run first"
         o3d.io.write_triangle_mesh(str(self.output_directory / filename), self.stl_mesh)
+        logger.info(f"Writing to {str(self.output_directory / filename)}")
+
+    def to_stl(self, filename="reconstructed_mesh.stl"):
+        """Writes the mesh in stl format
+        """
+        assert self.is_run, "a mesh reconstruction technique needs to be run first"
+        self.stl_mesh = self.stl_mesh.compute_vertex_normals()
+        logger.info(f"Writing to {str(self.output_directory / filename)}")
+        o3d.io.write_triangle_mesh(str(self.output_directory / filename), self.stl_mesh)
 
     def crop_bounding_box(self, bbox=None):
         """
