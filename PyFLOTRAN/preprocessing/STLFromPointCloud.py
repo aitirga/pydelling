@@ -109,8 +109,9 @@ class STLFromPointCloud(BasePreprocessing):
             writer.SetFileName(f"temp-watertight.ply")
             writer.Write()
         self.stl_mesh = o3d.io.read_triangle_mesh("temp-watertight.ply")
-        Path.unlink(Path("temp-watertight.ply"))
-        Path.unlink(filename)
+        print(self.stl_mesh)
+        # Path.unlink(Path("temp-watertight.ply"))
+        # Path.unlink(filename)
 
         return fill.GetOutput()
 

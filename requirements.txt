@@ -2,7 +2,7 @@ ofpp==0.11
 numpy==1.19.3
 pandas==1.0.5
 h5py==2.10.0
-vtk==8.1.2
+vtk
 matplotlib==3.3.0
 scipy==1.5.2
 python-box==5.1.0
