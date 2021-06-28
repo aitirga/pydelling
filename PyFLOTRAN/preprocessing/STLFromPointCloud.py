@@ -154,6 +154,7 @@ class STLFromPointCloud(BasePreprocessing):
         logger.info(f"Writing to {str(self.output_directory / filename)}")
         o3d.io.write_triangle_mesh(str(self.output_directory / filename), self.stl_mesh)
 
+
     def crop_bounding_box(self, bbox=None):
         """
         Uses original cloud of point bounding box to crop the STL mesh
