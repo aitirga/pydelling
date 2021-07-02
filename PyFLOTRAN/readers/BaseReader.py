@@ -3,7 +3,7 @@ Base interface for a reader class
 """
 import numpy as np
 import logging
-
+from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
@@ -12,7 +12,7 @@ class BaseReader:
     info: dict
 
     def __init__(self, filename=None, header=False, **kwargs):
-        self.filename = str(filename)
+        self.filename = Path(filename)
         self.info = {"reader": {}}
         self.data = None
         self.header = header
