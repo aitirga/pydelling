@@ -25,10 +25,17 @@ class RasterFileReader(BaseReader):
         self.reader_info = self.info["reader"]
         self.xydata_computed = False
         self.data = np.zeros(shape=(int(self.reader_info["nrows"]), int(self.reader_info["ncols"])))
-        x_range = np.arange(self.reader_info["xllcorner"], self.reader_info["xllcorner"] + self.reader_info["nrows"] * self.reader_info["cellsize"],
-                            self.reader_info["cellsize"])
-        y_range = np.arange(self.reader_info["yllcorner"], self.reader_info["yllcorner"] + self.reader_info["ncols"] * self.reader_info["cellsize"],
-                            self.reader_info["cellsize"])
+
+        if 'cellsize' in self.reader_info:
+            x_range = np.arange(self.reader_info["xllcorner"], self.reader_info["xllcorner"] + self.reader_info["nrows"] * self.reader_info["cellsize"],
+                                self.reader_info["cellsize"])
+            y_range = np.arange(self.reader_info["yllcorner"], self.reader_info["yllcorner"] + self.reader_info["ncols"] * self.reader_info["cellsize"],
+                                self.reader_info["cellsize"])
+        else:
+            x_range = np.arange(self.reader_info["xllcorner"], self.reader_info["xllcorner"] + self.reader_info["nrows"] * self.reader_info["dx"],
+                                self.reader_info["dx"])
+            y_range = np.arange(self.reader_info["yllcorner"], self.reader_info["yllcorner"] + self.reader_info["ncols"] * self.reader_info["dy"],
+                                self.reader_info["dy"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
         self.y_mesh = np.flipud(self.y_mesh)  # To fit into the .asc format criteria
 
@@ -83,7 +90,7 @@ class RasterFileReader(BaseReader):
         """
         print(f"Starting dump into {output_file}")
         if not self.xydata_computed:
-            xydata = self.dump_to_xydata()
+            xydata = self.get_xy_data()
         else:
             xydata = self.xydata
         f = open(output_file, "w")
