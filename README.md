@@ -14,7 +14,9 @@ Otherwise, you can follow the steps below to run PyFLOTRAN manually.
 ## Installation
 Configure the conda environment running
 
-`conda env create -f /config/conda_env.yml`
+`conda env create --file environment.yaml`
+
+Regular pip dependencies can be found at `requirements.txt`
 
 
 ## Templates and Examples
