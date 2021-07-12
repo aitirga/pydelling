@@ -1,0 +1,15 @@
+dependencies:
+  - python>=3.9
+  - pandas
+  - vtk
+  - matplotlib
+  - scipy
+  - seaborn
+  - h5py
+  - pip:
+        - python-box
+        - xlrd
+        - openpyxl
+        - tqdm
+        - ofpp
+        - pyyaml
