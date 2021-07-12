@@ -55,6 +55,47 @@ def interpolate_centroid_to_structured_grid(centroid: np.ndarray,
     grid_x, grid_y = np.meshgrid(linspace_x, linspace_y)
 
 
+def aperture_from_a_xy_point_old(dataset: BaseFilter, x_point, y_point, line_interpolator, variable=None, target_value=1.0, threshold=0.45, line_resolution=100):
+    """
+    This method computes the aperture at a given position in the XY plane.
+    Args:
+        x_point: X coordinate
+        y_point: Y coordinate
+        variable: The variable to consider that indicates the aperture
+        target_value: Value of the variable when the fracture is open
+        threshold: Value of the maximum variation from the target_value |line[variable] - target_value| < threshold is assumed
+        line_resolution: Resolution of the line interpolation that is being used
+    Returns:
+        The value of the aperture at a given point
+    """
+    point_1 = [x_point, y_point, dataset.z_min]
+    point_2 = [x_point, y_point, dataset.z_max]
+    line_interpolator.set_points(point_1=point_1, point_2=point_2)
+    line_interpolator.set_line_resolution(line_resolution)
+
+    line_interpolation_point_data = line_interpolator.point_data
+    dataset_mesh_points = dataset.mesh_points
+    if variable:
+        # If a target variable is defined,
+        # print(abs(line_interpolation_point_data[variable] - target_value))
+        line_interpolation = line_interpolation_point_data[abs(line_interpolation_point_data[variable] - target_value) < threshold]
+        z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation.index]["z"]
+        if len(z_points) > 0:
+            # aperture = abs(z_points.max() - z_points.min())
+            aperture = z_points.max()
+        else:
+            aperture = 0.0
+        return aperture
+
+    if not variable:
+        # Calculate directly the aperture
+        z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation_point_data.index]["z"]
+        if len(z_points) > 0:
+            aperture = abs(z_points.max() - z_points.min())
+        else:
+            aperture = 0.0
+        return aperture
+
 def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpolator, variable=None, target_value=1.0, threshold=0.45, line_resolution=100):
     """
     This method computes the aperture at a given position in the XY plane.
@@ -71,17 +112,18 @@ def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpo
     point_1 = [x_point, y_point, dataset.z_min]
     point_2 = [x_point, y_point, dataset.z_max]
     line_interpolator.set_points(point_1=point_1, point_2=point_2)
+    line_interpolator.set_line_resolution(line_resolution)
+    line_interpolator_resolution = (dataset.z_max - dataset.z_min) / line_resolution
+
 
     line_interpolation_point_data = line_interpolator.point_data
     dataset_mesh_points = dataset.mesh_points
     if variable:
         # If a target variable is defined,
+        # print(abs(line_interpolation_point_data[variable] - target_value))
         line_interpolation = line_interpolation_point_data[abs(line_interpolation_point_data[variable] - target_value) < threshold]
         z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation.index]["z"]
-        if len(z_points) > 0:
-            aperture = abs(z_points.max() - z_points.min())
-        else:
-            aperture = 0.0
+        aperture = len(z_points) * line_interpolator_resolution
         return aperture
 
     if not variable:
