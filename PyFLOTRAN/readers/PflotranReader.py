@@ -83,6 +83,19 @@ class PflotranReader(BaseReader):
         temp_keys = [key.split('_')[1] for key in self.variables if 'Total' in key]
         return temp_keys
 
+    @property
+    def x_centroid(self):
+        return pd.DataFrame(np.diff(self.coordinates['x[m]']) + self.coordinates['x[m]'][0:-1], columns=['x[m]'])
+
+    @property
+    def y_centroid(self):
+        return np.diff(self.coordinates['y[m]']) + self.coordinates['y[m]'][0:-1]
+
+    @property
+    def z_centroid(self):
+        return np.diff(self.coordinates['z[m]']) + self.coordinates['z[m]'][0:-1]
+
+
     def get_mineral_vf_key(self, mineral):
         """
         Returns the correct key of the mineral volume fraction name
