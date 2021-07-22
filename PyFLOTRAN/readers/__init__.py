@@ -9,3 +9,4 @@ from .VtkReader import VtkReader
 from .iGPReader.io.iGPReader import iGPReader
 from .ConnectFlowReader import ConnectFlowReader
 from .PflotranReader import PflotranReader
+from .PflotranObservationPointReader import PflotranObservationPointReader
