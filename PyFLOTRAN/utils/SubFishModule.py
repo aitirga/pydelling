@@ -4,13 +4,16 @@ Subsurface Fracture Independent Solutions Helper (SubFISH)
 import numpy as np
 import mpmath as mp
 import scipy.special as scsp
+import logging
 
+logger = logging.getLogger(__file__)
 
 class SubfishException(Exception):
     pass
 
 
 def calculate_tang(tang_data):
+    logger.info('Calculating Tang solution')
     # Load parameters
     b = tang_data["b"]
     theta = tang_data["poros"]
@@ -23,10 +26,9 @@ def calculate_tang(tang_data):
     v = tang_data["v"]
     l = tang_data["l"]
 
-    min_time = tang_data["min_time"]
-    max_time = tang_data["max_time"]
-    point_num = tang_data["point_num"]
-
+    min_time = float(tang_data["min_time"])
+    max_time = float(tang_data["max_time"])
+    point_num = int(tang_data["point_num"])
     times = np.geomspace(min_time, max_time, point_num)
     solution = np.zeros(point_num)
 

@@ -92,8 +92,9 @@ class PflotranObservationPointReader(BaseReader):
     def plot_variable(self, variable) -> plt.Axes:
         logger.info(f'Creating lineplot of {variable}')
         plt.clf()
-        lineplot = sns.lineplot(x=self.time_series,
+        lineplot: plt.Axes = sns.lineplot(x=self.time_series,
                                 y=self.results[variable])
+        lineplot.set_label(f'{variable}')
         return lineplot
 
     def to_csv(self, filename='postprocess/results.csv', variables=None) -> pd.DataFrame:
