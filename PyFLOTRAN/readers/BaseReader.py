@@ -75,3 +75,7 @@ class BaseReader:
         print(f"Starting dump into {output_file}")
         np.savetxt(output_file, self.get_data(), delimiter=delimiter)
         print(f"The data has been properly exported to the {output_file} file")
+
+    def create_postprocess_dict(self):
+        self.postprocessing_dict = Path().cwd() / "postprocess"
+        self.postprocessing_dict.mkdir(exist_ok=True)

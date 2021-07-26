@@ -96,6 +96,17 @@ class PflotranObservationPointReader(BaseReader):
                                 y=self.results[variable])
         return lineplot
 
+    def to_csv(self, filename='postprocess/results.csv', variables=None) -> pd.DataFrame:
+        self.create_postprocess_dict()
+        logger.info(f'Exporting results to csv')
+        if variables:
+            plot_results: pd.DataFrame = self.results[variables]
+            plot_results.to_csv(filename)
+        else:
+            self.results.to_csv(filename, index=False)
+
+        # print(self.variables)
+
     def get_mineral_vf_key(self, mineral):
         """
         Returns the correct key of the mineral volume fraction name
@@ -143,35 +154,3 @@ class PflotranObservationPointReader(BaseReader):
     @property
     def time_series(self):
         return self.results.iloc[:, 0]
-
-class PflotranResults:
-    """
-    This class stores the PFLOTRAN results
-    """
-    def __init__(self, time, data):
-        """
-        Args:
-            time: timestep
-            data: results dataset
-        """
-        self.time = time
-        self.raw_data = data
-        self.results = {key: np.array(self.raw_data[key]) for key in self.raw_data}
-        self.variable_keys = self.results.keys()
-
-    def __repr__(self):
-        return f"Results of time {self.time}"
-
-    @property
-    def mineral_names(self):
-        temp_keys = [key.split('_')[0] for key in self.variable_keys if 'VF' in key]
-        return temp_keys
-
-    @property
-    def species_names(self):
-        temp_keys = [key.split('_')[1] for key in self.variable_keys if 'Total' in key]
-        return temp_keys
-
-
-
-
