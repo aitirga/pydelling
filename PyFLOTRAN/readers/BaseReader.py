@@ -4,8 +4,12 @@ Base interface for a reader class
 import numpy as np
 import logging
 from pathlib import Path
-logger = logging.getLogger(__name__)
+import matplotlib.pyplot as plt
+import pandas as pd
 
+logger = logging.getLogger(__name__)
+import PyFLOTRAN.utils.SubFishModule as subfish
+import seaborn as sns
 
 class BaseReader:
     data: np.ndarray  # Hint of self.data array
@@ -75,3 +79,26 @@ class BaseReader:
         print(f"Starting dump into {output_file}")
         np.savetxt(output_file, self.get_data(), delimiter=delimiter)
         print(f"The data has been properly exported to the {output_file} file")
+
+    def create_postprocess_dict(self):
+        self.postprocessing_dict = Path().cwd() / "postprocess"
+        self.postprocessing_dict.mkdir(exist_ok=True)
+
+    def generate_subfish_data(self, subfish_dict: dict, unit_factor=1/(365 * 24)) -> pd.DataFrame:
+        """
+        This method reads a given subfish dict and returns the calculated results
+        Args:
+            subfish_dict: dictionary containing subfish module parameters
+            unit_factor: factor multiplyin the results (originally computed in seconds)
+        Returns:
+            Array containing the times and computed values
+        """
+        if not subfish_dict:
+            raise AttributeError('Please, provide a suitable subfish dict object')
+        tang_sol = subfish.calculate_tang(subfish_dict)
+        tang_sol[0] *= unit_factor
+        tang_sol_pd = pd.DataFrame({'Time [d]': tang_sol[0],
+                                    'Result [M]': tang_sol[1]
+                                    }
+                                   )
+        return tang_sol_pd
