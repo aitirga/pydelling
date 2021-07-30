@@ -84,7 +84,7 @@ class BaseReader:
         self.postprocessing_dict = Path().cwd() / "postprocess"
         self.postprocessing_dict.mkdir(exist_ok=True)
 
-    def generate_subfish_data(self, subfish_dict: dict, unit_factor=1/(365 * 24)) -> pd.DataFrame:
+    def generate_subfish_data(self, subfish_dict: dict, unit_factor=1/(365 * 24), unit_name='d') -> pd.DataFrame:
         """
         This method reads a given subfish dict and returns the calculated results
         Args:
@@ -97,7 +97,7 @@ class BaseReader:
             raise AttributeError('Please, provide a suitable subfish dict object')
         tang_sol = subfish.calculate_tang(subfish_dict)
         tang_sol[0] *= unit_factor
-        tang_sol_pd = pd.DataFrame({'Time [d]': tang_sol[0],
+        tang_sol_pd = pd.DataFrame({f'Time [{unit_name}]': tang_sol[0],
                                     'Result [M]': tang_sol[1]
                                     }
                                    )
