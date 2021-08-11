@@ -149,8 +149,8 @@ class PflotranReader(BaseReader):
             for species in self.species_names:
                 # Generate rate plots
                 primary_species_key = self.get_primary_species_key (species)
-                plot_df = pd.DataFrame ()
-                plt.clf ()
+                plot_df = pd.DataFrame()
+                plt.clf()
                 for time in config.postprocessing.times:
                     specie_data = self.results[time].results[primary_species_key][:, 0, 0]
                     specie_data_pd = pd.DataFrame (specie_data, columns=[f'{time} years'])
