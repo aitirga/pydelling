@@ -11,7 +11,8 @@ from pathlib import Path
 import h5py
 import natsort
 import pandas as pd
-
+import seaborn as sns
+import matplotlib.pyplot as plt
 logger = logging.getLogger(__name__)
 
 
@@ -140,6 +141,27 @@ class PflotranReader(BaseReader):
         """
         return f"Total_{species}"
 
+    def plot_primary_species(self, type='1D', postprocess_dir='./postprocess'):
+        """This method plots the primary species of a 1D model"""
+        logger.info(f'Plotting [{self.species_names}] primary species from {self.filename}')
+        postprocess_dir = Path(postprocess_dir)
+        if type == '1D':
+            for species in self.species_names:
+                # Generate rate plots
+                primary_species_key = self.get_primary_species_key (species)
+                plot_df = pd.DataFrame ()
+                plt.clf ()
+                for time in config.postprocessing.times:
+                    specie_data = self.results[time].results[primary_species_key][:, 0, 0]
+                    specie_data_pd = pd.DataFrame (specie_data, columns=[f'{time} years'])
+                    plot_df = plot_df.combine_first (specie_data_pd)
+                plot_df = plot_df.combine_first (self.x_centroid)
+                plot_df = plot_df.set_index ('x[m]')
+                line_plot: plt.Axes = sns.lineplot (data=plot_df)
+                line_plot.set_xlabel ('X [m]')
+                line_plot.set_ylabel (f'{species}')
+                plt.savefig(postprocess_dir / f'{species}.png')
+
 
 class PflotranResults:
     """
@@ -168,6 +190,7 @@ class PflotranResults:
     def species_names(self):
         temp_keys = [key.split('_')[1] for key in self.variable_keys if 'Total' in key]
         return temp_keys
+
 
 
 
