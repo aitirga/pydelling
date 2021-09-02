@@ -1,5 +1,8 @@
 import numpy as np
 from .BaseReader import BaseReader
+import logging
+
+logger = logging.getLogger(__file__)
 
 
 class RasterFileReader(BaseReader):
@@ -10,6 +13,7 @@ class RasterFileReader(BaseReader):
         self.read_header(opened_file)
         self.build_structure()
         self.read_data(opened_file)
+        logger.info(f"Reading ASC raster file from {opened_file}")
 
     def read_header(self, opened_file, n_header=6):
         for i in range(0, n_header):
