@@ -141,3 +141,24 @@ class RasterFileReader(BaseReader):
         print("Data has been downsampled, the new settings are these:")
         print(self.info)
 
+    def get_value_from_coord(self, x: float, y: float):
+        """
+        This method returns the raster value finding the nearest neighbour of a given x, y coordinate
+        Args:
+            x: Coordinate of the x-direction
+            y: Coordinate of the y-direction
+
+        Returns:
+            Raster value at the given coordinate
+        """
+        # Define auxiliaty variables
+        d_raster = self.reader_info["cellsize"]
+        origin_x = self.reader_info["xllcorner"]
+        origin_y = self.reader_info["yllcorner"]
+
+        ix = int(np.floor((x - origin_x) / (1.001 * d_raster)))  # 1.001 value is used to avoid issues with
+        # the floor function
+        iy = int(np.floor((y - origin_y) / (1.001 * d_raster)))  # 1.001 value is used to avoid issues with
+        # the floor function
+        iy = int(self.reader_info["ncols"] - iy - 1)
+        return self.data[iy, ix]
