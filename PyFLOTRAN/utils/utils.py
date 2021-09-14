@@ -173,3 +173,29 @@ def read_local_config():
     assert len(_config_file) == 1, "Please provide a configuration file that has a '*config.yaml' name structure"
     config = read_config(config_file=_config_file[0])
     return config
+
+
+def sample_values_from_dict(d: dict, n: int) -> dict:
+    """
+    This method reads a dictionary and generates n samples from them based on the
+    following criteria.
+
+    The structure of the dictionary should be as follows:
+    name_of_dict:
+        material_name_i:
+            type: type of the desired distribution
+            option_keys: these keys depend on the chosen distribution type
+        material_name_i:
+
+    Type of implemented distributions:
+        constant[value]: sets a constant value for the variable
+        log_normal[mean, std]: generates a log-normal distribution based on the mean, std values
+        specified in natural scale.
+
+    Args:
+        d: dictionary to extract the samples from
+        n: integer specifying the number of generated samples
+    Returns:
+        A dictionary containing the sampled results
+    """
+    return {}
