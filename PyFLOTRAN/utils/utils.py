@@ -175,7 +175,7 @@ def read_local_config():
     return config
 
 
-def sample_values_from_dict(d: dict, n: int) -> dict:
+def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> dict:
     """
     This method reads a dictionary and generates n samples from them based on the
     following criteria.
@@ -193,9 +193,51 @@ def sample_values_from_dict(d: dict, n: int) -> dict:
         specified in natural scale.
 
     Args:
+        write_to_file: optional argument that writes a csv file with the generated cases. Defaults to True.
         d: dictionary to extract the samples from
         n: integer specifying the number of generated samples
     Returns:
         A dictionary containing the sampled results
     """
-    return {}
+    class BaseDistribution:
+        def __init__(self):
+            pass
+        def run(self) -> float:
+            """
+            This method generates a value of the given distribution
+            Returns: a float number containing the value
+            """
+
+    class ConstantDistribution(BaseDistribution):
+        def __init__(self, value):
+            super().__init__()
+            self.value = value
+
+        def run(self):
+            return self.value
+
+    class NormalDistribution(BaseDistribution):
+        def __init__(self, mean, std, log=False):
+            super().__init__()
+            self.mean = mean
+            self.std = std
+            self.log = log
+
+    # Process each material and create sample generators
+    generator_dict = {}
+    for material in input_dict:
+        material_dict = input_dict[material]
+        if material_dict['type'] == 'constant':
+            generator_dict[material] = ConstantDistribution(value=material_dict['value'])
+        elif material_dict['type'] == 'normal':
+            generator_dict[material] = NormalDistribution(mean=material_dict['value'],
+                                                          std=material_dict['std'],
+                                                          )
+        elif material_dict['type'] == 'log-normal':
+            generator_dict[material] = NormalDistribution(mean=material_dict['value'],
+                                                          std=material_dict['std'],
+                                                          log=True,
+                                                          )
+
+    final_dict = {}
+    return final_dict

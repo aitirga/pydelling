@@ -33,3 +33,4 @@ os.makedirs(config.path.logs if config.path.logs else Path().cwd() / "logs", exi
 with open(Path(__file__).parent / "logger_config.yml", "r") as ymlfile:
     log_config = yaml.safe_load(ymlfile)
 logging.config.dictConfig(log_config)
+
