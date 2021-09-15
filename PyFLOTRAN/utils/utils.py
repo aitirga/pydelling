@@ -13,6 +13,7 @@ except:
     from PyFLOTRAN.paraview_processor.filters import BaseFilter
 import pandas as pd
 from box import Box
+from scipy.stats import lognorm
 
 
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):
@@ -175,12 +176,13 @@ def read_local_config():
     return config
 
 
-def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> dict:
+def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> list:
     """
     This method reads a dictionary and generates n samples from them based on the
     following criteria.
 
     The structure of the dictionary should be as follows:
+
     name_of_dict:
         material_name_i:
             type: type of the desired distribution
@@ -219,9 +221,19 @@ def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> dic
     class NormalDistribution(BaseDistribution):
         def __init__(self, mean, std, log=False):
             super().__init__()
-            self.mean = mean
-            self.std = std
+            self.mean = float(mean)
+            self.std = float(std)
             self.log = log
+
+        def run(self):
+            if not self.log:
+                return np.random.normal(self.mean, self.std)
+            else:
+                mean_exp = np.log(self.mean)
+                std_exp = np.log(self.std)
+                # normal_exp = np.random.normal(mean_exp, std_exp)
+                # normal_value = np.exp(normal_exp)
+                return np.random.lognormal(mean_exp, self.std)
 
     # Process each material and create sample generators
     generator_dict = {}
@@ -230,14 +242,22 @@ def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> dic
         if material_dict['type'] == 'constant':
             generator_dict[material] = ConstantDistribution(value=material_dict['value'])
         elif material_dict['type'] == 'normal':
-            generator_dict[material] = NormalDistribution(mean=material_dict['value'],
+            generator_dict[material] = NormalDistribution(mean=material_dict['mean'],
                                                           std=material_dict['std'],
                                                           )
-        elif material_dict['type'] == 'log-normal':
-            generator_dict[material] = NormalDistribution(mean=material_dict['value'],
+        elif material_dict['type'] == 'log-normal' or material_dict['type'] == 'log_normal':
+            generator_dict[material] = NormalDistribution(mean=material_dict['mean'],
                                                           std=material_dict['std'],
                                                           log=True,
                                                           )
 
-    final_dict = {}
-    return final_dict
+    final_list = []
+    for sample_id in range(n):
+        current_case = {}
+        for generator in generator_dict:
+            print(generator)
+            current_case[generator] = generator_dict[generator].run()
+        final_list.append(current_case)
+    df_test = pd.DataFrame(final_list)
+    df_test.to_csv('SA_cases.csv', index=False)
+    return final_list
