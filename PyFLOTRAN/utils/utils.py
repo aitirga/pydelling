@@ -229,11 +229,7 @@ def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> lis
             if not self.log:
                 return np.random.normal(self.mean, self.std)
             else:
-                mean_exp = np.log(self.mean)
-                std_exp = np.log(self.std)
-                # normal_exp = np.random.normal(mean_exp, std_exp)
-                # normal_value = np.exp(normal_exp)
-                return np.random.lognormal(mean_exp, self.std)
+                return np.random.lognormal(self.mean, self.std)
 
     # Process each material and create sample generators
     generator_dict = {}
@@ -250,12 +246,21 @@ def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> lis
                                                           std=material_dict['std'],
                                                           log=True,
                                                           )
+        elif material_dict['type'] == 'log_normal-two_values':
+            y_min_log = np.log(float(material_dict['y_min']))
+            y_max_log = np.log(float(material_dict['y_max']))
+            mean = (y_min_log + y_max_log) / 2.0
+            std = (mean - y_min_log) / 2.0
+
+            generator_dict[material] = NormalDistribution(mean=mean,
+                                                          std=std,
+                                                          log=True,
+                                                          )
 
     final_list = []
     for sample_id in range(n):
         current_case = {}
         for generator in generator_dict:
-            print(generator)
             current_case[generator] = generator_dict[generator].run()
         final_list.append(current_case)
     df_test = pd.DataFrame(final_list)
