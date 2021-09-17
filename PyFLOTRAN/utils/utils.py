@@ -176,7 +176,7 @@ def read_local_config():
     return config
 
 
-def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> list:
+def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True, return_generator=False) -> list:
     """
     This method reads a dictionary and generates n samples from them based on the
     following criteria.
@@ -263,6 +263,9 @@ def sample_values_from_dict(input_dict: dict, n: int, write_to_file=True) -> lis
         for generator in generator_dict:
             current_case[generator] = generator_dict[generator].run()
         final_list.append(current_case)
-    df_test = pd.DataFrame(final_list)
-    df_test.to_csv('SA_cases.csv', index=False)
+    if write_to_file:
+        df_test = pd.DataFrame(final_list)
+        df_test.to_csv('SA_cases.csv', index=False)
+    if return_generator:
+        return generator_dict
     return final_list
