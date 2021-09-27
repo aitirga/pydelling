@@ -77,7 +77,7 @@ class StreamlineReader(BaseReader):
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
 
         # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
-        temp_df['Material ID'] = (temp_df['Material ID'] + 0.5).apply(np.floor)
+        temp_df['Material ID'] = (temp_df['Material ID'] + 0.45).apply(np.floor)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1, 1.5), 1)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1.5, 2.5), 2)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(2.5, 3.5), 3)
@@ -86,16 +86,6 @@ class StreamlineReader(BaseReader):
 
         temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
         temp_series = temp_series.reset_index()
-
-        # MANUAL
-        # group_2 = temp_series.groupby('Material ID').get_group(float(2.0))['IntegrationTime']
-        # group_3 = temp_series.groupby('Material ID').get_group(float(3.0))['IntegrationTime']
-        # group_4 = temp_series.groupby('Material ID').get_group(float(4.0))['IntegrationTime']
-        # group_5 = temp_series.groupby('Material ID').get_group(float(5.0))['IntegrationTime']
-        # group_54 = pd.concat([group_5, group_4])
-        # group_543 = pd.concat([group_5, group_4, group_3])
-        # group_5432 = pd.concat([group_5, group_4, group_3, group_2])
-        # return temp_series, group_5, group_54, group_543, group_5432
 
         # AUTOMATIC
         dic = {}
@@ -169,7 +159,7 @@ class StreamlineReader(BaseReader):
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
 
         # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
-        temp_df['Material ID'] = (temp_df['Material ID'] + 0.5).apply(np.floor)
+        temp_df['Material ID'] = (temp_df['Material ID'] + 0.45).apply(np.floor)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1, 1.5), 1)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1.5, 2.5), 2)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(2.5, 3.5), 3)
