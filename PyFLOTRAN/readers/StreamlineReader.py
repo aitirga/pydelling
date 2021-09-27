@@ -83,7 +83,7 @@ class StreamlineReader(BaseReader):
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(2.5, 3.5), 3)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(3.5, 4.5), 4)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(4.5, 5), 5)
-
+        print('changed')
         temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
         temp_series = temp_series.reset_index()
 
