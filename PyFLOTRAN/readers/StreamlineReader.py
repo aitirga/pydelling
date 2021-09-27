@@ -77,7 +77,7 @@ class StreamlineReader(BaseReader):
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
 
         # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
-        temp_df['Material ID'] = temp_df['Material ID'].apply(np.floor)
+        temp_df['Material ID'] = (temp_df['Material ID'] + 0.5).apply(np.floor)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1, 1.5), 1)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1.5, 2.5), 2)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(2.5, 3.5), 3)
@@ -169,7 +169,7 @@ class StreamlineReader(BaseReader):
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
 
         # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
-        temp_df['Material ID'] = temp_df['Material ID'].apply(np.floor)
+        temp_df['Material ID'] = (temp_df['Material ID'] + 0.5).apply(np.floor)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1, 1.5), 1)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1.5, 2.5), 2)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(2.5, 3.5), 3)
