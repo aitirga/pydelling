@@ -76,6 +76,26 @@ class StreamlineReader(BaseReader):
         if reason_of_termination:
             temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
 
+        temp_df['Material ID'] = (temp_df['Material ID'] + 0.45).apply(np.floor)
+        temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()['IntegrationTime']
+        temp_series = temp_series.reset_index()
+
+        return temp_series
+
+
+
+    def compute_arrival_times_per_material_paula(self, reason_of_termination=None) -> pd.Series:
+        """
+        This method computes the arrival times of the streamlines for a particular material
+        Returns:
+             A pd.Series object containing the arrival times of the streamlines
+        """
+        logger.info("Computing arrival times of the streamlines per material")
+        reason_of_termination = reason_of_termination if reason_of_termination else config.streamline_reader.reason_of_termination
+        temp_df = self.stream_data.copy()
+        if reason_of_termination:
+            temp_df = temp_df.filter(lambda x: x["ReasonForTermination"].max() == reason_of_termination)
+
         # temp_df['Material ID'] = temp_df['Material ID'].apply(np.ceil)
         temp_df['Material ID'] = (temp_df['Material ID'] + 0.45).apply(np.floor)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(1, 1.5), 1)
@@ -83,7 +103,6 @@ class StreamlineReader(BaseReader):
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(2.5, 3.5), 3)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(3.5, 4.5), 4)
         # temp_df['Material ID'] = temp_df['Material ID'].mask(temp_df['Material ID'].between(4.5, 5), 5)
-        print('changed')
         temp_series: pd.Series = temp_df.groupby(["Material ID", "SeedIds"]).max()
         temp_series = temp_series.reset_index()
 
@@ -308,3 +327,62 @@ class StreamlineReader(BaseReader):
         aperture_matrix[:, aperture_matrix.shape[1] - 1] = aperture_matrix[:, aperture_matrix.shape[1] - 2]
         return aperture_matrix
 
+    def integrate_variable_within_materials(self, variable,
+                                            material_names=None,
+                                            add_variable_name_to_output=True,
+                                            output_variable_name = None,
+                                            *args,
+                                            **kwargs
+                                            ):
+        logger.info(f'Integrating variable {variable} within the materials for all the streamlines')
+        output_list = []
+        for streamline in self.stream_data:
+            output_list.append(self._integrate_variable_within_materials_single(streamline=streamline[1],
+                                                           variable=variable,
+                                                           *args,
+                                                           **kwargs)
+                             )
+        output_df = pd.DataFrame(output_list)
+        if material_names:
+            if add_variable_name_to_output:
+                if not output_variable_name:
+                    output_variable_name = variable
+                output_column_names = [f"{material_names[column]}-{output_variable_name}" for column in output_df.columns]
+            else:
+                output_column_names = [material_names[column] for column in output_df.columns]
+            output_df.columns = output_column_names
+        return output_df
+
+
+    @staticmethod
+    def _integrate_variable_within_materials_single(streamline: pd.DataFrame,
+                                            variable: str,
+                                            categorize_materials: bool=True,
+                                            material_id_column: str='Material ID',
+                                            material_id_offset: float = 0.45,
+                                            ) -> dict:
+        """
+        This method implements an algorithm to integrate a given variable along the different materials of a streamline
+        Args:
+            variable: variable to integrate
+
+        Returns:
+            pd.Dataframe containing the materials and the integrated variable
+        """
+        streamline = streamline.reset_index()
+        if categorize_materials:
+            streamline[material_id_column] = (streamline[material_id_column] + material_id_offset).apply(np.floor)
+        material_groups = streamline.groupby(material_id_column).groups
+        output_dict = {material: 0.0 for material in material_groups.keys()}
+        var_current = None
+        for idx, segment in streamline.iterrows():
+            if idx == 0:
+                # Initial segment
+                output_dict[segment[material_id_column]] += segment[variable]
+                var_current = segment[variable]
+                continue
+            if var_current == None:
+                raise ValueError('There was an error when processing the initial segment')
+            output_dict[segment[material_id_column]] += segment[variable] - var_current
+            var_current = segment[variable]
+        return output_dict
