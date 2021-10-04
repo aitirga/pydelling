@@ -19,7 +19,10 @@ def read_config(config_file: Path="./config.yaml"):
 
 
 _config_file = list(Path.cwd().glob("*config*"))
-assert len(_config_file) == 1, "Please provide a configuration file that has a '*config.yaml' name structure"
+if not _config_file:
+    _config_file = [get_config_path() / 'config.yml']
+    logging.warning('Using default configuration file (not the user defined one)')
+assert len(_config_file) >= 1, "Please provide a configuration file that has a '*config.yaml' name structure"
 config = read_config(config_file=_config_file[0])
 
 # Add global configuration
