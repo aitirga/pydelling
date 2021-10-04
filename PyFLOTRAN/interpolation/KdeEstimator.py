@@ -28,7 +28,6 @@ class KdeEstimator:
         """
         if data:
             self.data = data
-        print(self._training_data)
         self.kde_estimator: KernelDensity = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth).fit(self._training_data)
         assert self.kde_estimator, 'Provide some data to work with'
         return self.kde_estimator
@@ -73,3 +72,6 @@ class KdeEstimator:
     def _training_data(self):
         assert not self.data.empty, 'Provide some data to work with'
         return self.data.values.reshape(-1, self.data.shape[1])
+
+    def sample(self, *args, **kwargs):
+        return self.kde_estimator.sample(*args, **kwargs)
