@@ -196,6 +196,39 @@ class PflotranReader(BaseReader):
                 line_plot.set_ylabel (f'{mineral} volume fraction variation')
                 plt.savefig(postprocess_dir / f'{mineral}.png')
 
+    def plot_total_porosity_variation(self, type='1D', postprocess_dir='./postprocess', ignored_minerals=[]):
+        """This method plots the vf variation due to mineral precipitation"""
+        logger.info(f'Plotting [{self.mineral_names}] primary species from {self.filename}')
+        postprocess_dir = Path(postprocess_dir)
+        postprocess_dir.mkdir(exist_ok=True)
+        plot_df = pd.DataFrame()
+
+        if type == '1D':
+            assert 'Porosity' in self.results[0.0].results, 'Porosity must be within the PFLOTRAN output variables'
+            initial_porosity = self.results[0.0].results['Porosity'][:, 0, 0]
+            for time in config.postprocessing.times:
+                total_porosity_variation = np.zeros_like(initial_porosity)
+                for mineral in self.mineral_names:
+                    if mineral in ignored_minerals:
+                        continue
+                    # Generate porosity variation plots
+                    primary_minerals_key = self.get_mineral_vf_key(mineral)
+                    initial_mineral_vf = self.results[0.0].results[primary_minerals_key][:, 0, 0]
+                    mineral_vf = self.results[time].results[primary_minerals_key][:, 0, 0]
+                    mineral_variation = mineral_vf - initial_mineral_vf
+                    total_porosity_variation += mineral_variation
+
+                total_porosity_variation = total_porosity_variation / initial_porosity * 100
+                mineral_vf_pd = pd.DataFrame(total_porosity_variation, columns=[f'{time} years'])
+                plot_df = plot_df.combine_first(mineral_vf_pd)
+            plot_df = plot_df.combine_first(self.x_centroid)
+            plot_df = plot_df.set_index('x[m]')
+            plot_df = plot_df.reindex(natsort.natsorted(plot_df.columns), axis=1)
+            line_plot: plt.Axes = sns.lineplot (data=plot_df)
+            line_plot.set_xlabel ('X [m]')
+            line_plot.set_ylabel (f'{mineral} volume fraction variation')
+        plt.savefig(postprocess_dir / f'{mineral}.png')
+
 class PflotranResults:
     """
     This class stores the PFLOTRAN results
