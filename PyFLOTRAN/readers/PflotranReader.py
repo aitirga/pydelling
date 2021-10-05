@@ -14,6 +14,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 logger = logging.getLogger(__name__)
+from collections import OrderedDict
 
 
 class PflotranReader(BaseReader):
@@ -29,7 +30,9 @@ class PflotranReader(BaseReader):
     def open_file(self, filename):
         self.data: h5py.File = h5py.File(self.filename, 'r')
         # Obtain time keys
-        self.time_keys = {float(key.split(' ')[2]): key for key in self.data.keys() if 'Time' in key}
+        self.time_dict_keys = natsort.natsorted(OrderedDict({float(key.split(' ')[2]): key for key in self.data.keys() if 'Time' in key}))
+        self.time_keys = OrderedDict({float(key.split(' ')[2]): key for key in self.data.keys() if 'Time' in key})
+        self.time_keys = {key: self.time_keys[key] for key in self.time_dict_keys}
 
     @property
     def time_values(self):
