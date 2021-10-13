@@ -16,3 +16,4 @@ open3d
 mpmath
 natsort
 pytecplot
+sklearn
