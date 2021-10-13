@@ -6,7 +6,7 @@ import numpy as np
 import logging
 import matplotlib.pyplot as plt
 logger = logging.getLogger(__file__)
-
+import seaborn as sns
 
 class KdeEstimator:
     """
@@ -34,7 +34,15 @@ class KdeEstimator:
         self.kde_estimator: KernelDensity = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth).fit(self._training_data)
         return self.kde_estimator
 
-    def plot_1d_comparison_histograms(self, variable=None, n=10000, savefig=None, bins=30):
+    def plot_1d_comparison_histograms(self,
+                                      variable=None,
+                                      n=10000,
+                                      savefig=None,
+                                      bins=30,
+                                      colors=None,
+                                      xlabel=None,
+                                      ylabel=None
+                                      ):
         plt.clf()
         fig, ax = plt.subplots()
         fig: plt.Figure
@@ -48,17 +56,53 @@ class KdeEstimator:
                 density=True,
                 alpha=0.5,
                 label=variable,
+                color=colors[0] if colors else 'C0'
                 )
 
         ax.hist(sampled_values[variable].values, bins=bins,
                 density=True,
                 alpha=0.5,
                 label=f"{variable}-kde",
+                color=colors[1] if colors else 'C1'
                 )
-
+        ax.set_axisbelow(True)
+        if xlabel:
+            ax.set_xlabel(xlabel)
+        if ylabel:
+            ax.set_ylabel(ylabel)
         plt.legend()
+        plt.grid()
         if savefig:
             plt.savefig(savefig)
+        else:
+            plt.show()
+        return ax
+
+    def plot_1d_comparison_histograms_multi(self, variables, n=10000, savefig=None, bins=30, palette=None, dpi=150):
+        plt.clf()
+        fig, ax = plt.subplots()
+        fig: plt.Figure
+        ax: plt.Axes
+
+        sampled_values = pd.DataFrame(self.kde_estimator.sample(n), columns=self.data.columns)
+        for idx, variable in enumerate(variables):
+            if palette:
+                color = palette[idx]
+            sns.histplot(self.data[variable].values, bins=bins,
+                    alpha=0.75,
+                    label=variable,
+                    color=color if palette else {}
+                    )
+            sns.histplot(sampled_values[variable].values, bins=bins,
+                    alpha=0.25,
+                    label=f"{variable}-kde",
+                    color=color if palette else {}
+                         )
+        ax.set_axisbelow(True)
+        plt.legend()
+        plt.grid()
+        if savefig:
+            plt.savefig(savefig, dpi=dpi)
         else:
             plt.show()
         return ax

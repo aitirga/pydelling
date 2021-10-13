@@ -1,0 +1,6 @@
+general:
+  project_name: implicit_to_explicit_converter
+  igp_project_folder: ../../data/gid_models/korad_Final_Volumes_iGP_d.gid
+  multiprocessing: True
+  num_of_processes: 6
+
