@@ -31,7 +31,8 @@ class Surface(_AbstractGidObject):
 
     def extrude(self, start_point: Point, end_point: Point, end_object):
         logger.info(f'Extruding {self} using direction {start_point.coords} -> {end_point.coords}')
-        export_str = f'Mescape Utilities Copy Surfaces DoExtrude {end_object} MantainLayers Translation FNoJoin {start_point.coords_comma} FNoJoin {end_point.coords_comma}\n'
+        export_str = f'Mescape Utilities Copy Surfaces DoExtrude {end_object} MaintainLayers Translation FNoJoin {start_point.coords_comma} FNoJoin {end_point.coords_comma}\n'
+        export_str += f'{self.id}\n'
         extra_surfaces = 5
         extra_lines = 2 * len(self.lines)
         extra_points = len(self.lines)
