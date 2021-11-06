@@ -2,6 +2,7 @@ from __future__ import annotations
 from ._AbstractGidObject import _AbstractGidObject
 from .Point import Point
 from .Line import Line
+from .Surface import Surface
 import logging
 import functools
 logger = logging.getLogger(__file__)
@@ -12,13 +13,26 @@ class GidObject(object):
     This class could be inherited to create new GiD objects
     It stores different GiD objects and generates batch files to generate the geometry automatically on GiD
     """
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.batch_commands = ''
+        self.points = []
+        self.lines = []
+        self.surfaces = []
+        self.volumes = []
+        self.n_points = 1
+        self.n_lines = 1
+        self.n_surfaces = 1
+        self.n_volumes = 1
         self.pipeline = []
-        logger.info('A new GidObject has been created')
+        self.set_up(*args, **kwargs)
 
     def construct(self, *args, **kwargs):
         pass
+
+    def set_up(self, *args, **kwargs):
+        """
+        This method is expected to be changed by the user and it is called when the object is initialized
+        """
 
     def add(self, objects: Union[List[_AbstractGidObject], _AbstractGidObject, GidObject]):
         """
@@ -35,8 +49,15 @@ class GidObject(object):
             if isinstance(obj, Line):
                 self.pipeline.append({'add': obj})
 
+            if isinstance(obj, Surface):
+                self.pipeline.append({'add': obj})
+
             if isinstance(obj, GidObject):
                 self.import_gidobject(obj)
+
+    def extrude(self, obj: Union[_AbstractGidObject, GidObject], start_point: Point, end_point: Point, end_object='Volumes'):
+        assert isinstance(obj, Surface), 'Only surfaces can be extruded for now'
+        self.pipeline.append({'extrude': obj, 'kwargs': {'start_point': start_point, 'end_point': end_point, 'end_object': end_object}})
 
     def join(self, point_1: Point, point_2: Point):
         join_line: Line = Line(point_1, point_2)
