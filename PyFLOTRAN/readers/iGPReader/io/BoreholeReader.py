@@ -122,6 +122,7 @@ class BoreholeReader(BaseReader):
         if config.borehole_processing.make_material_plots.grid:
             ax.grid(zorder=0)
         ax.set_axisbelow(True)
+        ax.set_ylabel('Z (mAOD)')
         plot_data = {}
         dictionary_built = False
         for borehole in self.data:
@@ -133,7 +134,16 @@ class BoreholeReader(BaseReader):
             dictionary_built = True
             for material in self.data[borehole]['Material_name'].unique():
                 plot_data[material]['x'].append(self.data[borehole][self.data[borehole]['Material_name'] == material][variable].values.astype(np.float))
-                plot_data[material]['y'].append(self.data[borehole][self.data[borehole]['Material_name'] == material]['Z (mAOD)'].values.astype(np.float))
+                if config.borehole_processing.make_material_plots.plot_cross_correlation:
+                    cross_correlation_var = config.borehole_processing.make_material_plots.plot_cross_correlation.variable
+                    plot_data[material]['y'].append(self.data[borehole][self.data[borehole]['Material_name'] == material][cross_correlation_var].values.astype(np.float))
+                    logger.info(f'Plotting cross-correlation plots using {cross_correlation_var}')
+                    ax.semilogy()
+                    ax.set_ylabel(config.borehole_processing.make_material_plots.plot_cross_correlation.label if config.borehole_processing.make_material_plots.plot_cross_correlation.label else f'{cross_correlation_var} [m^2]')
+
+
+                else:
+                    plot_data[material]['y'].append(self.data[borehole][self.data[borehole]['Material_name'] == material]['Z (mAOD)'].values.astype(np.float))
 
         for material in plot_data:
             plot_x_values = np.concatenate(plot_data[material]['x']).astype(np.float)
@@ -150,7 +160,6 @@ class BoreholeReader(BaseReader):
                                 right=plot_range[1],
                                 )
         ax.legend()
-        ax.set_ylabel('Z (mAOD)')
         if variable is 'Porosity (-)':
             ax.set_xlabel('Porosity [-]')
         elif variable is 'kx':
