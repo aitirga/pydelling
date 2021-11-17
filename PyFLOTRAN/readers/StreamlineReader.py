@@ -297,6 +297,17 @@ class StreamlineReader(BaseReader):
         self.data.to_csv(output_file)
         print(f"The data has been properly exported to the {output_file} file")
 
+    def to_csv(self, output_file, delimiter=","):
+        """
+        Writes the data into a csv file
+        :param output_file:
+        :return:
+        """
+        print(f"Starting dump into {output_file}")
+        # self.data.to_csv(output_file, delimiter=delimiter)
+        self.data.to_csv(output_file)
+        print(f"The data has been properly exported to the {output_file} file")
+
     def filter_streamlines(self,
                            reason_of_termination=None,
                            min_x=None,
