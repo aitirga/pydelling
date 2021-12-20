@@ -24,7 +24,7 @@ class KdeEstimator:
             self.data = pd.DataFrame(self.data)
 
     @set_run
-    def fit(self, data: pd.DataFrame=None):
+    def run(self, data: pd.DataFrame=None):
         """
         Fit the provided dataset to the corresponding kernel distribution
         """

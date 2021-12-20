@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class SparseDataInterpolator(BaseInterpolator):
     @set_run
-    def interpolate(self, **kwargs):
+    def run(self, **kwargs):
         logger.info(f"Interpolating data based on {self.info}")
         self.interpolated_data = griddata(self.data[:, 0:-1], self.data[:, -1], self.mesh, **kwargs)
         return self.get_data()

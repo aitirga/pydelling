@@ -61,7 +61,7 @@ class BaseInterpolator:
                 self.id_data = np.vstack((self.id_data, temp_id_data))
 
     @set_run
-    def interpolate(self):
+    def run(self):
         """
         Runs the interpolation algorithm
         Returns:
