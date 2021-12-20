@@ -728,6 +728,9 @@ class iGPReader(BaseReader):
                 print(f"{step * '  '}{property} = {self.material_info[material][property]}")
 
 
+    def get_region(self, region_name):
+        return self.centroids[self.region_dict[region_name]['centroid_id'] - 1]
+
 
 def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_size, centroids):
     amount_read = 0.0
