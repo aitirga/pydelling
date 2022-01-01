@@ -20,10 +20,10 @@ class BaseInterpolator:
     def __init__(self,
                  interpolation_data=None,
                  mesh_data=None):
-        self.data = []
-        self.mesh = []
+        self.data: np.ndarray = []
+        self.mesh: np.ndarray = []
         self.info = {"interpolation": {}}
-        self.interpolated_data = []
+        self.interpolated_data: np.ndarray = []
         self.filename = None
         if interpolation_data is not None:
             self.add_data(data=interpolation_data)
