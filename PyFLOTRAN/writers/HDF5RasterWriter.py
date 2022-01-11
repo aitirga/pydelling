@@ -5,6 +5,7 @@ from .BaseWriter import BaseWriter
 from PyFLOTRAN.config import config
 import matplotlib.pyplot as plt
 
+
 class HDF5RasterWriter(BaseWriter):
     def __init__(self, filename, data=None, region_name="region", times=0.0, attributes={}, **kwargs):
         super().__init__(self, data=data, **kwargs)
@@ -53,7 +54,7 @@ class HDF5RasterWriter(BaseWriter):
         return _data
 
     def add_default_attributes(self, hdf5_group: h5py.Dataset):
-        dilatation_factor = float(config.general.dilatation_factor)
+        dilatation_factor = self.info['interpolation']['dilatation_factor']
         l_x = np.abs(self.info["interpolation"]["x_max"] - self.info["interpolation"]["x_min"])
         l_x_dilatated = np.abs(self.info["interpolation"]["x_max"] - self.info["interpolation"]["x_min"]) * dilatation_factor
         delta_x = (l_x_dilatated - l_x) / 2.0
