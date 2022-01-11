@@ -38,12 +38,8 @@ class SparseDataInterpolator(BaseInterpolator):
             data_x_plus: np.ndarray = self.data[self.data[:, 0] >= self.data[:, 0].mean()]
             data_x_minus: np.ndarray = self.data[self.data[:, 0] < self.data[:, 0].mean()]
             # Interpolate the data
-            print(data_x_minus.shape)
-            print(data_x_plus.shape)
             interpolate_plus = griddata(data_x_plus[:, 0:-1], data_x_plus[:, -1], mesh_x_plus, method=method, **kwargs)
-            print('plus done')
             interpolate_minus = griddata(data_x_minus[:, 0:-1], data_x_minus[:, -1], mesh_x_minus, method=method, **kwargs)
-            print('minus done')
             # Combine the data
             self.interpolated_data = np.concatenate((interpolate_plus, interpolate_minus), axis=0)
             return self.get_data()
