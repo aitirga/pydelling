@@ -55,3 +55,21 @@ class SparseDataInterpolator(BaseInterpolator):
         logger.info(f"Equaling values <{min_value} to {min_value}")
         self.interpolated_data[self.interpolated_data < min_value] = min_value
         return self.interpolated_data
+
+
+    def plot_regular_mesh(self):
+        """Generates a plot of the interpolated data on a regular mesh"""
+        assert self.is_run, "The interpolator has not been run"
+        assert self.has_regular_mesh, "The interpolator has not been run with a regular mesh"
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plot_data = self.get_data()
+
+
+    def generate_pointwise_data(self):
+        """Generates a pointwise data file"""
+        assert self.is_run, "The interpolator has not been run"
+        assert self.has_regular_mesh, "The interpolator has not been run with a regular mesh"
+        mesh_data = self.mesh.copy()
+        mesh_data = np.concatenate((mesh_data, self.interpolated_data), axis=1)
+        return mesh_data
