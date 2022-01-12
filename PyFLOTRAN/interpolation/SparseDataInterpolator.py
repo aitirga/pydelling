@@ -71,5 +71,12 @@ class SparseDataInterpolator(BaseInterpolator):
         assert self.is_run, "The interpolator has not been run"
         assert self.has_regular_mesh, "The interpolator has not been run with a regular mesh"
         mesh_data = self.mesh.copy()
-        mesh_data = np.concatenate((mesh_data, self.interpolated_data), axis=1)
+        mesh_data = np.hstack((mesh_data, np.reshape(self.interpolated_data, (-1, 1))))
         return mesh_data
+
+    def export_pointwise_data(self, output_file='pointwise_data.csv'):
+        """Exports the interpolated data to a csv data file"""
+        assert self.is_run, "The interpolator has not been run"
+        assert self.has_regular_mesh, "The interpolator has not been run with a regular mesh"
+        mesh_data = self.generate_pointwise_data()
+        np.savetxt(output_file, mesh_data, delimiter=',', header='x,y,value')
