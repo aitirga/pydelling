@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class BaseInterpolator:
     is_run: bool = False
+    has_regular_mesh: bool = False
 
     def __init__(self,
                  interpolation_data=None,
@@ -128,6 +129,7 @@ class BaseInterpolator:
 
     def create_regular_mesh(self, n_x, n_y, dilatation_factor=1.0):
         """Create an inner regular mesh"""
+        self.has_regular_mesh = True
         self.mesh = []
         self.get_minmax_coords()
         dx = abs(self.data_xmax - self.data_xmin) / n_x
@@ -167,6 +169,7 @@ class BaseInterpolator:
             import matplotlib.pyplot as plt
             histogram_plot = sns.kdeplot(x=self.interpolated_data)
             plt.show()
+
 
 
 
