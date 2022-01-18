@@ -6,6 +6,7 @@ import pandas as pd
 import logging
 from tqdm import tqdm
 import plotly.graph_objects as go
+from tabulate import tabulate
 
 
 logger = logging.getLogger(__name__)
@@ -57,14 +58,31 @@ class DfnPreprocessor(object):
 
     def summary(self):
         """Prints a summary of the dfn object."""
-        pass
+        print(tabulate(
+            [
+                ['Number of fractures', len(self.dfn)],
+                ['Max size', f"{self.max_size:1.2f} m"],
+                ['Min size', f"{self.min_size:1.2f} m"]
+            ],
+            headers=['Parameter', 'Value'],
+            tablefmt='grid',
+            numalign='center',
+        ))
+
 
     def visualize_dfn(self, add_centroid=True):
         """Visualizes the dfn object."""
-        self.generate_dfn_plotly(add_centroid=add_centroid)
+        self.fig = self.generate_dfn_plotly(add_centroid=add_centroid)
+        self.fig.show()
 
-    def export_dfn_image(self, filename):
-        pass
+    def export_dfn_image(self, filename='dfn.png', add_centroid=True, *args, **kwargs, ):
+        logger.info(f'Exporting dfn image to {filename}')
+
+        if hasattr(self, 'fig'):
+            self.fig.write_image(filename, *args, **kwargs)
+        else:
+            self.fig = self.generate_dfn_plotly(add_centroid=add_centroid)
+            self.fig.write_image(filename, *args, **kwargs)
 
     def generate_dfn_plotly(self, add_centroid=True):
         ''' Generates a plotly figure of the dfn object.
@@ -72,6 +90,7 @@ class DfnPreprocessor(object):
         Returns: A plotly figure
 
         '''
+        logger.info('Generating plotly figure')
         fig = go.Figure()
         for fracture in tqdm(self.dfn):
             fracture_sides = fracture.get_side_points()
@@ -96,9 +115,18 @@ class DfnPreprocessor(object):
                 color='#1f77b4',
                 opacity=0.75
             ))
-        fig.show()
 
+        return fig
 
+    @property
+    def max_size(self):
+        """Returns the maximum size of the dfn object."""
+        return max([fracture.size for fracture in self.dfn])
+
+    @property
+    def min_size(self):
+        """Returns the minimum size of the dfn object."""
+        return min([fracture.size for fracture in self.dfn])
 
 
 
