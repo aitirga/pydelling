@@ -59,30 +59,28 @@ class DfnPreprocessor(object):
         """Prints a summary of the dfn object."""
         pass
 
-    def visualize_dfn(self):
+    def visualize_dfn(self, add_centroid=True):
         """Visualizes the dfn object."""
-        self.generate_dfn_plotly()
+        self.generate_dfn_plotly(add_centroid=add_centroid)
 
     def export_dfn_image(self, filename):
         pass
 
-    def generate_dfn_plotly(self):
+    def generate_dfn_plotly(self, add_centroid=True):
         ''' Generates a plotly figure of the dfn object.
 
         Returns: A plotly figure
 
         '''
         fig = go.Figure()
-        for fracture in self.dfn:
+        for fracture in tqdm(self.dfn):
             fracture_sides = fracture.get_side_points()
-            print(fracture_sides[:, 0].shape)
-            print(fracture_sides[:, 0])
-
-            fig.add_trace(go.Scatter3d(
-                x=[fracture.x_centroid],
-                y=[fracture.y_centroid],
-                z=[fracture.z_centroid],
-            ))
+            if add_centroid:
+                fig.add_trace(go.Scatter3d(
+                    x=[fracture.x_centroid],
+                    y=[fracture.y_centroid],
+                    z=[fracture.z_centroid],
+                ))
 
             fig.add_trace(go.Mesh3d(
                 x=fracture_sides[:, 0],

@@ -11,8 +11,43 @@ class Fracture(object):
         self.size = size
         self.centroid = np.array([self.x_centroid, self.y_centroid, self.z_centroid])
 
-
     def get_side_points(self):
+        """
+        Finds the side points of the fracture
+        Returns: Coordinates of the plane side points
+        """
+        alpha = self.dip_dir / 360 * (2 * np.pi)
+        delta = self.dip / 360 * (2 * np.pi)
+
+        A = self.centroid + np.array([
+            - self.size / 2 * (np.sin(alpha) + np.cos(alpha)),
+            - self.size / 2 * np.cos(alpha),
+            self.size / 2 * np.sin(delta)
+        ])
+
+        B = self.centroid + np.array([
+            self.size / 2 * (np.sin(alpha) - np.cos(alpha)),
+            self.size / 2 * np.cos(alpha),
+            self.size / 2 * np.sin(delta)
+        ])
+
+        C = self.centroid + np.array([
+            self.size / 2 * (np.sin(alpha) + np.cos(alpha)),
+            self.size / 2 * np.cos(alpha),
+            - self.size / 2 * np.sin(delta)
+        ])
+
+        D = self.centroid + np.array([
+            - self.size / 2 * (np.sin(alpha) - np.cos(alpha)),
+            - self.size / 2 * np.cos(alpha),
+            - self.size / 2 * np.sin(delta)
+        ])
+
+        return np.array([A, B, C, D])
+
+
+
+    def get_side_points_v1(self):
         """
         alpha = 45; %strike
         delta = 30; %dip
