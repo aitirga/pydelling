@@ -80,19 +80,22 @@ class DfnPreprocessor(object):
                     x=[fracture.x_centroid],
                     y=[fracture.y_centroid],
                     z=[fracture.z_centroid],
+                    mode='markers',
+                    marker=dict(
+                        size=3.5,
+                        color='rgb(0, 0, 0)',
+                        symbol='circle',
+                        opacity=0.65
+                    )
                 ))
 
             fig.add_trace(go.Mesh3d(
                 x=fracture_sides[:, 0],
                 y=fracture_sides[:, 1],
                 z=fracture_sides[:, 2],
-                # line=dict(
-                #     color='rgb(0, 0, 0)',
-                #     width=2
-                # )
+                color='#1f77b4',
+                opacity=0.75
             ))
-
-            break
         fig.show()
 
 
