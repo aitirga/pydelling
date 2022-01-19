@@ -84,7 +84,7 @@ class DfnPreprocessor(object):
             self.fig = self.generate_dfn_plotly(add_centroid=add_centroid)
             self.fig.write_image(filename, *args, **kwargs)
 
-    def generate_dfn_plotly(self, add_centroid=True):
+    def generate_dfn_plotly(self, add_centroid=False, size_color=False):
         ''' Generates a plotly figure of the dfn object.
 
         Returns: A plotly figure
@@ -107,13 +107,21 @@ class DfnPreprocessor(object):
                         opacity=0.65
                     )
                 ))
+            # Add color depending on the fracture size
+            if size_color:
+                A = 255 / (self.max_size - self.min_size)
+                B = 255 - A * self.max_size
+                value = int(A * fracture.size + B)
+                color = f'rgb({value}, 0, 0)'
+            else:
+                color = 'blue'
 
             fig.add_trace(go.Mesh3d(
                 x=fracture_sides[:, 0],
                 y=fracture_sides[:, 1],
                 z=fracture_sides[:, 2],
-                color='#1f77b4',
-                opacity=0.75
+                color=color,
+                opacity=0.75,
             ))
 
         return fig
