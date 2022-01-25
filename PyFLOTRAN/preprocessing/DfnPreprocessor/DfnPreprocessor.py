@@ -69,22 +69,17 @@ class DfnPreprocessor(object):
             numalign='center',
         ))
 
-
-    def visualize_dfn(self, add_centroid=True):
+    def visualize_dfn(self, add_centroid=True, fracture_color='blue', size_color=False):
         """Visualizes the dfn object."""
-        self.fig = self.generate_dfn_plotly(add_centroid=add_centroid)
+        self.fig = self.generate_dfn_plotly(add_centroid=add_centroid, fracture_color=fracture_color, size_color=size_color)
         self.fig.show()
 
-    def export_dfn_image(self, filename='dfn.png', add_centroid=True, *args, **kwargs, ):
+    def export_dfn_image(self, filename='dfn.png', add_centroid=True, fracture_color='blue', *args, **kwargs, ):
         logger.info(f'Exporting dfn image to {filename}')
+        self.fig = self.generate_dfn_plotly(add_centroid=add_centroid, fracture_color=fracture_color)
+        self.fig.write_image(filename, *args, **kwargs)
 
-        if hasattr(self, 'fig'):
-            self.fig.write_image(filename, *args, **kwargs)
-        else:
-            self.fig = self.generate_dfn_plotly(add_centroid=add_centroid)
-            self.fig.write_image(filename, *args, **kwargs)
-
-    def generate_dfn_plotly(self, add_centroid=False, size_color=False):
+    def generate_dfn_plotly(self, add_centroid=False, size_color=False, fracture_color='blue'):
         ''' Generates a plotly figure of the dfn object.
 
         Returns: A plotly figure
@@ -102,7 +97,7 @@ class DfnPreprocessor(object):
                     mode='markers',
                     marker=dict(
                         size=3.5,
-                        color='rgb(0, 0, 0)',
+                        color='black',
                         symbol='circle',
                         opacity=0.65
                     )
@@ -114,8 +109,7 @@ class DfnPreprocessor(object):
                 value = int(A * fracture.size + B)
                 color = f'rgb({value}, 0, 0)'
             else:
-                color = 'blue'
-
+                color = fracture_color
             fig.add_trace(go.Mesh3d(
                 x=fracture_sides[:, 0],
                 y=fracture_sides[:, 1],
