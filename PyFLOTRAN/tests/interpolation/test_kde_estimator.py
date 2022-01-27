@@ -13,7 +13,7 @@ class KdeEstimatorCase(unittest.TestCase):
 
     def test_train_gaussian(self):
         self.kde_estimator = KdeEstimator(data=self.test_data, bandwidth=0.0001)
-        self.kde_estimator.fit()
+        self.kde_estimator.run()
         test_samples = self.kde_estimator.sample(100)
         self.assertLess(abs(test_samples.mean()), 0.5)
 
