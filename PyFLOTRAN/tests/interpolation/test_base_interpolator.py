@@ -16,7 +16,7 @@ class BaseInterpolatorCase(unittest.TestCase):
         numpy.testing.assert_array_equal(self.base_interpolator.data, self.interpolation_data)
 
     def test_interpolation(self):
-        interpolated_data = self.base_interpolator.interpolate()
+        interpolated_data = self.base_interpolator.run()
         numpy.testing.assert_array_equal(interpolated_data, self.mesh_data[:, 0])
 
 

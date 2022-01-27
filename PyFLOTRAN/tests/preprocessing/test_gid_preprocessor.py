@@ -76,7 +76,6 @@ class GidPreprocessorTest(unittest.TestCase):
         surface = Surface(polyline.lines)
         surface_2 = Surface(polyline_2.lines)
 
-
         class TestSurface(GidObject):
             def construct(self, *args, **kwargs):
                 self.add(polyline)

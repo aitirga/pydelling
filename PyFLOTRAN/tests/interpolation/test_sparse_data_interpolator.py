@@ -16,7 +16,7 @@ class SparseDataInterpolatorCase(unittest.TestCase):
         numpy.testing.assert_array_equal(self.base_interpolator.data, self.interpolation_data)
 
     def test_interpolation(self):
-        self.base_interpolator.interpolate()
+        self.base_interpolator.run()
 
 
 if __name__ == '__main__':
