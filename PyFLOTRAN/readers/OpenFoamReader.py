@@ -37,6 +37,20 @@ class OpenFoamReader(BaseReader):
 
         return self.mesh.cell_centres
 
+    @property
+    def cell_volumes(self) -> np.array:
+        if not config.globals.is_cell_volumes_read:
+            try:
+                self.mesh.read_cell_volumes(str(self.filename / "0/C"))
+                logger.info(f"Reading cell center locations from {self.filename / '0/C'}")
+                config.globals.is_cell_volumes_read = True
+            except:
+                logger.info(f"Reading cell center locations from {self.filename / 'constant/C'}")
+                self.mesh.read_cell_volumes(str(self.filename / "constant/C"))
+                config.globals.is_cell_volumes_read = True
+
+        return self.mesh.cell_volumes
+
     def get_data(self) -> np.ndarray:
         """
         Outputs the read data
