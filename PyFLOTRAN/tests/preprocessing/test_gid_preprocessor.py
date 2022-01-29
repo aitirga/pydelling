@@ -69,13 +69,12 @@ class GidPreprocessorTest(unittest.TestCase):
         point_4 = Point([0.0, 1.0, 0.0])
         point_5 = Point([0.0, 2.0, 0.0])
 
-
         polyline = Polyline([point_1, point_2, point_3, point_4], connect=True)
+
         polyline_2 = Polyline([point_1, point_2, point_3, point_5], connect=True)
 
         surface = Surface(polyline.lines)
         surface_2 = Surface(polyline_2.lines)
-
         class TestSurface(GidObject):
             def construct(self, *args, **kwargs):
                 self.add(polyline)

@@ -11,7 +11,7 @@ class Polyline(GidObject):
     local_id: int = 1
 
     def __init__(self, points: List[Point], connect=False):
-        super(Polyline, self).__init__()
+        super().__init__()
         self.lines = []
         self.points = points
         self.connect = connect

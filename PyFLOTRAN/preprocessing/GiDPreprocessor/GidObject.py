@@ -24,7 +24,7 @@ class GidObject(object):
         self.n_surfaces = 1
         self.n_volumes = 1
         self.pipeline = []
-        self.set_up(*args, **kwargs)
+        # self.set_up(*args, **kwargs)
 
     def construct(self, *args, **kwargs):
         pass
