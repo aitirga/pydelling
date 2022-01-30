@@ -42,10 +42,10 @@ class OpenFoamReader(BaseReader):
         if not config.globals.is_cell_volumes_read:
             try:
                 self.mesh.read_cell_volumes(str(self.filename / "0/C"))
-                logger.info(f"Reading cell center locations from {self.filename / '0/C'}")
+                logger.info(f"Reading cell volume locations from {self.filename / '0/C'}")
                 config.globals.is_cell_volumes_read = True
             except:
-                logger.info(f"Reading cell center locations from {self.filename / 'constant/C'}")
+                logger.info(f"Reading cell volume locations from {self.filename / 'constant/C'}")
                 self.mesh.read_cell_volumes(str(self.filename / "constant/C"))
                 config.globals.is_cell_volumes_read = True
 
