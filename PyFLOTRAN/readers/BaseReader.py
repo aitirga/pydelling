@@ -21,7 +21,7 @@ class BaseReader:
         self.data = None
         self.header = header
         self.__dict__.update(kwargs)
-        self.open_file(filename)
+        self.open_file(filename, **kwargs)
 
     def read_file(self, opened_file):
         """
@@ -30,7 +30,7 @@ class BaseReader:
         """
         pass
 
-    def open_file(self, filename):
+    def open_file(self, filename, **kwargs):
         with open(filename) as opened_file:
             if self.header:
                 opened_file.readline()  # For now, skips the header if it has
