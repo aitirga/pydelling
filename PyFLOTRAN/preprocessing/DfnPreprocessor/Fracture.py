@@ -3,6 +3,7 @@ import numpy as np
 
 class Fracture(object):
     def __init__(self, dip, dip_dir, x, y, z, size):
+        self.side_points = None
         self.dip = dip
         self.dip_dir = dip_dir
         self.x_centroid = x
@@ -42,6 +43,7 @@ class Fracture(object):
             - self.size / 2 * np.cos(alpha),
             - self.size / 2 * np.sin(delta)
         ])
+        self.side_points = 4
 
         return np.array([A, B, C, D])
 
@@ -89,5 +91,15 @@ class Fracture(object):
 
         return P
 
-
+    def to_obj(self, global_id=0):
+        """Converts the fracture to an obj file"""
+        side_points = self.get_side_points()
+        obj_string = ''
+        for i in range(len(side_points)):
+            obj_string += 'v ' + str(side_points[i][0]) + ' ' + str(side_points[i][1]) + ' ' + str(side_points[i][2]) + '\n'
+        obj_string += f'f '
+        for i in range(len(side_points)):
+            obj_string += str(global_id + i) + ' '
+        obj_string += '\n'
+        return obj_string
 
