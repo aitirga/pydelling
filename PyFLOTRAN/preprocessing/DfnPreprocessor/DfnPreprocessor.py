@@ -79,6 +79,10 @@ class DfnPreprocessor(object):
         self.fig = self.generate_dfn_plotly(add_centroid=add_centroid, fracture_color=fracture_color)
         self.fig.write_image(filename, *args, **kwargs)
 
+    def to_stl(self):
+        '''Exports the dfn object to stl format.'''
+
+
     def generate_dfn_plotly(self, add_centroid=False, size_color=False, fracture_color='blue'):
         ''' Generates a plotly figure of the dfn object.
 

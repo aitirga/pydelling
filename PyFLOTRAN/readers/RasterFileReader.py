@@ -9,8 +9,16 @@ class RasterFileReader(BaseReader):
     """
     Class that contains functions to read a rasterized file in .asc format
     """
-    def read_file(self, opened_file):
-        self.read_header(opened_file)
+
+    def open_file(self, filename, n_header=6):
+        with open(filename) as opened_file:
+            if self.header:
+                opened_file.readline()  # For now, skips the header if it has
+            self.read_file(opened_file, n_header)
+        self.build_info()
+
+    def read_file(self, opened_file, n_header=6):
+        self.read_header(opened_file, n_header=n_header)
         self.build_structure()
         self.read_data(opened_file)
         logger.info(f"Reading ASC raster file from {opened_file}")
