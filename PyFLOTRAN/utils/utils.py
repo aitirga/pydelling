@@ -97,7 +97,7 @@ def aperture_from_a_xy_point_old(dataset: BaseFilter, x_point, y_point, line_int
             aperture = 0.0
         return aperture
 
-def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpolator, variable=None, target_value=1.0, threshold=0.45, line_resolution=100):
+def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpolator, variable=None, target_value=1.0, threshold=0.45, line_resolution=100, method='explicit'):
     """
     This method computes the aperture at a given position in the XY plane.
     Args:
@@ -107,6 +107,7 @@ def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpo
         target_value: Value of the variable when the fracture is open
         threshold: Value of the maximum variation from the target_value |line[variable] - target_value| < threshold is assumed
         line_resolution: Resolution of the line interpolation that is being used
+        method: Method to use to calculate the aperture. It can be 'explicit' or 'implicit'
     Returns:
         The value of the aperture at a given point
     """
@@ -122,10 +123,18 @@ def aperture_from_a_xy_point(dataset: BaseFilter, x_point, y_point, line_interpo
     if variable:
         # If a target variable is defined,
         # print(abs(line_interpolation_point_data[variable] - target_value))
-        line_interpolation = line_interpolation_point_data[abs(line_interpolation_point_data[variable] - target_value) < threshold]
-        z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation.index]["z"]
-        aperture = len(z_points) * line_interpolator_resolution
-        return aperture
+        # line_interpolation = line_interpolation_point_data[abs(line_interpolation_point_data[variable] - target_value) < threshold]
+        # z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation.index]["z"]
+        if method == 'explicit':
+            line_interpolation = line_interpolation_point_data[abs(line_interpolation_point_data[variable] - target_value) < threshold]
+            z_points: pd.Series = dataset_mesh_points.iloc[line_interpolation.index]["z"]
+            aperture = len(z_points) * line_interpolator_resolution
+            return aperture
+        elif method == 'implicit':
+            eps_field = (line_interpolation_point_data[variable] - line_interpolation_point_data[variable].min())
+            eps_field = eps_field / eps_field.max()
+            aperture = (eps_field * line_interpolator_resolution).sum()
+            return aperture
 
     if not variable:
         # Calculate directly the aperture
