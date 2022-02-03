@@ -15,11 +15,15 @@ logger = logging.getLogger(__name__)
 class DfnPreprocessor(object):
     dfn: List[Fracture] = []
 
-    def __init__(self):
-        pass
-
     def __getitem__(self, item):
         return self.dfn[item]
+
+    def __init__(self):
+        self.clean_dfn()
+
+    def clean_dfn(self):
+        """Removes dfn object"""
+        self.dfn = []
 
     def load_fractures(self, pd_df: pd,
                        dip='dip',
