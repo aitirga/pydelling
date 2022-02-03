@@ -17,8 +17,8 @@ class Fracture(object):
         Finds the side points of the fracture
         Returns: Coordinates of the plane side points
         """
-        alpha = self.dip_dir / 360 * (2 * np.pi)
-        delta = self.dip / 360 * (2 * np.pi)
+        alpha = (self.dip_dir + 0) / 360 * (2 * np.pi)
+        delta = (self.dip + 0) / 360 * (2 * np.pi)
 
         A = self.centroid + np.array([
             - self.size / 2 * (np.sin(alpha) + np.cos(alpha)),
