@@ -86,7 +86,7 @@ class DfnPreprocessor(object):
         self.fig = self.generate_dfn_plotly(add_centroid=add_centroid, fracture_color=fracture_color)
         self.fig.write_image(filename, *args, **kwargs)
 
-    def to_obj(self, filename='dfn.obj'):
+    def to_obj(self, filename='dfn.obj', method='v1'):
         '''Exports the dfn object to stl format.'''
         logger.info(f'Exporting dfn object to {filename}')
         obj_file = open(filename, 'w')
@@ -94,17 +94,17 @@ class DfnPreprocessor(object):
         obj_file.write('o dfn\n')
         global_id = 1
         for fracture in tqdm(self.dfn):
-            obj_file.write(fracture.to_obj(global_id=global_id))
+            obj_file.write(fracture.to_obj(global_id=global_id, method=method))
             global_id += fracture.side_points
 
-    def to_dfnworks(self, filename='dfn.dat'):
+    def to_dfnworks(self, filename='dfn.dat', method='v1'):
         '''Exports the dfn object to dfnworks format.'''
         logger.info(f'Exporting dfn object to {filename}')
         dfn_file = open(filename, 'w')
         n_total_fractures = len(self.dfn)
         dfn_file.write(f'nPolygons: {n_total_fractures}\n')
         for fracture in tqdm(self.dfn):
-            side_points = fracture.get_side_points()
+            side_points = fracture.get_side_points(method=method)
             dfn_file.write(f'{len(side_points)} ')
             for point in side_points:
                 dfn_file.write(f'{{{point[0]},{point[1]},{point[2]}}}')
