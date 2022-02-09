@@ -12,7 +12,7 @@ class Fracture(object):
         self.size = size
         self.centroid = np.array([self.x_centroid, self.y_centroid, self.z_centroid])
 
-    def get_side_points(self):
+    def get_side_points_v1(self):
         """
         Finds the side points of the fracture
         Returns: Coordinates of the plane side points
@@ -21,25 +21,25 @@ class Fracture(object):
         delta = (self.dip + 0) / 360 * (2 * np.pi)
 
         A = self.centroid + np.array([
-            - self.size / 2 * (np.sin(alpha) + np.cos(alpha)),
+            - self.size / 2 * (np.sin(alpha) + np.cos(delta)),
             - self.size / 2 * np.cos(alpha),
             self.size / 2 * np.sin(delta)
         ])
 
         B = self.centroid + np.array([
-            self.size / 2 * (np.sin(alpha) - np.cos(alpha)),
+            self.size / 2 * (np.sin(alpha) - np.cos(delta)),
             self.size / 2 * np.cos(alpha),
             self.size / 2 * np.sin(delta)
         ])
 
         C = self.centroid + np.array([
-            self.size / 2 * (np.sin(alpha) + np.cos(alpha)),
+            self.size / 2 * (np.sin(alpha) + np.cos(delta)),
             self.size / 2 * np.cos(alpha),
             - self.size / 2 * np.sin(delta)
         ])
 
         D = self.centroid + np.array([
-            - self.size / 2 * (np.sin(alpha) - np.cos(alpha)),
+            - self.size / 2 * (np.sin(alpha) - np.cos(delta)),
             - self.size / 2 * np.cos(alpha),
             - self.size / 2 * np.sin(delta)
         ])
@@ -49,7 +49,7 @@ class Fracture(object):
 
 
 
-    def get_side_points_v1(self):
+    def get_side_points_v3(self):
         """
         alpha = 45; %strike
         delta = 30; %dip
@@ -91,9 +91,53 @@ class Fracture(object):
 
         return P
 
-    def to_obj(self, global_id=0):
+    def get_side_points_v2(self):
+        """
+        Finds the side points of the fracture
+        Returns: Coordinates of the plane side points
+        """
+        alpha = self.dip_dir / 360 * (2 * np.pi)
+        delta = self.dip / 360 * (2 * np.pi)
+
+        A = self.centroid + np.array([
+            + self.size / 2 * (-np.cos(alpha) * np.cos(delta) + np.sin(alpha)),
+            + self.size / 2 * (-np.sin(alpha) * np.cos(delta) - np.cos(alpha)),
+            self.size / 2 * np.sin(delta)
+        ])
+
+        B = self.centroid + np.array([
+            + self.size / 2 * (-np.cos(alpha) * np.cos(delta) - np.sin(alpha)),
+            + self.size / 2 * (-np.sin(alpha) * np.cos(delta) + np.cos(alpha)),
+            self.size / 2 * np.sin(delta)
+        ])
+
+        C = self.centroid + np.array([
+            + self.size / 2 * (np.cos(alpha) * np.cos(delta) - np.sin(alpha)),
+            + self.size / 2 * (np.sin(alpha) * np.cos(delta) + np.cos(alpha)),
+            - self.size / 2 * np.sin(delta)
+        ])
+
+        D = self.centroid + np.array([
+            + self.size / 2 * (np.cos(alpha) * np.cos(delta) + np.sin(alpha)),
+            + self.size / 2 * (np.sin(alpha) * np.cos(delta) - np.cos(alpha)),
+            - self.size / 2 * np.sin(delta)
+        ])
+        self.side_points = 4
+
+        return np.array([A, B, C, D])
+
+    def get_side_points(self, method='v1'):
+        if method == 'v1':
+            return self.get_side_points_v1()
+        elif method == 'v2':
+            return self.get_side_points_v2()
+        elif method == 'v3':
+            return self.get_side_points_v3()
+
+
+    def to_obj(self, global_id=0, method='v1'):
         """Converts the fracture to an obj file"""
-        side_points = self.get_side_points()
+        side_points = self.get_side_points(method=method)
         obj_string = ''
         for i in range(len(side_points)):
             obj_string += 'v ' + str(side_points[i][0]) + ' ' + str(side_points[i][1]) + ' ' + str(side_points[i][2]) + '\n'
