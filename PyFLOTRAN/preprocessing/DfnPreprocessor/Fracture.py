@@ -18,7 +18,7 @@ class Fracture(object):
         Returns: Coordinates of the plane side points
         """
         phi = self.dip_dir / 360 * (2 * np.pi)
-        theta = -self.dip / 360 * (2 * np.pi)
+        theta = self.dip / 360 * (2 * np.pi)
 
         u = np.array([np.cos(theta) * np.sin(phi), np.cos(theta) * np.cos(phi), -np.sin(theta)])
         v = np.array([np.cos(phi), - np.sin(phi), 0])
