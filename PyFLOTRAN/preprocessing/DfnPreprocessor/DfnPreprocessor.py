@@ -86,7 +86,7 @@ class DfnPreprocessor(object):
         self.fig = self.generate_dfn_plotly(add_centroid=add_centroid, fracture_color=fracture_color)
         self.fig.write_image(filename, *args, **kwargs)
 
-    def to_obj(self, filename='dfn.obj', method='v1'):
+    def to_obj(self, filename='dfn.obj', method='v2'):
         '''Exports the dfn object to stl format.'''
         logger.info(f'Exporting dfn object to {filename}')
         obj_file = open(filename, 'w')
@@ -97,7 +97,7 @@ class DfnPreprocessor(object):
             obj_file.write(fracture.to_obj(global_id=global_id, method=method))
             global_id += fracture.side_points
 
-    def to_dfnworks(self, filename='dfn.dat', method='v1'):
+    def to_dfnworks(self, filename='dfn.dat', method='v2'):
         '''Exports the dfn object to dfnworks format.'''
         logger.info(f'Exporting dfn object to {filename}')
         dfn_file = open(filename, 'w')

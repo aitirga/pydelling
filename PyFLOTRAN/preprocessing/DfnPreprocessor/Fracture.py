@@ -17,36 +17,21 @@ class Fracture(object):
         Finds the side points of the fracture
         Returns: Coordinates of the plane side points
         """
-        alpha = (self.dip_dir + 0) / 360 * (2 * np.pi)
-        delta = (self.dip + 0) / 360 * (2 * np.pi)
+        phi = self.dip_dir / 360 * (2 * np.pi)
+        theta = -self.dip / 360 * (2 * np.pi)
 
-        A = self.centroid + np.array([
-            - self.size / 2 * (np.sin(alpha) + np.cos(delta)),
-            - self.size / 2 * np.cos(alpha),
-            self.size / 2 * np.sin(delta)
-        ])
+        u = np.array([np.cos(theta) * np.sin(phi), np.cos(theta) * np.cos(phi), -np.sin(theta)])
+        v = np.array([np.cos(phi), - np.sin(phi), 0])
 
-        B = self.centroid + np.array([
-            self.size / 2 * (np.sin(alpha) - np.cos(delta)),
-            self.size / 2 * np.cos(alpha),
-            self.size / 2 * np.sin(delta)
-        ])
+        A = self.centroid + self.size / 2 * (u + v)
+        B = self.centroid + self.size / 2 * (u - v)
+        C = self.centroid - self.size / 2 * (u + v)
+        D = self.centroid - self.size / 2 * (u - v)
 
-        C = self.centroid + np.array([
-            self.size / 2 * (np.sin(alpha) + np.cos(delta)),
-            self.size / 2 * np.cos(alpha),
-            - self.size / 2 * np.sin(delta)
-        ])
 
-        D = self.centroid + np.array([
-            - self.size / 2 * (np.sin(alpha) - np.cos(delta)),
-            - self.size / 2 * np.cos(alpha),
-            - self.size / 2 * np.sin(delta)
-        ])
         self.side_points = 4
 
         return np.array([A, B, C, D])
-
 
 
     def get_side_points_v3(self):
@@ -96,35 +81,37 @@ class Fracture(object):
         Finds the side points of the fracture
         Returns: Coordinates of the plane side points
         """
-        alpha = self.dip_dir / 360 * (2 * np.pi)
-        delta = self.dip / 360 * (2 * np.pi)
+        alpha = self.dip / 360 * (2 * np.pi)
+        beta = self.dip_dir / 360 * (2 * np.pi)
 
         A = self.centroid + np.array([
-            + self.size / 2 * (-np.cos(alpha) * np.cos(delta) + np.sin(alpha)),
-            + self.size / 2 * (-np.sin(alpha) * np.cos(delta) - np.cos(alpha)),
-            self.size / 2 * np.sin(delta)
+            + self.size / 2 * (-np.cos(beta) - np.sin(beta) * np.cos(alpha)),
+            + self.size / 2 * (np.sin(beta) - np.cos(beta) * np.cos(alpha)),
+            self.size / 2 * np.sin(alpha)
         ])
 
         B = self.centroid + np.array([
-            + self.size / 2 * (-np.cos(alpha) * np.cos(delta) - np.sin(alpha)),
-            + self.size / 2 * (-np.sin(alpha) * np.cos(delta) + np.cos(alpha)),
-            self.size / 2 * np.sin(delta)
+            + self.size / 2 * (-np.cos(beta) + np.sin(beta) * np.cos(alpha)),
+            + self.size / 2 * (np.sin(beta) + np.cos(beta) * np.cos(alpha)),
+            - self.size / 2 * np.sin(alpha)
         ])
 
         C = self.centroid + np.array([
-            + self.size / 2 * (np.cos(alpha) * np.cos(delta) - np.sin(alpha)),
-            + self.size / 2 * (np.sin(alpha) * np.cos(delta) + np.cos(alpha)),
-            - self.size / 2 * np.sin(delta)
+            + self.size / 2 * (np.cos(beta) + np.sin(beta) * np.cos(alpha)),
+            + self.size / 2 * (-np.sin(beta) + np.cos(beta) * np.cos(alpha)),
+            - self.size / 2 * np.sin(alpha)
         ])
 
         D = self.centroid + np.array([
-            + self.size / 2 * (np.cos(alpha) * np.cos(delta) + np.sin(alpha)),
-            + self.size / 2 * (np.sin(alpha) * np.cos(delta) - np.cos(alpha)),
-            - self.size / 2 * np.sin(delta)
+            + self.size / 2 * (np.cos(beta) - np.sin(beta) * np.cos(alpha)),
+            + self.size / 2 * (-np.sin(beta) - np.cos(beta) * np.cos(alpha)),
+            + self.size / 2 * np.sin(alpha)
         ])
+
         self.side_points = 4
 
         return np.array([A, B, C, D])
+
 
     def get_side_points(self, method='v1'):
         if method == 'v1':
