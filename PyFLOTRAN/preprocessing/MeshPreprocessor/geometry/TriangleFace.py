@@ -1,6 +1,6 @@
 import numpy as np
 
-from PyFLOTRAN.readers.iGPReader.geometry import BaseFace
+from PyFLOTRAN.preprocessing.MeshPreprocessor.geometry import BaseFace
 
 
 class TriangleFace(BaseFace):
