@@ -1,6 +1,6 @@
-import geometry as geometry
 from typing import *
 import numpy as np
+import PyFLOTRAN.preprocessing.MeshPreprocessor.geometry as geometry
 
 
 class MeshPreprocessor(object):
@@ -17,8 +17,8 @@ class MeshPreprocessor(object):
     def add_element(self, element: geometry.BaseElement):
         self.elements.append(element)
 
-    def add_tetrahedra(self, ):
-        pass
+    def add_tetrahedra(self, node_ids: List[int], y):
+        self.elements.append(geometry.TetrahedraElement(node_ids=node_ids, ))
 
     def add_node(self, node: np.ndarray):
         self.nodes.append(node)

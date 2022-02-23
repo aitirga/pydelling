@@ -1,15 +1,16 @@
 from PyFLOTRAN.config import config
-
+from .BaseFace import BaseFace
+from typing import *
 
 class BaseElement:
-    def __init__(self, node_ids, node_coords, element_type_n, local_id, centroid_coords=None):
+    local_id = 0
+    def __init__(self, node_ids, node_coords, centroid_coords=None):
         self.nodes = node_ids  # Node id set
         self.coords = node_coords  # Coordinates of each node
         self.centroid_coords = centroid_coords
-        self.type = config.globals.element_dict[element_type_n]  # Element type
-        self.n_type = element_type_n  # Number of nodes for an element
-        self.local_id = local_id  # Element id
-        self.faces = {}  # Dictionary to store face information
+        self.local_id = BaseElement.local_id # Element id
+        BaseElement.local_id += 1
+        self.faces: Dict[str, BaseFace] = {}  # Faces of an element
 
     def __repr__(self):
         print("### Element info ###")
