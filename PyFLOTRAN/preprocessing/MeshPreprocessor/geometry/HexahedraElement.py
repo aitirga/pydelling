@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.qhull import ConvexHull
 
-from PyFLOTRAN.readers.iGPReader.geometry import QuadrilateralFace, BaseElement
+from PyFLOTRAN.preprocessing.MeshPreprocessor.geometry import QuadrilateralFace, BaseElement
 
 
 class HexahedraElement(BaseElement):

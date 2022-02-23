@@ -1,6 +1,6 @@
 from scipy.spatial.qhull import ConvexHull
 
-from PyFLOTRAN.readers.iGPReader.geometry import QuadrilateralFace, TriangleFace, BaseElement
+from PyFLOTRAN.preprocessing.MeshPreprocessor.geometry import BaseElement, TriangleFace, QuadrilateralFace
 from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 
 

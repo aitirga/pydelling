@@ -2,6 +2,7 @@ from PyFLOTRAN.config import config
 from .BaseFace import BaseFace
 from typing import *
 
+
 class BaseElement:
     local_id = 0
     def __init__(self, node_ids, node_coords, centroid_coords=None):
