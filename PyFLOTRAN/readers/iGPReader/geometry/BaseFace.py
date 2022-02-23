@@ -12,7 +12,7 @@ class BaseFace:
         # print(f"Area: {self.area}")
         # if len(self.nodes) == 3:
         #     self.plot_face()
-z
+
     def compute_area(self):
         """
         This function computes the area of a 3D planar polygon
