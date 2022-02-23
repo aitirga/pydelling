@@ -5,7 +5,7 @@ from PyFLOTRAN.readers.iGPReader.geometry import TriangleFace, BaseElement
 
 
 class TetrahedraElement(BaseElement):
-    def __init__(self, node_ids, node_coords, element_type_n, local_id, centroid_coords):
+    def __init__(self, node_ids, node_coords, element_type_n, local_id, centroid_coords=None):
         super().__init__(node_ids, node_coords, element_type_n, local_id, centroid_coords)
         self.define_faces()  # Define faces of the element
         self.volume = self.compute_volume()
