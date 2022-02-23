@@ -80,6 +80,9 @@ class iGPReader(BaseReader):
         self.mesh_info["n_nodes"] = int(header[1])
         _elements = []
         for line in range(self.mesh_info["n_elements"]):
+            print(self.mesh_info["n_elements"])
+            print(line)
+
             mesh_line = self.mesh_data.readline().split()
             _elements.append([int(element) - 1 for element in mesh_line[1:]])
         # self.elements = np.array(_elements, dtype=np.int32) - 1  # To local ordering
