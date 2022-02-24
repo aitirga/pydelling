@@ -35,7 +35,6 @@ class MeshPreprocessor(object):
         """Returns the number of elements in the mesh"""
         return len(self.elements)
 
-
     def convert_mesh_to_meshio(self):
         """Converts the mesh into a meshio mesh
         Returns:
