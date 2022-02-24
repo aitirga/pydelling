@@ -37,7 +37,7 @@ class FemReader(MeshPreprocessor):
                         line = line.rstrip()
                         split_line = line.split()
                         for ne in range(0, num_elem_per_node):
-                            nodes_elem[e, ne] = int(split_line[ne + 1])
+                            nodes_elem[e, ne] = int(split_line[ne + 1]) - 1
                             element_type[e] = int(split_line[0])
 
                 elif split_line[0] == "XYZCOOR":
@@ -59,10 +59,10 @@ class FemReader(MeshPreprocessor):
                 # Add a tetrahedra to the mesh structure
                 self.add_tetrahedra(node_ids=nodes_elem[e],
                                     node_coords=[
-                                        self.nodes[nodes_elem[e, 0] - 1],
-                                        self.nodes[nodes_elem[e, 1] - 1],
-                                        self.nodes[nodes_elem[e, 2] - 1],
-                                        self.nodes[nodes_elem[e, 3] - 1],
+                                        self.nodes[nodes_elem[e, 0]],
+                                        self.nodes[nodes_elem[e, 1]],
+                                        self.nodes[nodes_elem[e, 2]],
+                                        self.nodes[nodes_elem[e, 3]],
                                     ]
                                     )
             else:
