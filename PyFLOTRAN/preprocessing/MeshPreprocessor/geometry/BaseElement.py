@@ -15,17 +15,7 @@ class BaseElement:
         self.type = None
 
     def __repr__(self):
-        print("### Element info ###")
-        print(f"Element ID: {self.local_id}")
-        print(f"Number of nodes: {self.n_nodes}")
-        print(f"Element type: {self.type}")
-        print(f"Node list: {self.nodes}")
-        print("### End element info ###")
-
-        print("### Face info ###")
-        for face in self.faces:
-            print(f"{face}: {self.faces[face].nodes}")
-        print("### End face info ###")
+        return f"{self.type} {self.local_id}"
 
     def print_element_info(self):
         print("### Element info ###")
