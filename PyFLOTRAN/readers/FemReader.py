@@ -62,7 +62,8 @@ class FemReader(MeshPreprocessor):
                                         self.nodes[nodes_elem[e, 0] - 1],
                                         self.nodes[nodes_elem[e, 1] - 1],
                                         self.nodes[nodes_elem[e, 2] - 1],
-                                        self.nodes[nodes_elem[e, 3] - 1]]
+                                        self.nodes[nodes_elem[e, 3] - 1],
+                                    ]
                                     )
             else:
                 logger.warning(f"Element type {element_type[e]} not supported")
