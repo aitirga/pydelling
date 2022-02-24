@@ -55,7 +55,6 @@ class BaseFace:
         ax = Axes3D(fig)
         verts = [list(zip(x, y, z))]
         # verts = list(zip(self.coords))
-        print(np.min(self.coords[:, 0]))
         c_mean = np.mean(self.coords, axis=0)
         ax.scatter3D(xs=[self.centroid[0]], ys=[self.centroid[1]], zs=[self.centroid[2]], c="r")
         ax.scatter3D(xs=[c_mean[0]], ys=[c_mean[1]], zs=[c_mean[2]], c="g")
@@ -63,5 +62,4 @@ class BaseFace:
         ax.axes.set_xlim3d(np.min(self.coords[:, 0]), np.max(self.coords[:, 0]))
         ax.axes.set_ylim3d(np.min(self.coords[:, 1]), np.max(self.coords[:, 1]))
         ax.axes.set_zlim3d(np.min(self.coords[:, 2]), np.max(self.coords[:, 2]))
-        print(self.centroid)
         plt.show()
