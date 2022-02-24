@@ -2,7 +2,7 @@ import unittest
 
 
 class TestMeshPreprocessor(unittest.TestCase):
-    def test_mesh_preprocessor(self):
+    def test_read_data(self):
         pass
 
 
