@@ -6,6 +6,7 @@ from PyFLOTRAN.preprocessing.MeshPreprocessor.geometry import BaseFace
 class QuadrilateralFace(BaseFace):
     def __init__(self, nodes, coords):
         super().__init__(nodes, coords)
+        self.type = "quadrilateral"
 
     def compute_centroid(self):
         return np.mean(self.coords, axis=0)

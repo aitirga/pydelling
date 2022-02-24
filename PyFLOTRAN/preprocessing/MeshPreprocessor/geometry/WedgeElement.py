@@ -7,6 +7,7 @@ from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 class WedgeElement(BaseElement):
     def __init__(self, node_ids, node_coords, centroid_coords=None):
         super().__init__(node_ids=node_ids, node_coords=node_coords, centroid_coords=centroid_coords)
+        self.type = "wedge"
         self.define_faces()  # Define faces of the element
 
         if centroid_coords is None:
