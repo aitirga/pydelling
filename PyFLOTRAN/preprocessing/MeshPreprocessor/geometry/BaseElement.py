@@ -12,11 +12,12 @@ class BaseElement:
         self.local_id = BaseElement.local_id # Element id
         BaseElement.local_id += 1
         self.faces: Dict[str, BaseFace] = {}  # Faces of an element
+        self.type = None
 
     def __repr__(self):
         print("### Element info ###")
         print(f"Element ID: {self.local_id}")
-        print(f"Number of nodes: {self.n_type}")
+        print(f"Number of nodes: {self.n_nodes}")
         print(f"Element type: {self.type}")
         print(f"Node list: {self.nodes}")
         print("### End element info ###")
@@ -29,7 +30,7 @@ class BaseElement:
     def print_element_info(self):
         print("### Element info ###")
         print(f"Element ID: {self.local_id}")
-        print(f"Number of nodes: {self.n_type}")
+        print(f"Number of nodes: {self.n_nodes}")
         print(f"Element type: {self.type}")
         print(f"Node list: {self.nodes}")
         print("### End element info ###")
@@ -39,3 +40,7 @@ class BaseElement:
         for face in self.faces:
             print(f"{face}: {self.faces[face].nodes}")
         print("### End face info ###")
+
+    @property
+    def n_nodes(self):
+        return len(self.nodes)

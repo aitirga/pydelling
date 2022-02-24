@@ -7,6 +7,7 @@ from PyFLOTRAN.preprocessing.MeshPreprocessor.geometry import QuadrilateralFace,
 class HexahedraElement(BaseElement):
     def __init__(self, node_ids, node_coords, centroid_coords=None):
         super().__init__(node_ids=node_ids, node_coords=node_coords, centroid_coords=centroid_coords)
+        self.type = "hexahedra"
         self.define_faces()
 
         if centroid_coords is None:
