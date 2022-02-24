@@ -9,8 +9,8 @@ class FemReader(MeshPreprocessor):
         super().__init__()
 
     def open_file(self, filename, **kwargs):
-        
-        with open("r", filename) as f:
+
+        with open(filename, "r") as f:
             for line in f:
                 line = line.rstrip()
                 split_line = line.split()
@@ -19,34 +19,29 @@ class FemReader(MeshPreprocessor):
                     line = f.readline()
                     line = line.rstrip()
                     split_line = line.split()
-                    self.n_elements = int(split_line[0])
-                    self.n_nodes = int(split_line[1])
-
-                    print(line)
+                    self.nodes = int(split_line[0])
+                    self.elements = int(split_line[1])
 
                 elif split_line[0] == "VARNODE":
                     line = f.readline()
                     line = line.rstrip()
                     split_line = line.split()
-                    self.n_elem_per_node = int(split_line[1])
-                    self.nodes_elem = np.zeros([self.n_node, self.n_elem_per_node])
+                    num_elem_per_node = int(split_line[1])
+                    nodes_elem = np.zeros([self.nodes, num_elem_per_node])
 
-                    for n in range(0, self.n_node):
+                    for e in range(0, self.elements):
                         line = f.readline()
                         line = line.rstrip()
                         split_line = line.split()
-                        for ne in range(0, self.n_elem_per_node):
-                            self.nodes_elem[n, ne] = int(split_line[ne + 1])
+                        for ne in range(0, num_elem_per_node):
+                            nodes_elem[e, ne] = int(split_line[ne + 1])
 
                 elif split_line[0] == "XYZCOOR":
                     line = f.readline()
                     line = line.rstrip()
                     split_line = line.split()
-                    self._mesh_nodes = np.zeros([self.n_elements, 3])
-                    for e in range(0, self.n_elements):
-                        self._mesh_nodes[e, 0] = float(split_line[0][0:-1])
-                        self._mesh_nodes[e, 1] = float(split_line[1][0:-1])
-                        self._mesh_nodes[e, 2] = float(split_line[2][0:-1])
+                    for n in range(0, self.nodes):
+                        self.add_node(np.array([float(split_line[0][0:-1]), float(split_line[1][0:-1]), float(split_line[2][0:-1])]))
                         line = f.readline()
                         line = line.rstrip()
                         split_line = line.split()
@@ -54,4 +49,7 @@ class FemReader(MeshPreprocessor):
 
                 else:
                     pass
+
+        for e in range(0, self.elements):
+            self.add_tetrahedra(nodes_elem[e], [self.nodes[nodes_elem[e][0]], self.nodes[nodes_elem[e][1]], self.nodes[nodes_elem[e][2]], self.nodes[nodes_elem[e][3]]])
         
