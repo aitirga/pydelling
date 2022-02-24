@@ -1,7 +1,9 @@
 import os
 import numpy as np
 from ..preprocessing.MeshPreprocessor import MeshPreprocessor
+import logging
 
+logger = logging.getLogger(__name__)
 
 class FemReader(MeshPreprocessor):
     def __init__(self, filename):
@@ -27,6 +29,7 @@ class FemReader(MeshPreprocessor):
                     split_line = line.split()
                     num_elem_per_node = int(split_line[1])
                     nodes_elem = np.zeros([self.aux_n_elements, num_elem_per_node], dtype=int)
+                    element_type = np.zeros([self.aux_n_elements], dtype=int)
 
                     for e in range(0, self.aux_n_elements):
                         line = f.readline()
@@ -34,6 +37,7 @@ class FemReader(MeshPreprocessor):
                         split_line = line.split()
                         for ne in range(0, num_elem_per_node):
                             nodes_elem[e, ne] = int(split_line[ne + 1])
+                            element_type[e] = int(split_line[0])
 
                 elif split_line[0] == "XYZCOOR":
                     line = f.readline()
@@ -50,12 +54,16 @@ class FemReader(MeshPreprocessor):
                     pass
 
         for e in range(0, self.aux_n_elements):
-            self.add_tetrahedra(node_ids=nodes_elem[e],
-                                node_coords=[
-                                    self.nodes[nodes_elem[e, 0] - 1],
-                                    self.nodes[nodes_elem[e, 1] - 1],
-                                    self.nodes[nodes_elem[e, 2] - 1],
-                                    self.nodes[nodes_elem[e, 3] - 1]]
-                                )
+            if element_type[2] == 6:
+                # Add a tetrahedra to the mesh structure
+                self.add_tetrahedra(node_ids=nodes_elem[e],
+                                    node_coords=[
+                                        self.nodes[nodes_elem[e, 0] - 1],
+                                        self.nodes[nodes_elem[e, 1] - 1],
+                                        self.nodes[nodes_elem[e, 2] - 1],
+                                        self.nodes[nodes_elem[e, 3] - 1]]
+                                    )
+            else:
+                logger.warning(f"Element type {element_type[e]} not supported")
 
         
