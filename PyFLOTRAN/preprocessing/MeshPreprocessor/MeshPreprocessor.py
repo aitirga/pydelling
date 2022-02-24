@@ -1,6 +1,7 @@
 from typing import *
 import numpy as np
 import PyFLOTRAN.preprocessing.MeshPreprocessor.geometry as geometry
+import meshio as msh
 
 
 class MeshPreprocessor(object):
@@ -8,6 +9,7 @@ class MeshPreprocessor(object):
     elements: List[geometry.BaseElement]
     nodes: List[np.ndarray]
     centroids: List[np.ndarray]
+    meshio_mesh: msh.Mesh = None
 
     def __init__(self):
         self.nodes = []
@@ -34,5 +36,32 @@ class MeshPreprocessor(object):
         return len(self.elements)
 
 
+    def convert_mesh_to_meshio(self):
+        """Converts the mesh into a meshio mesh
+        Returns:
+            meshio mesh
+        """
+        elements_in_meshio = {}
+        for element in self.elements:
+            if element.type == 'tetrahedra':
+                if not 'tetra' in elements_in_meshio.keys():
+                    elements_in_meshio['tetra'] = []
+                elements_in_meshio['tetra'].append(element.nodes.tolist())
+            elif element.type == 'hexahedra':
+                if not 'hexahedron' in elements_in_meshio.keys():
+                    elements_in_meshio['hexahedron'] = []
+                elements_in_meshio['hexahedron'].append(element.nodes.tolist())
 
+        self.meshio_mesh = msh.Mesh(
+            points=self.nodes,
+            cells=elements_in_meshio
+        )
 
+    def to_vtk(self, filename='mesh.vtk'):
+        """Converts the mesh into vtk using meshio
+        Args:
+            filename: name of the output file
+        """
+        if not self.meshio_mesh:
+            self.convert_mesh_to_meshio()
+        self.meshio_mesh.write(filename)

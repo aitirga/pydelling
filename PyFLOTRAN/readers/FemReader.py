@@ -2,8 +2,9 @@ import os
 import numpy as np
 from ..preprocessing.MeshPreprocessor import MeshPreprocessor
 import logging
-
 logger = logging.getLogger(__name__)
+import meshio as msh
+
 
 class FemReader(MeshPreprocessor):
     def __init__(self, filename):
@@ -66,4 +67,10 @@ class FemReader(MeshPreprocessor):
             else:
                 logger.warning(f"Element type {element_type[e]} not supported")
 
-        
+
+
+
+
+
+
+

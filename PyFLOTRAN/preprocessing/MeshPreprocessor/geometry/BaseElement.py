@@ -1,3 +1,5 @@
+import numpy as np
+
 from PyFLOTRAN.config import config
 from .BaseFace import BaseFace
 from typing import *
@@ -6,13 +8,14 @@ from typing import *
 class BaseElement:
     local_id = 0
     def __init__(self, node_ids, node_coords, centroid_coords=None):
-        self.nodes = node_ids  # Node id set
-        self.coords = node_coords  # Coordinates of each node
+        self.nodes: np.ndarray = node_ids  # Node id set
+        self.coords: List[np.ndarray] = node_coords  # Coordinates of each node
         self.centroid_coords = centroid_coords
         self.local_id = BaseElement.local_id # Element id
         BaseElement.local_id += 1
         self.faces: Dict[str, BaseFace] = {}  # Faces of an element
         self.type = None
+        self.meshio_type = None
 
     def __repr__(self):
         return f"{self.type} {self.local_id}"
