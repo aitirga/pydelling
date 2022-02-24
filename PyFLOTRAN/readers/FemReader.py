@@ -3,13 +3,12 @@ import numpy as np
 from ..preprocessing.MeshPreprocessor import MeshPreprocessor
 
 
-
 class FemReader(MeshPreprocessor):
-    def __init__(self, filename, **kwargs):
+    def __init__(self, filename):
         super().__init__()
+        self.open_file(filename)
 
-    def open_file(self, filename, **kwargs):
-
+    def open_file(self, filename):
         with open(filename, "r") as f:
             for line in f:
                 line = line.rstrip()
@@ -19,17 +18,17 @@ class FemReader(MeshPreprocessor):
                     line = f.readline()
                     line = line.rstrip()
                     split_line = line.split()
-                    self.nodes = int(split_line[0])
-                    self.elements = int(split_line[1])
+                    self.aux_n_nodes = int(split_line[0])
+                    self.aux_n_elements = int(split_line[1])
 
                 elif split_line[0] == "VARNODE":
                     line = f.readline()
                     line = line.rstrip()
                     split_line = line.split()
                     num_elem_per_node = int(split_line[1])
-                    nodes_elem = np.zeros([self.elements, num_elem_per_node])
+                    nodes_elem = np.zeros([self.aux_n_elements, num_elem_per_node], dtype=int)
 
-                    for e in range(0, self.elements):
+                    for e in range(0, self.aux_n_elements):
                         line = f.readline()
                         line = line.rstrip()
                         split_line = line.split()
@@ -40,7 +39,7 @@ class FemReader(MeshPreprocessor):
                     line = f.readline()
                     line = line.rstrip()
                     split_line = line.split()
-                    for n in range(0, self.nodes):
+                    for n in range(0, self.aux_n_nodes):
                         self.add_node(np.array([float(split_line[0][0:-1]), float(split_line[1][0:-1]), float(split_line[2][0:-1])]))
                         line = f.readline()
                         line = line.rstrip()
@@ -50,6 +49,13 @@ class FemReader(MeshPreprocessor):
                 else:
                     pass
 
-        for e in range(0, self.elements):
-            self.add_tetrahedra(nodes_elem[e], [self.nodes[nodes_elem[e][0]], self.nodes[nodes_elem[e][1]], self.nodes[nodes_elem[e][2]], self.nodes[nodes_elem[e][3]]])
+        for e in range(0, self.aux_n_elements):
+            self.add_tetrahedra(node_ids=nodes_elem[e],
+                                node_coords=[
+                                    self.nodes[nodes_elem[e, 0] - 1],
+                                    self.nodes[nodes_elem[e, 1] - 1],
+                                    self.nodes[nodes_elem[e, 2] - 1],
+                                    self.nodes[nodes_elem[e, 3] - 1]]
+                                )
+
         
