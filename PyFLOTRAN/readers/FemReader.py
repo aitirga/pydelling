@@ -27,7 +27,7 @@ class FemReader(MeshPreprocessor):
                     line = line.rstrip()
                     split_line = line.split()
                     num_elem_per_node = int(split_line[1])
-                    nodes_elem = np.zeros([self.nodes, num_elem_per_node])
+                    nodes_elem = np.zeros([self.elements, num_elem_per_node])
 
                     for e in range(0, self.elements):
                         line = f.readline()
