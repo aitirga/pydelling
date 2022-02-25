@@ -64,3 +64,8 @@ class MeshPreprocessor(object):
         if not self.meshio_mesh:
             self.convert_mesh_to_meshio()
         self.meshio_mesh.write(filename)
+
+    def nodes_to_csv(self, filename='nodes.csv'):
+        """Exports the nodes to CSV"""
+        node_array = np.array(self.nodes)
+        np.savetxt(filename, node_array, delimiter=',')

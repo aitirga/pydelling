@@ -43,13 +43,12 @@ class FemReader(MeshPreprocessor):
 
                 elif split_line[0] == "XYZCOOR":
                     line = f.readline()
-                    line = line.rstrip()
-                    split_line = line.split()
+                    line = line.rstrip().replace(',', '').split()
+
                     for n in range(0, self.aux_n_nodes):
-                        self.add_node(np.array([float(split_line[0][0:-1]), float(split_line[1][0:-1]), float(split_line[2][0:-1])]))
+                        self.add_node(np.array([float(line[0]), float(line[1]), float(line[2])]))
                         line = f.readline()
-                        line = line.rstrip()
-                        split_line = line.split()
+                        line = line.rstrip().replace(',', '').split()
                     break
 
                 else:
