@@ -52,7 +52,7 @@ class FemReader(MeshPreprocessor):
                     break
 
                 else:
-                    pass
+                    continue
 
         for e in range(0, self.aux_n_elements):
             if element_type[2] == 6:
