@@ -4,6 +4,7 @@ from ..preprocessing.MeshPreprocessor import MeshPreprocessor
 import logging
 logger = logging.getLogger(__name__)
 import meshio as msh
+from tqdm import tqdm
 
 
 class FemReader(MeshPreprocessor):
@@ -32,7 +33,7 @@ class FemReader(MeshPreprocessor):
                     nodes_elem = np.zeros([self.aux_n_elements, num_elem_per_node], dtype=int)
                     element_type = np.zeros([self.aux_n_elements], dtype=int)
 
-                    for e in range(0, self.aux_n_elements):
+                    for e in tqdm(range(0, self.aux_n_elements), ):
                         line = f.readline()
                         line = line.rstrip()
                         split_line = line.split()
