@@ -11,3 +11,4 @@ from .ConnectFlowReader import ConnectFlowReader
 from .PflotranReader import PflotranReader
 from .PflotranObservationPointReader import PflotranObservationPointReader
 from .FemReader import FemReader
+from .UnstructuredMeshReader import UnstructuredMeshReader
