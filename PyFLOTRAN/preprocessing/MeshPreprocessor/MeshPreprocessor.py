@@ -14,7 +14,6 @@ class MeshPreprocessor(object):
     def __init__(self):
         self.unordered_nodes = {}
         self.elements = []
-        self.centroids = []
 
     def add_element(self, element: geometry.BaseElement):
         self.elements.append(element)
@@ -99,3 +98,11 @@ class MeshPreprocessor(object):
         """Exports the node_ids to CSV"""
         node_array = np.array(self.nodes)
         np.savetxt(filename, node_array, delimiter=',')
+
+    @property
+    def centroids(self):
+        """Returns the centroids of the mesh"""
+        centroids = []
+        for element in self.elements:
+            centroids.append(element.centroid)
+        return centroids

@@ -8,3 +8,4 @@ class BaseAbstractMeshObject:
     local_id = int  # Element id
     type: str or None
     meshio_type: str or None
+    centroid: np.ndarray  # Centroid of the element
