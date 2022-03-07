@@ -43,6 +43,7 @@ class MeshPreprocessor(object):
             self.unordered_nodes[node_ids[idx]] = node
 
     def add_node(self, node: np.ndarray):
+        '''Explicitly adds a node (deprecated)'''
         self.nodes.append(node)
 
     @property
