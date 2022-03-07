@@ -2,10 +2,11 @@ import numpy as np
 
 from PyFLOTRAN.config import config
 from .BaseFace import BaseFace
+from .BaseAbstractMeshObject import BaseAbstractMeshObject
 from typing import *
 
 
-class BaseElement:
+class BaseElement(BaseAbstractMeshObject):
     local_id = 0
     def __init__(self, node_ids, node_coords, centroid_coords=None):
         self.nodes: np.ndarray = node_ids  # Node id set

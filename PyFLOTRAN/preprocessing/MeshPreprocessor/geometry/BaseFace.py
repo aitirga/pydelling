@@ -1,7 +1,7 @@
 from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
+from .BaseAbstractMeshObject import BaseAbstractMeshObject
 
-
-class BaseFace:
+class BaseFace(BaseAbstractMeshObject):
     def __init__(self, node_ids, node_coords):
         self.nodes = np.array(node_ids)
         self.coords = np.array(node_coords)

@@ -6,7 +6,7 @@ import meshio as msh
 
 class MeshPreprocessor(object):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
-    elements: List[geometry.BaseElement]
+    elements: List[geometry.BaseAbstractMeshObject]
     nodes: List[np.ndarray]
     centroids: List[np.ndarray]
     meshio_mesh: msh.Mesh = None
