@@ -15,9 +15,9 @@ class QuadrilateralFace(BaseFace):
         # poly_centroid = np.zeros(shape=3)
         # for triangle_nodes in triangles:
         #     # Set-up variables
-        #     q1 = self.coords[triangle_nodes[0]]  # Point1 of small triangle
-        #     q2 = self.coords[triangle_nodes[1]]  # Point2 of small triangle
-        #     q3 = self.coords[triangle_nodes[2]]  # Point3 of small triangle
+        #     q1 = self.node_coords[triangle_nodes[0]]  # Point1 of small triangle
+        #     q2 = self.node_coords[triangle_nodes[1]]  # Point2 of small triangle
+        #     q3 = self.node_coords[triangle_nodes[2]]  # Point3 of small triangle
         #     q_v = np.array([q1, q2, q3])
         #     v1 = q2 - q1
         #     v2 = q3 - q1

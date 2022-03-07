@@ -191,7 +191,7 @@ class iGPReader(BaseReader):
         self.ExplicitWriter.write_connections(self, output_file)
         if dump_mesh_info:
             self.ImplicitWriter.write_elements(self, output_file)  # Write elements for mesh visualization
-            self.ImplicitWriter.write_nodes(self, output_file)  # Write nodes for mesh visualization
+            self.ImplicitWriter.write_nodes(self, output_file)  # Write node_ids for mesh visualization
         output_file.close()
         # Write condition data
         self.ExplicitWriter.write_condition_data(self)
@@ -260,9 +260,9 @@ class iGPReader(BaseReader):
 
     def raster_interpolator(self, raster_folder, raster_filenames):
         """Performs layer based raster interpolation
-        This function approximates the nodes that lay on each of the layers with the rasterized data of such layer.
+        This function approximates the node_ids that lay on each of the layers with the rasterized data of such layer.
         The current approach is based on nearest neighbours approximation
-        :return np.array of interpolated nodes
+        :return np.array of interpolated node_ids
         """
         logger.info("Interpolating raster regions to mesh")
         for region in config.raster_refinement.regions:
@@ -276,7 +276,7 @@ class iGPReader(BaseReader):
             if region in config.raster_refinement.top_regions:
                 logger.info(f"An offset of +{config.raster_refinement.top_offset} m will be applied in the z-direction to region {region}")
             if region == config.raster_refinement.second_layer:
-                logger.info(f"Region {region} has been selected as the second layer region. Thus, its nodes will be displaced {config.raster_refinement.first_layer_to_second_layer_difference}m from the top raster file")
+                logger.info(f"Region {region} has been selected as the second layer region. Thus, its node_ids will be displaced {config.raster_refinement.first_layer_to_second_layer_difference}m from the top raster file")
             for mesh_id in id_list:
                 x_mesh = self.nodes[mesh_id][0]
                 y_mesh = self.nodes[mesh_id][1]
@@ -297,8 +297,8 @@ class iGPReader(BaseReader):
                 self.nodes[mesh_id][2] = z_raster + z_offset + z_second_layer_diff
             logger.info(f"Interpolation of region {region} completed. Max absolute difference {self._raster_max_error:1.2f}m")
 
-        # nodes = raster_interpolator(self.path, raster_folder, raster_filenames)
-        # self.nodes = nodes  # Update the mesh with the moved nodes
+        # node_ids = raster_interpolator(self.path, raster_folder, raster_filenames)
+        # self.node_ids = node_ids  # Update the mesh with the moved node_ids
         return self.nodes
 
     def write_ASCII_meshfile(self, filename):
@@ -710,9 +710,9 @@ class iGPReader(BaseReader):
     @property
     def n_mesh_nodes(self) -> int:
         """
-        Gives the total number of mesh nodes
+        Gives the total number of mesh node_ids
         Returns:
-            The total number of mesh nodes
+            The total number of mesh node_ids
         """
         return self.mesh_info["n_nodes"]
 
