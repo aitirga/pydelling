@@ -10,6 +10,7 @@ from tqdm import tqdm
 class FemReader(MeshPreprocessor):
     def __init__(self, filename):
         super().__init__()
+        self.aux_nodes = []
         self.open_file(filename)
 
     def open_file(self, filename):
@@ -46,7 +47,7 @@ class FemReader(MeshPreprocessor):
                     line = line.rstrip().replace(',', '').split()
 
                     for n in range(0, self.aux_n_nodes):
-                        self.add_node(np.array([float(line[0]), float(line[1]), float(line[2])]))
+                        self.aux_nodes.append(np.array([float(line[0]), float(line[1]), float(line[2])]))
                         line = f.readline()
                         line = line.rstrip().replace(',', '').split()
                     break
@@ -59,10 +60,10 @@ class FemReader(MeshPreprocessor):
                 # Add a tetrahedra to the mesh structure
                 self.add_tetrahedra(node_ids=nodes_elem[e],
                                     node_coords=[
-                                        self.nodes[nodes_elem[e, 0]],
-                                        self.nodes[nodes_elem[e, 1]],
-                                        self.nodes[nodes_elem[e, 2]],
-                                        self.nodes[nodes_elem[e, 3]],
+                                        self.aux_nodes[nodes_elem[e, 0]],
+                                        self.aux_nodes[nodes_elem[e, 1]],
+                                        self.aux_nodes[nodes_elem[e, 2]],
+                                        self.aux_nodes[nodes_elem[e, 3]],
                                     ]
                                     )
             else:
