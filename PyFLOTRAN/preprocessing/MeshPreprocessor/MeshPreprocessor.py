@@ -43,6 +43,7 @@ class MeshPreprocessor(object):
         Returns:
             meshio mesh
         """
+
         elements_in_meshio = {}
         for element in self.elements:
             if element.type == 'tetrahedra':
@@ -53,6 +54,16 @@ class MeshPreprocessor(object):
                 if not 'hexahedron' in elements_in_meshio.keys():
                     elements_in_meshio['hexahedron'] = []
                 elements_in_meshio['hexahedron'].append(element.nodes.tolist())
+            elif element.type == 'triangle':
+                if not 'triangle' in elements_in_meshio.keys():
+                    elements_in_meshio['triangle'] = []
+                elements_in_meshio['triangle'].append(element.nodes.tolist())
+            elif element.type == 'quad':
+                if not 'quad' in elements_in_meshio.keys():
+                    elements_in_meshio['quad'] = []
+                elements_in_meshio['quad'].append(element.nodes.tolist())
+
+
 
         self.meshio_mesh = msh.Mesh(
             points=self.nodes,
