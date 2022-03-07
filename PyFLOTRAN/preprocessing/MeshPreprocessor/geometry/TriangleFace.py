@@ -4,8 +4,8 @@ from PyFLOTRAN.preprocessing.MeshPreprocessor.geometry import BaseFace
 
 
 class TriangleFace(BaseFace):
-    def __init__(self, nodes, coords):
-        super().__init__(nodes, coords)
+    def __init__(self, node_ids, node_coords):
+        super().__init__(node_ids, node_coords)
         self.type = "triangle"
 
     def compute_centroid(self):

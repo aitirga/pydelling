@@ -10,7 +10,7 @@ class BaseFace:
         self.centroid = self.compute_centroid()
         # print(f"old centroid: {self.compute_centroid_mean()}, new centroid: {self.centroid}")
         # print(f"Area: {self.area}")
-        # if len(self.nodes) == 3:
+        # if len(self.node_ids) == 3:
         #     self.plot_face()
 
     def compute_area(self):
@@ -54,7 +54,7 @@ class BaseFace:
         fig = plt.figure()
         ax = Axes3D(fig)
         verts = [list(zip(x, y, z))]
-        # verts = list(zip(self.coords))
+        # verts = list(zip(self.node_coords))
         c_mean = np.mean(self.coords, axis=0)
         ax.scatter3D(xs=[self.centroid[0]], ys=[self.centroid[1]], zs=[self.centroid[2]], c="r")
         ax.scatter3D(xs=[c_mean[0]], ys=[c_mean[1]], zs=[c_mean[2]], c="g")

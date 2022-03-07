@@ -6,7 +6,7 @@ import meshio as msh
 
 class MeshPreprocessor(object):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
-    elements: List[geometry.BaseElement]
+    elements: List[geometry.BaseElement or geometry.BaseFace]
     nodes: List[np.ndarray]
     centroids: List[np.ndarray]
     meshio_mesh: msh.Mesh = None
@@ -22,12 +22,15 @@ class MeshPreprocessor(object):
     def add_tetrahedra(self, node_ids: List[int], node_coords: List[np.ndarray]):
         self.elements.append(geometry.TetrahedraElement(node_ids=node_ids, node_coords=node_coords))
 
+    def add_quadrilateral(self, node_ids: List[int], node_coords: List[np.ndarray]):
+        self.elements.append(geometry.QuadrilateralFace(node_ids=node_ids, node_coords=node_coords))
+
     def add_node(self, node: np.ndarray):
         self.nodes.append(node)
 
     @property
     def n_nodes(self):
-        """Returns the number of nodes in the mesh"""
+        """Returns the number of node_ids in the mesh"""
         return len(self.nodes)
 
     @property
@@ -65,7 +68,7 @@ class MeshPreprocessor(object):
             self.convert_mesh_to_meshio()
         self.meshio_mesh.write(filename)
 
-    def nodes_to_csv(self, filename='nodes.csv'):
-        """Exports the nodes to CSV"""
+    def nodes_to_csv(self, filename='node_ids.csv'):
+        """Exports the node_ids to CSV"""
         node_array = np.array(self.nodes)
         np.savetxt(filename, node_array, delimiter=',')

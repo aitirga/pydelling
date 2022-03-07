@@ -7,7 +7,7 @@ class BaseElement:
         self.coords = node_coords  # Coordinates of each node
         self.centroid_coords = centroid_coords
         self.type = config.globals.element_dict[element_type_n]  # Element type
-        self.n_type = element_type_n  # Number of nodes for an element
+        self.n_type = element_type_n  # Number of node_ids for an element
         self.local_id = local_id  # Element id
         self.faces = {}  # Dictionary to store face information
 
