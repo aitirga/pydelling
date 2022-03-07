@@ -3,8 +3,8 @@ from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 
 class BaseFace:
     def __init__(self, node_ids, node_coords):
-        self.nodes = node_ids
-        self.coords = node_coords
+        self.nodes = np.array(node_ids)
+        self.coords = np.array(node_coords)
         self.n_coords = len(node_coords)
 
     @property

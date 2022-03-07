@@ -9,7 +9,7 @@ class BaseElement:
     local_id = 0
     def __init__(self, node_ids, node_coords, centroid_coords=None):
         self.nodes: np.ndarray = node_ids  # Node id set
-        self.coords: List[np.ndarray] = node_coords  # Coordinates of each node
+        self.coords: np.ndarray = np.array(node_coords)  # Coordinates of each node
         self.centroid_coords = centroid_coords
         self.local_id = BaseElement.local_id # Element id
         BaseElement.local_id += 1
