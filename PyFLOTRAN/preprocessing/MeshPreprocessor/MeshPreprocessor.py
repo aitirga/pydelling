@@ -155,9 +155,10 @@ class MeshPreprocessor(object):
         Returns:
             A list of the nearest mesh elements.
         """
-        assert hasattr(self, "kd_tree"), "KD-tree not created"
+        if not hasattr(self, 'kd_tree'):
+            self.create_kd_tree()
         if distance_upper_bound:
-            ids = self.kd_tree.query_ball_point(point, k=k, distance_upper_bound=distance_upper_bound)[1]
+            ids = self.kd_tree.query(point, k=k, distance_upper_bound=distance_upper_bound)[1]
         else:
             ids = self.kd_tree.query(point, k=k)[1]
 
