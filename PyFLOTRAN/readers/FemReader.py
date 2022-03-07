@@ -8,12 +8,13 @@ from tqdm import tqdm
 
 
 class FemReader(MeshPreprocessor):
-    def __init__(self, filename):
+    def __init__(self, filename, kd_tree=True):
         super().__init__()
         self.aux_nodes = []
         self.open_file(filename)
         # Create KD-mesh structure
-        self.create_kd_tree()
+        if kd_tree:
+            self.create_kd_tree()
 
 
     def open_file(self, filename):
