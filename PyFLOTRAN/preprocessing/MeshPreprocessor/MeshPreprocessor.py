@@ -2,6 +2,7 @@ from typing import *
 import numpy as np
 import PyFLOTRAN.preprocessing.MeshPreprocessor.geometry as geometry
 import meshio as msh
+from scipy.spatial import KDTree
 
 
 class MeshPreprocessor(object):
@@ -10,6 +11,7 @@ class MeshPreprocessor(object):
     nodes: List[np.ndarray]
     centroids: List[np.ndarray]
     meshio_mesh: msh.Mesh = None
+    kd_tree: KDTree
 
     def __init__(self):
         self.unordered_nodes = {}
@@ -61,8 +63,47 @@ class MeshPreprocessor(object):
             meshio mesh
         """
 
+        elements_in_meshio = self._create_meshio_dict(self.elements)
+        self.meshio_mesh = msh.Mesh(
+            points=self.nodes,
+            cells=elements_in_meshio
+        )
+
+    def to_vtk(self, filename='mesh.vtk'):
+        """Converts the mesh into vtk using meshio
+        Args:
+            filename: name of the output file
+        """
+        if not self.meshio_mesh:
+            self.convert_mesh_to_meshio()
+        self.meshio_mesh.write(filename)
+
+    def subset_to_vtk(self, elements: List[geometry.BaseAbstractMeshObject], filename='subset.vtk'):
+        """Converts a subset of the mesh into a vtk file
+        Args:
+            elements: list of element indices
+            filename: name of the output file
+        """
+        assert len(elements) > 0, 'No elements to export'
+        subset_mesh = self._convert_subset_to_meshio(elements)
+        subset_mesh.write(filename)
+
+    def _convert_subset_to_meshio(self, elements: List[geometry.BaseAbstractMeshObject]) -> msh.Mesh:
+        """Converts a subset of the mesh into a meshio mesh
+        Args:
+            elements: list of element indices
+        Returns:
+            meshio mesh
+        """
+        elements_in_meshio = self._create_meshio_dict(elements)
+        return msh.Mesh(
+            points=self.nodes,
+            cells=elements_in_meshio
+        )
+
+    def _create_meshio_dict(self, elements: List[geometry.BaseAbstractMeshObject]) -> Dict[str, List[List[int]]]:
         elements_in_meshio = {}
-        for element in self.elements:
+        for element in elements:
             if element.type == 'tetrahedra':
                 if not 'tetra' in elements_in_meshio.keys():
                     elements_in_meshio['tetra'] = []
@@ -80,19 +121,7 @@ class MeshPreprocessor(object):
                     elements_in_meshio['quad'] = []
                 elements_in_meshio['quad'].append(element.nodes.tolist())
 
-        self.meshio_mesh = msh.Mesh(
-            points=self.nodes,
-            cells=elements_in_meshio
-        )
-
-    def to_vtk(self, filename='mesh.vtk'):
-        """Converts the mesh into vtk using meshio
-        Args:
-            filename: name of the output file
-        """
-        if not self.meshio_mesh:
-            self.convert_mesh_to_meshio()
-        self.meshio_mesh.write(filename)
+        return elements_in_meshio
 
     def nodes_to_csv(self, filename='node_ids.csv'):
         """Exports the node_ids to CSV"""
@@ -106,3 +135,34 @@ class MeshPreprocessor(object):
         for element in self.elements:
             centroids.append(element.centroid)
         return centroids
+
+    def create_kd_tree(self, kd_tree_config=None):
+        """
+        Create a KD-tree structure for the mesh.
+        Args:
+            kd_tree_config: A dictionary with the kd-tree configuration.
+        """
+        if kd_tree_config is None:
+            kd_tree_config = {}
+        self.kd_tree = KDTree(self.centroids, **kd_tree_config)
+
+    def get_nearest_mesh_elements(self, point, k=15, distance_upper_bound=None):
+        """
+        Get the nearest mesh elements to a point.
+        Args:
+            point: A point in 3D space.
+            k: The number of nearest elements to return.
+        Returns:
+            A list of the nearest mesh elements.
+        """
+        assert hasattr(self, "kd_tree"), "KD-tree not created"
+        if distance_upper_bound:
+            ids = self.kd_tree.query_ball_point(point, k=k, distance_upper_bound=distance_upper_bound)[1]
+        else:
+            ids = self.kd_tree.query(point, k=k)[1]
+
+        assert len(ids) != 0, "No elements found"
+        return [self.elements[i] for i in ids]
+
+
+

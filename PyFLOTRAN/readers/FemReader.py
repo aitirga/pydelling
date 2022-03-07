@@ -5,11 +5,9 @@ import logging
 logger = logging.getLogger(__name__)
 import meshio as msh
 from tqdm import tqdm
-from scipy.spatial import KDTree
 
 
 class FemReader(MeshPreprocessor):
-    kd_tree: KDTree
     def __init__(self, filename):
         super().__init__()
         self.aux_nodes = []
@@ -73,29 +71,6 @@ class FemReader(MeshPreprocessor):
                                     )
             else:
                 logger.warning(f"Element type {element_type[e]} not supported")
-
-    def create_kd_tree(self, kd_tree_config=None):
-        """
-        Create a KD-tree structure for the mesh.
-        Args:
-            kd_tree_config: A dictionary with the kd-tree configuration.
-        """
-        if kd_tree_config is None:
-            kd_tree_config = {}
-        self.kd_tree = KDTree(self.centroids, **kd_tree_config)
-
-    def get_nearest_mesh_elements(self, point, k=15, distance_upper_bound=None):
-        """
-        Get the nearest mesh elements to a point.
-        Args:
-            point: A point in 3D space.
-            k: The number of nearest elements to return.
-        Returns:
-            A list of the nearest mesh elements.
-        """
-        assert hasattr(self, "kd_tree"), "KD-tree not created"
-        ids = self.kd_tree.query(point, k=k, distance_upper_bound=None)[1]
-        return [self.elements[i] for i in ids]
 
 
 
