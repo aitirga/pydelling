@@ -16,7 +16,6 @@ class FemReader(MeshPreprocessor):
         if kd_tree:
             self.create_kd_tree()
 
-
     def open_file(self, filename):
         with open(filename, "r") as f:
             for line in f:
