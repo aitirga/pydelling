@@ -146,7 +146,7 @@ class MeshPreprocessor(object):
             kd_tree_config = {}
         self.kd_tree = KDTree(self.centroids, **kd_tree_config)
 
-    def get_nearest_mesh_elements(self, point, k=15, distance_upper_bound=None):
+    def get_k_nearest_mesh_elements(self, point, k=15, distance_upper_bound=None):
         """
         Get the nearest mesh elements to a point.
         Args:
@@ -165,5 +165,18 @@ class MeshPreprocessor(object):
         assert len(ids) != 0, "No elements found"
         return [self.elements[i] for i in ids]
 
-
+    def get_closest_mesh_elements(self, point, distance=None):
+        """
+        Get the nearest mesh elements to a point inside a distance.
+        Args:
+            point: A point in 3D space.
+            distance: The radius of the sphere.
+        Returns:
+            A list of the nearest mesh elements.
+        """
+        if not hasattr(self, 'kd_tree'):
+            self.create_kd_tree()
+        ids = self.kd_tree.query_ball_point(point, distance)
+        assert len(ids) != 0, "No elements found"
+        return [self.elements[i] for i in ids]
 
