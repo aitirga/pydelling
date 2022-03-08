@@ -180,3 +180,7 @@ class MeshPreprocessor(object):
         assert len(ids) != 0, "No elements found"
         return [self.elements[i] for i in ids]
 
+    def clear(self):
+        """Clears the mesh"""
+        self.unordered_nodes = {}
+        self.elements = []
