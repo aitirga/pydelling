@@ -229,7 +229,7 @@ class iGPReader(BaseReader):
         face_array = []
         for element in self.elements:
             for face in element.faces:
-                ordered_face = sorted(element.faces[face].nodes)
+                ordered_face = sorted(element.faces[face].coords)
                 ordered_face.append(element.local_id)
                 ordered_face.append(face)
                 face_array.append(ordered_face)

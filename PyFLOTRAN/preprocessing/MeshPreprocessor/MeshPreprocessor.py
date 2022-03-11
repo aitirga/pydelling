@@ -3,12 +3,13 @@ import numpy as np
 import PyFLOTRAN.preprocessing.MeshPreprocessor.geometry as geometry
 import meshio as msh
 from scipy.spatial import KDTree
+from PyFLOTRAN.preprocessing.DfnPreprocessor.Fracture import Fracture
 
 
 class MeshPreprocessor(object):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
     elements: List[geometry.BaseAbstractMeshObject]
-    nodes: List[np.ndarray]
+    coords: List[np.ndarray]
     centroids: List[np.ndarray]
     meshio_mesh: msh.Mesh = None
     kd_tree: KDTree
@@ -26,8 +27,8 @@ class MeshPreprocessor(object):
             self.unordered_nodes[node_ids[idx]] = node
 
     @property
-    def nodes(self) -> np.ndarray:
-        """Orders the nodes in the mesh"""
+    def coords(self) -> np.ndarray:
+        """Orders the coords in the mesh"""
         aux_nodes = np.ndarray(shape=(self.n_nodes, 3))
         for idx, node in self.unordered_nodes.items():
             aux_nodes[idx] = node
@@ -45,7 +46,7 @@ class MeshPreprocessor(object):
 
     def add_node(self, node: np.ndarray):
         '''Explicitly adds a node (deprecated)'''
-        self.nodes.append(node)
+        self.coords.append(node)
 
     @property
     def n_nodes(self):
@@ -65,7 +66,7 @@ class MeshPreprocessor(object):
 
         elements_in_meshio = self._create_meshio_dict(self.elements)
         self.meshio_mesh = msh.Mesh(
-            points=self.nodes,
+            points=self.coords,
             cells=elements_in_meshio
         )
 
@@ -97,7 +98,7 @@ class MeshPreprocessor(object):
         """
         elements_in_meshio = self._create_meshio_dict(elements)
         return msh.Mesh(
-            points=self.nodes,
+            points=self.coords,
             cells=elements_in_meshio
         )
 
@@ -125,7 +126,7 @@ class MeshPreprocessor(object):
 
     def nodes_to_csv(self, filename='node_ids.csv'):
         """Exports the node_ids to CSV"""
-        node_array = np.array(self.nodes)
+        node_array = np.array(self.coords)
         np.savetxt(filename, node_array, delimiter=',')
 
     @property
@@ -184,3 +185,100 @@ class MeshPreprocessor(object):
         """Clears the mesh"""
         self.unordered_nodes = {}
         self.elements = []
+
+    @staticmethod
+    def _intersect_fracture_with_element(element, fracture):
+        """
+        Returns the intersection of a fracture with an element.
+        Args:
+            element: The element to intersect with.
+            fracture: The fracture to intersect with.
+        Returns:
+            The intersection of the fracture and the element.
+        """
+        return element.intersect(fracture)
+
+    def _is_fracture_intersected(self, fracture: Fracture, element: geometry.BaseAbstractMeshObject):
+        """
+        Checks if a fracture is intersected by an element.
+        Args:
+            fracture: The fracture to intersect with.
+            element: The element to intersect with.
+        Returns:
+            True if the fracture is intersected by the element, False otherwise.
+        """
+        signs = []
+        bounding_box: List = fracture.get_bounding_box()
+        for coord in element.coords:
+            # Check if coord in bounding box
+            if bounding_box[0] < coord[0] < bounding_box[1] and bounding_box[2] < coord[1] < bounding_box[3] and \
+                    bounding_box[4] < coord[2] < bounding_box[5]:
+
+                distance_to_fracture = fracture.distance_to_point(coord)
+                signs.append(np.sign(distance_to_fracture))
+            else:
+                return False
+
+        if not np.all(np.array(signs) == signs[0]):
+            return True
+
+
+    def find_the_intersection_between_fracture_and_mesh(self, fracture: Fracture):
+        """Finds the intersection between a fracture and the mesh"""
+        intersections = []
+        for element in self.elements:
+            if self._is_fracture_intersected(fracture, element):
+                intersections.append(element)
+        self.subset_to_vtk(intersections, filename='intersections.vtk')
+
+    def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture):
+        """Finds the intersection points between a fracture and the mesh"""
+        intersection_points = []
+        for element in self.elements:
+            for idx_face, face_vectors in enumerate(element.edge_vectors):
+                for idx, edge_vector in enumerate(face_vectors):
+                    edge_point = self.coords[element.edges[idx_face][idx][0]]
+                    point = self.intersect_edge_plane(
+                        edge=edge_vector,
+                        edge_point=edge_point,
+                        plane_normal=fracture.unit_normal_vector,
+                        plane_centroid=fracture.centroid,
+                    )
+                    if point is not None:
+                        intersection_points.append(point)
+
+                    # if point is not None:
+                    #     print(point)
+        np.savetxt('intersection_points.csv', np.array(intersection_points))
+
+    @staticmethod
+    def intersect_edge_plane(edge: np.ndarray,
+                             edge_point: np.ndarray,
+                             plane_normal: np.ndarray,
+                             plane_centroid: np.ndarray,
+                             ) -> np.ndarray or None:
+        """This method instersects a given edge with a plane.
+        Args:
+            edge: The edge to intersect.
+            plane_normal: The normal of the plane.
+            plane_centroid: The centroid of the plane.
+        Returns:
+            The intersection point of the edge and the plane.
+        """
+        # print(f"edge: {edge}")
+        # print(f"edge_point: {edge_point}")
+        # print(f"plane_normal: {plane_normal}")
+        # print(f"plane_centroid: {plane_centroid}")
+        edge_dot = np.dot(edge, plane_normal)
+        if edge_dot == 0:
+            return None
+        else:
+            t = -np.dot((edge_point - plane_centroid), plane_normal) / edge_dot
+            if t < 1.0 and t > 0.0:
+                return edge_point + t * edge
+            else:
+                return None
+
+
+
+

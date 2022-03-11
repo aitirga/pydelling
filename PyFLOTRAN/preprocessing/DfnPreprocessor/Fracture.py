@@ -134,3 +134,30 @@ class Fracture(object):
         obj_string += '\n'
         return obj_string
 
+    @property
+    def unit_normal_vector(self):
+        """Returns the normal vector of the fracture"""
+        get_side_points = self.get_side_points()
+        v1 = get_side_points[1] - get_side_points[0]
+        v2 = get_side_points[2] - get_side_points[0]
+        cross = np.cross(v1, v2)
+        return cross / np.linalg.norm(cross)
+
+    def distance_to_point(self, point: np.ndarray):
+        """Returns the distance to a point"""
+        distance_vector = self.centroid - point
+        return np.dot(distance_vector, self.unit_normal_vector)
+
+    def get_bounding_box(self):
+        """Returns the bounding box of the fracture"""
+        side_points = self.get_side_points()
+        x_min = np.min(side_points[:, 0])
+        x_max = np.max(side_points[:, 0])
+        y_min = np.min(side_points[:, 1])
+        y_max = np.max(side_points[:, 1])
+        z_min = np.min(side_points[:, 2])
+        z_max = np.max(side_points[:, 2])
+        return np.array([x_min, x_max, y_min, y_max, z_min, z_max])
+
+
+

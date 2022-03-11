@@ -38,3 +38,17 @@ class BaseElement(BaseAbstractMeshObject):
     @property
     def n_nodes(self):
         return len(self.nodes)
+
+    @property
+    def edges(self):
+        edges_list = []
+        for face in self.faces:
+            edges_list.append(self.faces[face].edges)
+        return edges_list
+
+    @property
+    def edge_vectors(self):
+        edges_vectors_list = []
+        for face in self.faces:
+            edges_vectors_list.append(self.faces[face].edge_vectors)
+        return edges_vectors_list

@@ -31,3 +31,21 @@ class QuadrilateralFace(BaseFace):
         #     poly_centroid += area_triangle * mean_centroid
         #     # print(f"q1: {q1}, q2: {q2}, q3:{q3}, mean_centroid:{mean_centroid}")
         # return poly_centroid / self.area
+
+    @property
+    def edges(self):
+        return [
+            [self.nodes[0], self.nodes[1]],
+            [self.nodes[1], self.nodes[2]],
+            [self.nodes[2], self.nodes[3]],
+            [self.nodes[3], self.nodes[0]]
+        ]
+
+    @property
+    def edge_vectors(self):
+        return [
+            self.coords[1] - self.coords[0],
+            self.coords[2] - self.coords[1],
+            self.coords[3] - self.coords[2],
+            self.coords[0] - self.coords[3],
+        ]

@@ -21,7 +21,7 @@ class BaseElement:
 
         print("### Face info ###")
         for face in self.faces:
-            print(f"{face}: {self.faces[face].nodes}")
+            print(f"{face}: {self.faces[face].coords}")
         print("### End face info ###")
 
     def print_element_info(self):
@@ -35,5 +35,5 @@ class BaseElement:
     def print_face_info(self):
         print("### Face info ###")
         for face in self.faces:
-            print(f"{face}: {self.faces[face].nodes}")
+            print(f"{face}: {self.faces[face].coords}")
         print("### End face info ###")
