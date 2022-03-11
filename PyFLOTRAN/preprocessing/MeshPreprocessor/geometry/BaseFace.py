@@ -1,6 +1,7 @@
 from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 from .BaseAbstractMeshObject import BaseAbstractMeshObject
 
+
 class BaseFace(BaseAbstractMeshObject):
     def __init__(self, node_ids, node_coords):
         self.nodes = np.array(node_ids)
@@ -64,3 +65,19 @@ class BaseFace(BaseAbstractMeshObject):
         ax.axes.set_ylim3d(np.min(self.coords[:, 1]), np.max(self.coords[:, 1]))
         ax.axes.set_zlim3d(np.min(self.coords[:, 2]), np.max(self.coords[:, 2]))
         plt.show()
+
+    @property
+    def unit_normal_vector(self):
+        v1 = self.coords[1] - self.coords[0]
+        v2 = self.coords[2] - self.coords[0]
+        return np.linalg.norm(np.cross(v1, v2))
+
+    @property
+    def edges(self):
+        '''Returns the edges of the face'''
+        return NotImplementedError('This method is not implemented yet')
+
+    @property
+    def edge_vectors(self):
+        '''Returns the edge vectors of the face'''
+        return NotImplementedError('This method is not implemented yet')

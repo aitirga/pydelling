@@ -9,3 +9,13 @@ class BaseAbstractMeshObject:
     type: str or None
     meshio_type: str or None
     centroid: np.ndarray  # Centroid of the element
+
+    @property
+    def edges(self):
+        '''Returns the edges of the element'''
+        return None
+
+    @property
+    def edge_vectors(self):
+        '''Returns the edge vectors of the element'''
+        return None
