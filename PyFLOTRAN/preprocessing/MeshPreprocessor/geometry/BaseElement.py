@@ -2,9 +2,10 @@ import numpy as np
 
 from PyFLOTRAN.config import config
 from .BaseFace import BaseFace
+import pandas as pd
 from .BaseAbstractMeshObject import BaseAbstractMeshObject
 from typing import *
-
+from natsort import natsorted
 
 class BaseElement(BaseAbstractMeshObject):
     local_id = 0
@@ -43,12 +44,10 @@ class BaseElement(BaseAbstractMeshObject):
     def edges(self):
         edges_list = []
         for face in self.faces:
-            edges_list.append(self.faces[face].edges)
-        return edges_list
+            face_edges = self.faces[face].edges
+            edges_list.append(face_edges)
 
-    @property
-    def edge_vectors(self):
-        edges_vectors_list = []
-        for face in self.faces:
-            edges_vectors_list.append(self.faces[face].edge_vectors)
-        return edges_vectors_list
+        # Delete duplicates
+        edge_list_flatten = [sorted(item) for sublist in edges_list for item in sublist]
+        edge_list_unique = np.unique(edge_list_flatten, axis=0)
+        return edge_list_unique
