@@ -76,6 +76,9 @@ class DfnPreprocessor(object):
             numalign='center',
         ))
 
+    def __len__(self):
+        return len(self.dfn)
+
     def visualize_dfn(self, add_centroid=True, fracture_color='blue', size_color=False):
         """Visualizes the dfn object."""
         self.fig = self.generate_dfn_plotly(add_centroid=add_centroid, fracture_color=fracture_color, size_color=size_color)
@@ -109,11 +112,6 @@ class DfnPreprocessor(object):
             for point in side_points:
                 dfn_file.write(f'{{{point[0]},{point[1]},{point[2]}}}')
             dfn_file.write('\n')
-
-
-
-
-
 
 
     def generate_dfn_plotly(self, add_centroid=False, size_color=False, fracture_color='blue'):

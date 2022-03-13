@@ -4,7 +4,7 @@ import PyFLOTRAN.preprocessing.MeshPreprocessor.geometry as geometry
 import meshio as msh
 from scipy.spatial import KDTree
 from PyFLOTRAN.preprocessing.DfnPreprocessor.Fracture import Fracture
-
+from tqdm import tqdm
 
 class MeshPreprocessor(object):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
@@ -198,7 +198,7 @@ class MeshPreprocessor(object):
         """
         return element.intersect(fracture)
 
-    def _is_fracture_intersected(self, fracture: Fracture, element: geometry.BaseAbstractMeshObject):
+    def _is_fracture_intersected(self, fracture: Fracture, element: geometry.BaseElement):
         """
         Checks if a fracture is intersected by an element.
         Args:
@@ -234,28 +234,24 @@ class MeshPreprocessor(object):
     def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture):
         """Finds the intersection points between a fracture and the mesh"""
         intersection_points = []
-        for element in self.elements:
-            for idx_face, face_vectors in enumerate(element.edge_vectors):
-                for idx, edge_vector in enumerate(face_vectors):
-                    edge_point = self.coords[element.edges[idx_face][idx][0]]
-                    point = self.intersect_edge_plane(
-                        edge=edge_vector,
-                        edge_point=edge_point,
-                        plane_normal=fracture.unit_normal_vector,
-                        plane_centroid=fracture.centroid,
-                    )
-                    if point is not None:
-                        intersection_points.append(point)
-
-                    # if point is not None:
-                    #     print(point)
-        np.savetxt('intersection_points.csv', np.array(intersection_points))
+        kd_tree_filtered_elements = self.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
+        for element in kd_tree_filtered_elements:
+            for edge in element.edges:
+                edge_vector = self.coords[edge[1]] - self.coords[edge[0]]
+                edge_point = self.coords[edge[0]]
+                intersected_point = self.intersect_edge_plane(
+                    edge=edge_vector,
+                    edge_point=edge_point,
+                    plane=fracture,
+                )
+                if intersected_point is not None:
+                    intersection_points.append(intersected_point)
+        return intersection_points
 
     @staticmethod
     def intersect_edge_plane(edge: np.ndarray,
                              edge_point: np.ndarray,
-                             plane_normal: np.ndarray,
-                             plane_centroid: np.ndarray,
+                             plane: Fracture,
                              ) -> np.ndarray or None:
         """This method instersects a given edge with a plane.
         Args:
@@ -265,17 +261,16 @@ class MeshPreprocessor(object):
         Returns:
             The intersection point of the edge and the plane.
         """
-        # print(f"edge: {edge}")
-        # print(f"edge_point: {edge_point}")
-        # print(f"plane_normal: {plane_normal}")
-        # print(f"plane_centroid: {plane_centroid}")
-        edge_dot = np.dot(edge, plane_normal)
+
+        edge_dot = np.dot(edge, plane.unit_normal_vector)
         if edge_dot == 0:
             return None
         else:
-            t = -np.dot((edge_point - plane_centroid), plane_normal) / edge_dot
+            t = -np.dot((edge_point - plane.centroid), plane.unit_normal_vector) / edge_dot
             if t < 1.0 and t > 0.0:
-                return edge_point + t * edge
+                point = edge_point + t * edge
+                if plane.point_inside_bounding_box(point):
+                    return point
             else:
                 return None
 
