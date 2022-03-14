@@ -19,3 +19,4 @@ class BaseAbstractMeshObject:
     def edge_vectors(self):
         '''Returns the edge vectors of the element'''
         return None
+
