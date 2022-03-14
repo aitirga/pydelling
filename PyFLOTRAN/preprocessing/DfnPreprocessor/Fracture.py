@@ -11,6 +11,7 @@ class Fracture(object):
         self.z_centroid = z
         self.size = size
         self.centroid = np.array([self.x_centroid, self.y_centroid, self.z_centroid])
+        self.intersection_dictionary = {}
 
     def get_side_points_v1(self):
         """

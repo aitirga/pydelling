@@ -4,7 +4,9 @@ import PyFLOTRAN.preprocessing.MeshPreprocessor.geometry as geometry
 import meshio as msh
 from scipy.spatial import KDTree
 from PyFLOTRAN.preprocessing.DfnPreprocessor.Fracture import Fracture
+from PyFLOTRAN.utils.geometry_utils import compute_polygon_area
 from tqdm import tqdm
+
 
 class MeshPreprocessor(object):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
@@ -234,8 +236,10 @@ class MeshPreprocessor(object):
     def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture):
         """Finds the intersection points between a fracture and the mesh"""
         intersection_points = []
+        edge_intersections = []
         kd_tree_filtered_elements = self.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
         for element in kd_tree_filtered_elements:
+            edge_intersections = []
             for edge in element.edges:
                 edge_vector = self.coords[edge[1]] - self.coords[edge[0]]
                 edge_point = self.coords[edge[0]]
@@ -246,6 +250,10 @@ class MeshPreprocessor(object):
                 )
                 if intersected_point is not None:
                     intersection_points.append(intersected_point)
+                    edge_intersections.append(intersected_point)
+            if len(edge_intersections) >= 3:
+                fracture.intersection_dictionary[element.local_id] = compute_polygon_area(edge_intersections)
+
         return intersection_points
 
     @staticmethod
@@ -256,8 +264,7 @@ class MeshPreprocessor(object):
         """This method instersects a given edge with a plane.
         Args:
             edge: The edge to intersect.
-            plane_normal: The normal of the plane.
-            plane_centroid: The centroid of the plane.
+            plane: The plane to intersect with.
         Returns:
             The intersection point of the edge and the plane.
         """
