@@ -236,7 +236,6 @@ class MeshPreprocessor(object):
     def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture):
         """Finds the intersection points between a fracture and the mesh"""
         intersection_points = []
-        edge_intersections = []
         kd_tree_filtered_elements = self.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
         for element in kd_tree_filtered_elements:
             edge_intersections = []
