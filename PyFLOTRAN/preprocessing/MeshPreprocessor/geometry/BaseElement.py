@@ -18,6 +18,8 @@ class BaseElement(BaseAbstractMeshObject):
         self.faces: Dict[str, BaseFace] = {}  # Faces of an element
         self.type = None
         self.meshio_type = None
+        self.associated_fractures = []
+        self.total_fracture_volume = 0
 
     def __repr__(self):
         return f"{self.type} {self.local_id}"

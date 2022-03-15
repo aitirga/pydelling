@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Fracture(object):
-    def __init__(self, dip, dip_dir, x, y, z, size):
+    def __init__(self, dip, dip_dir, x, y, z, size, aperture):
         self.side_points = None
         self.dip = dip
         self.dip_dir = dip_dir
@@ -12,6 +12,7 @@ class Fracture(object):
         self.size = size
         self.centroid = np.array([self.x_centroid, self.y_centroid, self.z_centroid])
         self.intersection_dictionary = {}
+        self.aperture = aperture
 
     def get_side_points_v1(self):
         """
