@@ -74,27 +74,28 @@ class FemReader(MeshPreprocessor):
                 logger.warning(f"Element type {element_type[e]} not supported")
 
 
-    def compute_fracture_volume_in_elements(self):
+    def _compute_fracture_volume_in_elements(self):
         # Compute volume of fractures in each element.
         #self.elements.total_fracture_volume = np.zeros([len(elements)])
-        for elem in self.elements:
+        for elem in tqdm(self.elements, desc="Computing fracture volume fractions"):
             for fracture in elem.associated_fractures:
+                fracture_dict = elem.associated_fractures[fracture]
                 # Attribute of the element: portion of element occupied by fractures.
-                elem.total_fracture_volume += fracture['volume']
+                elem.total_fracture_volume += fracture_dict['volume']
 
 
-    # UPSCALED POROSITY
-    def upscale_mesh_porosity(self, matrix_porosity):
+    def upscale_mesh_porosity(self, matrix_porosity=None):
         # Compute upscaled porosity for each element.
+        self._compute_fracture_volume_in_elements()
         upscaled_porosity = {}
-        for elem in self.elements:
-            upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume) + (
-                        matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
+        for elem in tqdm(self.elements, desc="Upscaling porosity"):
+            upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume)# + (
+                       # matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
 
         return upscaled_porosity
 
 
-    def upscale_mesh_permeability(self, matrix_permeability_tensor, rho=1000, g=10, mu=10,
+    def upscale_mesh_permeability(self, matrix_permeability_tensor=None, rho=1000, g=10, mu=10,
                                   mode='full_tensor'):
         # UPSCALED PERMEABILITY
         fracture_perm = {}
@@ -102,10 +103,11 @@ class FemReader(MeshPreprocessor):
 
         # For each fracture, compute permeability tensor,
         # and add it to the elements intersected by the fracture.
-        for elem in self.elements:
+        for elem in tqdm(self.elements, desc="Upscaling permeability"):
             fracture_perm[elem.local_id] = np.zeros([3, 3])
             upscaled_perm[elem.local_id] = np.zeros([3, 3])
-            for frac_dict in elem.associated_fractures:
+            for frac_name in elem.associated_fractures:
+                frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
                 perm_tensor = np.zeros([3, 3])
                 n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
@@ -133,8 +135,8 @@ class FemReader(MeshPreprocessor):
                 fracture_perm[elem.local_id][2, 2] += (perm_tensor[2, 2] * frac_dict['volume'] / elem.volume)
 
             #Sum permeability contribution from fractures and from matrix.
-            upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] + matrix_permeability_tensor[elem.local_id] * (
-                        1 - elem.total_fracture_volume / elem.volume)
+            upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] #+ matrix_permeability_tensor[elem.local_id] * (
+                       # 1 - elem.total_fracture_volume / elem.volume)
 
         # EXPORT MODES
         # if mode == 'full_tensor':
