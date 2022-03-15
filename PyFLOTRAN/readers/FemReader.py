@@ -9,6 +9,9 @@ from tqdm import tqdm
 
 
 class FemReader(MeshPreprocessor):
+    upscaled_permeability = {} # dict of upscaled permeability values
+    upscaled_porosity = {} # dict of upscaled porosity values
+
     def __init__(self, filename, kd_tree=True):
         super().__init__()
         self.aux_nodes = []
@@ -92,6 +95,15 @@ class FemReader(MeshPreprocessor):
             upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume)# + (
                        # matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
 
+
+        vtk_porosity = np.asarray(self.elements)
+        for local_id in upscaled_porosity:
+            vtk_porosity[local_id] = upscaled_porosity[local_id]
+
+
+        self.cell_data['upscaled_porosity'] = [vtk_porosity.tolist()]
+        self.upscaled_porosity = upscaled_porosity
+
         return upscaled_porosity
 
 
@@ -137,7 +149,7 @@ class FemReader(MeshPreprocessor):
             #Sum permeability contribution from fractures and from matrix.
             upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] #+ matrix_permeability_tensor[elem.local_id] * (
                        # 1 - elem.total_fracture_volume / elem.volume)
-
+        self.upscaled_permeability = upscaled_perm
         # EXPORT MODES
         # if mode == 'full_tensor':
         #     # mesh_upscaled_perm =
@@ -151,6 +163,22 @@ class FemReader(MeshPreprocessor):
         #     print("Isotropic case not implemented yet")
 
         return upscaled_perm
+
+
+    def porosity_to_csv(self, filename='./porosity.csv'):
+        """Exports porosity values to csv
+
+        Returns:
+
+        """
+        import csv
+        logger.info(f"Exporting porosity to {filename}")
+        with open(filename, 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            for element_id in self.upscaled_porosity:
+                centroid = self.elements[element_id].centroid
+                porosity = self.upscaled_porosity[element_id]
+                writer.writerow([centroid[0], centroid[1], centroid[2], porosity])
 
 
 

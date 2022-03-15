@@ -15,6 +15,8 @@ class MeshPreprocessor(object):
     centroids: List[np.ndarray]
     meshio_mesh: msh.Mesh = None
     kd_tree: KDTree
+    point_data = {}
+    cell_data = {}
 
     def __init__(self):
         self.unordered_nodes = {}
@@ -67,9 +69,12 @@ class MeshPreprocessor(object):
         """
 
         elements_in_meshio = self._create_meshio_dict(self.elements)
+        print(self.cell_data)
         self.meshio_mesh = msh.Mesh(
             points=self.coords,
-            cells=elements_in_meshio
+            cells=elements_in_meshio,
+            cell_data=self.cell_data,
+            point_data=self.point_data
         )
 
     def to_vtk(self, filename='mesh.vtk'):
@@ -77,8 +82,7 @@ class MeshPreprocessor(object):
         Args:
             filename: name of the output file
         """
-        if not self.meshio_mesh:
-            self.convert_mesh_to_meshio()
+        self.convert_mesh_to_meshio()
         self.meshio_mesh.write(filename)
 
     def subset_to_vtk(self, elements: List[geometry.BaseAbstractMeshObject], filename='subset.vtk'):
@@ -101,7 +105,7 @@ class MeshPreprocessor(object):
         elements_in_meshio = self._create_meshio_dict(elements)
         return msh.Mesh(
             points=self.coords,
-            cells=elements_in_meshio
+            cells=elements_in_meshio,
         )
 
     def _create_meshio_dict(self, elements: List[geometry.BaseAbstractMeshObject]) -> Dict[str, List[List[int]]]:
