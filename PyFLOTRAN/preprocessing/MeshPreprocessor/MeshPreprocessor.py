@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 class MeshPreprocessor(object):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
-    elements: List[geometry.BaseAbstractMeshObject]
+    elements: List[geometry.BaseElement]
     coords: List[np.ndarray]
     centroids: List[np.ndarray]
     meshio_mesh: msh.Mesh = None
@@ -238,6 +238,7 @@ class MeshPreprocessor(object):
         intersection_points = []
         kd_tree_filtered_elements = self.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
         for element in kd_tree_filtered_elements:
+            element: geometry.BaseElement
             edge_intersections = []
             for edge in element.edges:
                 edge_vector = self.coords[edge[1]] - self.coords[edge[0]]
@@ -251,9 +252,15 @@ class MeshPreprocessor(object):
                     intersection_points.append(intersected_point)
                     edge_intersections.append(intersected_point)
             if len(edge_intersections) >= 3:
-                fracture.intersection_dictionary[element.local_id] = compute_polygon_area(edge_intersections)
+                intersection_area = compute_polygon_area(edge_intersections)
+                fracture.intersection_dictionary[element.local_id] = intersection_area
+                element.associated_fractures[fracture.local_id] = {
+                    'area': intersection_area,
+                    'fracture': fracture,
+                }
 
         return intersection_points
+
 
     @staticmethod
     def intersect_edge_plane(edge: np.ndarray,

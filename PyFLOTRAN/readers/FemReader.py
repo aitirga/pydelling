@@ -77,7 +77,7 @@ class FemReader(MeshPreprocessor):
     def compute_fracture_volume_in_elements(self):
         # Compute volume of fractures in each element.
         #self.elements.total_fracture_volume = np.zeros([len(elements)])
-        for elem in mesh.elements:
+        for elem in self.elements:
             for fracture in elem.associated_fractures:
                 # Attribute of the element: portion of element occupied by fractures.
                 elem.total_fracture_volume += fracture.intersection_dictionary["fracture_volume"]

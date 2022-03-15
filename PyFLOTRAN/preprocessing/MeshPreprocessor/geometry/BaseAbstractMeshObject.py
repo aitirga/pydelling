@@ -1,6 +1,7 @@
 import numpy as np
 from typing import *
 
+
 class BaseAbstractMeshObject:
     '''Class for the base abstract mesh object. Provides method and attribute namespace'''
     nodes: np.ndarray  # Node id set
