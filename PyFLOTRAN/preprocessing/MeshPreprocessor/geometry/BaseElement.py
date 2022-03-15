@@ -19,7 +19,7 @@ class BaseElement(BaseAbstractMeshObject):
         self.type = None
         self.meshio_type = None
         self.associated_fractures = {}
-        self.total_fracture_volume = 0
+        self.total_fracture_volume = 00
 
     def __repr__(self):
         return f"{self.type} {self.local_id}"
@@ -53,3 +53,11 @@ class BaseElement(BaseAbstractMeshObject):
         edge_list_flatten = [sorted(item) for sublist in edges_list for item in sublist]
         edge_list_unique = np.unique(edge_list_flatten, axis=0)
         return edge_list_unique
+
+    @property
+    def volume(self):
+        """Returns the volume of the hexahedra
+
+        Returns: volume of the hexahedra
+        """
+        return None

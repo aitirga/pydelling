@@ -89,3 +89,11 @@ class HexahedraElement(BaseElement):
         :return: centroid of the polyhedron
         """
         return np.mean(self.coords, axis=0)
+
+    @property
+    def volume(self):
+        """Returns the volume of the hexahedra
+
+        Returns: volume of the hexahedra
+        """
+        return self.compute_volume()

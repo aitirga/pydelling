@@ -256,6 +256,7 @@ class MeshPreprocessor(object):
                 fracture.intersection_dictionary[element.local_id] = intersection_area
                 element.associated_fractures[fracture.local_id] = {
                     'area': intersection_area,
+                    'volume': intersection_area * fracture.aperture,
                     'fracture': fracture,
                 }
 
