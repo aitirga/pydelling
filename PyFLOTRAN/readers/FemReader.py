@@ -80,15 +80,15 @@ class FemReader(MeshPreprocessor):
         for elem in self.elements:
             for fracture in elem.associated_fractures:
                 # Attribute of the element: portion of element occupied by fractures.
-                elem.total_fracture_volume += fracture.intersection_dictionary["fracture_volume"]
+                elem.total_fracture_volume += fracture['volume']
 
 
     # UPSCALED POROSITY
     def upscale_mesh_porosity(self, matrix_porosity):
         # Compute upscaled porosity for each element.
-        upscaled_porosity = np.zeros(len(self.elements))
+        upscaled_porosity = {}
         for elem in self.elements:
-            upscaled_porosity[elem] = (elem.total_fracture_volume / elem.volume) + (
+            upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume) + (
                         matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
 
         return upscaled_porosity
@@ -97,15 +97,16 @@ class FemReader(MeshPreprocessor):
     def upscale_mesh_permeability(self, matrix_permeability_tensor, rho=1000, g=10, mu=10,
                                   mode='full_tensor'):
         # UPSCALED PERMEABILITY
-        fracture_perm = np.zeros([len(self.elements)])
-        upscaled_perm = np.zeros([len(self.elements)])
+        fracture_perm = {}
+        upscaled_perm = {}
 
         # For each fracture, compute permeability tensor,
         # and add it to the elements intersected by the fracture.
         for elem in self.elements:
-            fracture_perm[elem] = np.zeros([3, 3])
-            upscaled_perm[elem] = np.zeros([3, 3])
-            for frac in elem.fractures:
+            fracture_perm[elem.local_id] = np.zeros([3, 3])
+            upscaled_perm[elem.local_id] = np.zeros([3, 3])
+            for frac_dict in elem.associated_fractures:
+                frac = frac_dict['fracture']
                 perm_tensor = np.zeros([3, 3])
                 n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
                 n2 = math.cos(frac.dip * (math.pi / 180)) * math.cos(frac.dip_dir * (math.pi / 180))
@@ -121,18 +122,18 @@ class FemReader(MeshPreprocessor):
                         perm_tensor[2, 2] = frac.perm * ((n1 ** 2) + (n2 ** 2))
 
                 #Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                fracture_perm[elem][0, 0] += (perm_tensor[0, 0] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
-                fracture_perm[elem][0, 1] += (perm_tensor[0, 1] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
-                fracture_perm[elem][0, 2] += (perm_tensor[0, 1] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
-                fracture_perm[elem][1, 0] += (perm_tensor[0, 1] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
-                fracture_perm[elem][1, 1] += (perm_tensor[1, 1] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
-                fracture_perm[elem][1, 2] += (perm_tensor[1, 2] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
-                fracture_perm[elem][2, 0] += (perm_tensor[0, 1] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
-                fracture_perm[elem][2, 1] += (perm_tensor[1, 2] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
-                fracture_perm[elem][2, 2] += (perm_tensor[2, 2] * frac.intersection_dictionary['fracture_volume'] / elem.volume)
+                fracture_perm[elem.local_id][0, 0] += (perm_tensor[0, 0] * frac_dict['volume'] / elem.volume)
+                fracture_perm[elem.local_id][0, 1] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                fracture_perm[elem.local_id][0, 2] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                fracture_perm[elem.local_id][1, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                fracture_perm[elem.local_id][1, 1] += (perm_tensor[1, 1] * frac_dict['volume'] / elem.volume)
+                fracture_perm[elem.local_id][1, 2] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
+                fracture_perm[elem.local_id][2, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                fracture_perm[elem.local_id][2, 1] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
+                fracture_perm[elem.local_id][2, 2] += (perm_tensor[2, 2] * frac_dict['volume'] / elem.volume)
 
             #Sum permeability contribution from fractures and from matrix.
-            upscaled_perm[elem] = fracture_perm[elem] + matrix_permeability_tensor[elem] * (
+            upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] + matrix_permeability_tensor[elem.local_id] * (
                         1 - elem.total_fracture_volume / elem.volume)
 
         # EXPORT MODES
