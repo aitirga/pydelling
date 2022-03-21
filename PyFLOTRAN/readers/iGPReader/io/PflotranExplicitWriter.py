@@ -44,7 +44,6 @@ class PflotranExplicitWriter(iGPReader):
     def write_condition_data(self):
         for condition in self.region_dict:
             # Open file for dumping connection data
-            print(self.region_dict[condition]["length"])
             if self.output_folder is None:
                 file_cond = open(f"{condition}.ex", "w")
             else:
@@ -77,7 +76,7 @@ class PflotranExplicitWriter(iGPReader):
             element_length = len(element.coords)
             _cells.append(config.globals.explicit_writer_dict[element_length])
             # Add elements on the _cells dataset
-            list(map(lambda x: _cells.append(x), element.coords))
+            list(map(lambda x: _cells.append(x), element.nodes))
         domain_group.create_dataset("Cells", data=_cells)
         # Create Vertices
         domain_group.create_dataset("Vertices", data=self.nodes)

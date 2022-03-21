@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='PyFLOTRAN',  # How you named your package folder (MyLib)
     packages=find_packages(),  # Chose the same as "name"
-    version='1.5.1',  # Start with a small number and increase it with every change you make
+    version='1.5.2',  # Start with a small number and increase it with every change you make
     license='MIT',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description='Package to pre-process PFLOTRAN (and other software) files',
     # Give a short description about your library
@@ -16,15 +16,15 @@ setup(
     install_requires=[  # I get to this in a second
         'ofpp',
         'numpy',
-        'pandas==1.0.5',
-        'h5py==2.10.0',
-        'vtk>=8.1.2',
-        'matplotlib==3.3.0',
-        'scipy==1.5.2',
-        'python-box==5.1.0',
-        'pyyaml==5.3.1',
-        'setuptools~=51.0.0',
-        'xlrd==1.2.0',
+        'pandas',
+        'h5py',
+        'vtk',
+        'matplotlib',
+        'scipy',
+        'python-box',
+        'pyyaml',
+        'setuptools',
+        'xlrd',
         'openpyxl',
         'tqdm',
         'seaborn',
@@ -32,6 +32,7 @@ setup(
         'natsort',
         'pytecplot',
         'sklearn',
+        'munch',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
