@@ -17,3 +17,6 @@ mpmath
 natsort
 pytecplot
 sklearn
+meshio
+plotly
+shapely
