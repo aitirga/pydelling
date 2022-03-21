@@ -13,7 +13,7 @@ class PflotranImplicitWriter(BaseWriter, iGPReader):
         export_file.write(f"ELEMENTS {self.mesh_info['n_elements']}\n")
         for element in self.elements:
             export_file.write(
-                f"{config.globals.element_dict[len(element.coords)]} {' '.join(map(str, np.array(element.coords) + 1))}\n")
+                f"{config.globals.element_dict[len(element.coords)]} {' '.join(map(str, np.array(element.nodes) + 1))}\n")
 
     def write_nodes(self, export_file):
         export_file.write(f"VERTICES {self.mesh_info['n_nodes']}\n")

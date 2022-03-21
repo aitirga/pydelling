@@ -94,7 +94,7 @@ END
 REGION all
   FILE ./regions.h5 
 END
-REGION top_surface
+REGION Pwall
   FILE ./regions.h5
 END
 
@@ -107,10 +107,10 @@ FLOW_CONDITION initial
     PRESSURE hydrostatic
   /
   PRESSURE 101293
-  DATUM 0.d0 0.d0 5.8050672820907945d0
+  DATUM 0.d0 0.d0 5.805067282090795d0
 END
 
-FLOW_CONDITION top_surface
+FLOW_CONDITION Pwall
   TYPE
     PRESSURE Dirichlet
   /
@@ -127,7 +127,7 @@ TRANSPORT_CONDITION initial
   /
 END
 
-TRANSPORT_CONDITION top_surface
+TRANSPORT_CONDITION Pwall
   TYPE Dirichlet_zero_gradient
   CONSTRAINT_LIST
     0.d0 inlet
@@ -161,10 +161,10 @@ INITIAL_CONDITION
 END
 
 
-BOUNDARY_CONDITION top_surface
-  FLOW_CONDITION top_surface
-  TRANSPORT_CONDITION top_surface
-  REGION top_surface
+BOUNDARY_CONDITION Pwall
+  FLOW_CONDITION Pwall
+  TRANSPORT_CONDITION Pwall
+  REGION Pwall
 END
 
 
