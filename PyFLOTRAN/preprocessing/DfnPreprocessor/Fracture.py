@@ -3,7 +3,7 @@ import numpy as np
 
 class Fracture(object):
     local_id = 0
-    def __init__(self, dip, dip_dir, x, y, z, size, aperture=0.1):
+    def __init__(self, dip, dip_dir, x, y, z, size, aperture=0.001):
         self.side_points = None
         self.dip = dip
         self.dip_dir = dip_dir

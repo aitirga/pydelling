@@ -95,15 +95,6 @@ class FemReader(MeshPreprocessor):
             upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume)# + (
                        # matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
 
-
-        vtk_porosity = np.asarray(self.elements)
-        for local_id in upscaled_porosity:
-            vtk_porosity[local_id] = upscaled_porosity[local_id]
-
-
-        self.cell_data['upscaled_porosity'] = [vtk_porosity.tolist()]
-        self.upscaled_porosity = upscaled_porosity
-
         return upscaled_porosity
 
 
@@ -122,9 +113,12 @@ class FemReader(MeshPreprocessor):
                 frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
                 perm_tensor = np.zeros([3, 3])
-                n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
-                n2 = math.cos(frac.dip * (math.pi / 180)) * math.cos(frac.dip_dir * (math.pi / 180))
-                n3 = -1 * math.sin(frac.dip * (math.pi / 180))
+                # n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
+                # n2 = math.cos(frac.dip * (math.pi / 180)) * math.cos(frac.dip_dir * (math.pi / 180))
+                # n3 = -1 * math.sin(frac.dip * (math.pi / 180))
+                n1 = frac.unit_normal_vector[0]
+                n2 = frac.unit_normal_vector[1]
+                n3 = frac.unit_normal_vector[2]
                 frac.perm = ((frac.aperture ** 3) * rho * g) / (12 * mu)
                 for i in range(1, 4):
                     for j in range(1, 4):
@@ -149,8 +143,6 @@ class FemReader(MeshPreprocessor):
             #Sum permeability contribution from fractures and from matrix.
             upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] #+ matrix_permeability_tensor[elem.local_id] * (
                        # 1 - elem.total_fracture_volume / elem.volume)
-        self.upscaled_permeability = upscaled_perm
-
 
         # EXPORT MODES
         # if mode == 'full_tensor':
