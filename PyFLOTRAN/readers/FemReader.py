@@ -150,6 +150,8 @@ class FemReader(MeshPreprocessor):
             upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] #+ matrix_permeability_tensor[elem.local_id] * (
                        # 1 - elem.total_fracture_volume / elem.volume)
         self.upscaled_permeability = upscaled_perm
+
+
         # EXPORT MODES
         # if mode == 'full_tensor':
         #     # mesh_upscaled_perm =
