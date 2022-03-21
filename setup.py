@@ -33,6 +33,9 @@ setup(
         'pytecplot',
         'sklearn',
         'munch',
+        'meshio',
+        'plotly',
+        'shapely'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
