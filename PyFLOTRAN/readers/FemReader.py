@@ -68,11 +68,25 @@ class FemReader(MeshPreprocessor):
 
 
                 elif split_line[0] == "COOR":
-                    #TRYING TO FIGURE THIS OUT IN THE NEW FILE
                     line = f.readline()
                     line = line.rstrip().replace(',', '').split()
                     # for np in tqdm(range(0, self.aux_n_nodes), desc='Reading nodes'):
 
+
+                    self.aux_xcoor = []
+                    self.aux_ycoor = []
+                    #self.aux_zcoor = np.zeros([self.aux_n_nodes])  #NOR DEFINITIVE, WE NEED TO READ ELEVATIONS BEFORE CRETING THE NODES.
+                    for l in range(0, self.aux_n_nodes/(self.aux_n_layers+1)):
+                        for i in range(0,12):
+                            self.aux_xcoor.append(float(line[i]))
+                    for l in range(0, self.aux_n_nodes/(self.aux_n_layers+1)):
+                        for i in range(0,12):
+                            self.aux_ycoor.append(float(line[i]))
+                    for n in range(0, self.aux_n_nodes):
+                        self.aux_nodes.append(np.array([self.aux_xcoor[n], self.aux_ycoor[n], self.aux_zcoor[n]]))
+                        #line = f.readline()
+                        #line = line.rstrip().replace(',', '').split()
+                    break
 
                 elif split_line[0] == "XYZCOOR":
                     line = f.readline()
@@ -82,6 +96,22 @@ class FemReader(MeshPreprocessor):
                         self.aux_nodes.append(np.array([float(line[0]), float(line[1]), float(line[2])]))
                         line = f.readline()
                         line = line.rstrip().replace(',', '').split()
+                    break
+
+
+
+                elif split_line[0] == "ELEV_I":
+                    line = f.readline()
+                    line = line.rstrip().replace(',', '').split()
+
+                    self.aux_elevation_value = []
+                    self.nodes_with_this_elevation = []
+
+                    #For each layer:
+                        #LOOP TO READ ELEVATION VALUES [Line[0]]
+                        #READ ELEVATION VALUE, AND MATRIX WITH MAXIMUM OF 13 COLUMNS HAVING ALL NODES WITH THAT ELEVATION.
+                        #                          [Line[1] to Line[14] for I don't know how many lines]
+
                     break
 
                 else:
