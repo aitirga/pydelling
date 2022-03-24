@@ -26,12 +26,28 @@ class FemReader(MeshPreprocessor):
                 line = line.rstrip()
                 split_line = line.split()
 
+                if split_line[0] == "CLASS":
+                    line = f.readline()
+                    line = line.rstrip()
+                    split_line = line.split()
+                    self.aux_n_layers = int(split_line[4])
+
                 if split_line[0] == "DIMENS":
                     line = f.readline()
                     line = line.rstrip()
                     split_line = line.split()
                     self.aux_n_nodes = int(split_line[0])
                     self.aux_n_elements = int(split_line[1])
+                    self.aux_num_nodes_per_elem = int(split_line[2])
+
+                elif split_line[0] == "NODE":
+                    nodes_elem = np.zeros([self.aux_n_elements, self.aux_num_nodes_per_elem], dtype=int)
+                    for e in tqdm(range(0, self.aux_n_elements), ):
+                        line = f.readline()
+                        line = line.rstrip()
+                        split_line = line.split()
+                        for ne in range(0, self.aux_num_nodes_per_elem):
+                            nodes_elem[e, ne] = int(split_line[ne]) - 1
 
                 elif split_line[0] == "VARNODE":
                     line = f.readline()
@@ -48,6 +64,12 @@ class FemReader(MeshPreprocessor):
                         for ne in range(0, num_elem_per_node):
                             nodes_elem[e, ne] = int(split_line[ne + 1]) - 1
                             element_type[e] = int(split_line[0])
+
+
+                elif split_line[0] == "COOR":
+                    #TRYING TO FIGURE THIS OUT IN THE NEW FILE
+                    line = f.readline()
+                    line = line.rstrip().replace(',', '').split()
 
                 elif split_line[0] == "XYZCOOR":
                     line = f.readline()
