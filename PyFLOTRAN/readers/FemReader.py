@@ -25,6 +25,8 @@ class FemReader(MeshPreprocessor):
             for line in f:
                 line = line.rstrip()
                 split_line = line.split()
+                print(split_line)
+
 
                 if split_line[0] == "CLASS":
                     line = f.readline()
