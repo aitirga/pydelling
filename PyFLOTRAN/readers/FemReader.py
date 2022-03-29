@@ -44,7 +44,7 @@ class FemReader(MeshPreprocessor):
 
                 elif split_line[0] == "NODE":
                     nodes_elem = np.zeros([self.aux_n_elements, self.aux_num_nodes_per_elem], dtype=int)
-                    for e in tqdm(range(0, self.aux_n_elements), ):
+                    for e in tqdm(range(0, self.aux_n_elements), desc='Reading elements'):
                         line = f.readline()
                         line = line.rstrip()
                         split_line = line.split()
@@ -72,12 +72,14 @@ class FemReader(MeshPreprocessor):
                     #TRYING TO FIGURE THIS OUT IN THE NEW FILE
                     line = f.readline()
                     line = line.rstrip().replace(',', '').split()
+                    # for np in tqdm(range(0, self.aux_n_nodes), desc='Reading nodes'):
+
 
                 elif split_line[0] == "XYZCOOR":
                     line = f.readline()
                     line = line.rstrip().replace(',', '').split()
 
-                    for n in range(0, self.aux_n_nodes):
+                    for n in tqdm(range(0, self.aux_n_nodes), desc='Reading nodes'):
                         self.aux_nodes.append(np.array([float(line[0]), float(line[1]), float(line[2])]))
                         line = f.readline()
                         line = line.rstrip().replace(',', '').split()
