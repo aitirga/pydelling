@@ -120,6 +120,14 @@ class FemReader(MeshPreprocessor):
             upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume)# + (
                        # matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
 
+        vtk_porosity = np.asarray(self.elements)
+        for local_id in upscaled_porosity:
+            vtk_porosity[local_id] = upscaled_porosity[local_id]
+
+
+        self.cell_data['upscaled_porosity'] = [vtk_porosity.tolist()]
+        self.upscaled_porosity = upscaled_porosity
+
         return upscaled_porosity
 
 
