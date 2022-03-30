@@ -18,6 +18,7 @@ class MeshPreprocessor(object):
     point_data = {}
     cell_data = {}
     _coords = None
+    _centroids = None
 
     def __init__(self):
         self.unordered_nodes = {}
@@ -72,7 +73,6 @@ class MeshPreprocessor(object):
         """
 
         elements_in_meshio = self._create_meshio_dict(self.elements)
-        print(self.cell_data)
         self.meshio_mesh = msh.Mesh(
             points=self.coords,
             cells=elements_in_meshio,
@@ -141,10 +141,12 @@ class MeshPreprocessor(object):
     @property
     def centroids(self):
         """Returns the centroids of the mesh"""
-        centroids = []
-        for element in self.elements:
-            centroids.append(element.centroid)
-        return centroids
+        if self._centroids is None:
+            centroids = []
+            for element in self.elements:
+                centroids.append(element.centroid)
+            self._centroids = np.array(centroids)
+        return self._centroids
 
     def create_kd_tree(self, kd_tree_config=None):
         """
