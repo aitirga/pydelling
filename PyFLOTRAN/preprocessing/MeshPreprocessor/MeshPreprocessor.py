@@ -17,6 +17,7 @@ class MeshPreprocessor(object):
     kd_tree: KDTree
     point_data = {}
     cell_data = {}
+    _coords = None
 
     def __init__(self):
         self.unordered_nodes = {}
@@ -33,10 +34,12 @@ class MeshPreprocessor(object):
     @property
     def coords(self) -> np.ndarray:
         """Orders the coords in the mesh"""
-        aux_nodes = np.ndarray(shape=(self.n_nodes, 3))
-        for idx, node in self.unordered_nodes.items():
-            aux_nodes[idx] = node
-        return aux_nodes
+        if self._coords is None:
+            aux_nodes = np.ndarray(shape=(self.n_nodes, 3))
+            for idx, node in self.unordered_nodes.items():
+                aux_nodes[idx] = node
+            self._coords = aux_nodes
+        return self._coords
 
     def add_quadrilateral(self, node_ids: List[int], node_coords: List[np.ndarray]):
         self.elements.append(geometry.QuadrilateralFace(node_ids=node_ids, node_coords=node_coords))
