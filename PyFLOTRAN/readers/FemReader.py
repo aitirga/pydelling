@@ -124,7 +124,6 @@ class FemReader(MeshPreprocessor):
         for local_id in upscaled_porosity:
             vtk_porosity[local_id] = upscaled_porosity[local_id]
 
-
         self.cell_data['upscaled_porosity'] = [vtk_porosity.tolist()]
         self.upscaled_porosity = upscaled_porosity
 
