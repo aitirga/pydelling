@@ -189,7 +189,7 @@ class MeshPreprocessor(object):
         if not hasattr(self, 'kd_tree'):
             self.create_kd_tree()
         ids = self.kd_tree.query_ball_point(point, distance)
-        assert len(ids) != 0, "No elements found"
+        # assert len(ids) != 0, "No elements found"
         return [self.elements[i] for i in ids]
 
     def clear(self):
