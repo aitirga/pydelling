@@ -19,15 +19,16 @@ class STLFromPointCloud(BasePreprocessing):
 
     def __init__(self, data: pd.DataFrame = None, filename: str = None):
         super().__init__(data, filename)
+
+
+    @set_run
+    def run(self, method="ball_pivoting", *args, **kwargs):
         logger.info("Preprocessing cloud of points")
         assert self.is_data_ok(), "Data is not properly set-up"
         self.point_cloud = o3d.geometry.PointCloud()
         self.point_cloud.points = o3d.utility.Vector3dVector(self.data)
         self.point_cloud.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=1.5,
                                                           max_nn=75))
-
-    @set_run
-    def run(self, method="ball_pivoting", *args, **kwargs):
         if config.stl_from_point_cloud.stl_strategy:
             method = config.stl_from_point_cloud.stl_strategy
         if method == 'ball_pivoting' or method == 'ball pivoting':
@@ -143,18 +144,21 @@ class STLFromPointCloud(BasePreprocessing):
     def to_ply(self, filename="reconstructed_mesh.ply"):
         """Writes the mesh in ply format
         """
-        assert self.is_run, "a mesh reconstruction technique needs to be run first"
+        # assert self.is_run, "a mesh reconstruction technique needs to be run first"
         o3d.io.write_triangle_mesh(str(self.output_directory / filename), self.stl_mesh)
         logger.info(f"Writing to {str(self.output_directory / filename)}")
 
     def to_stl(self, filename="reconstructed_mesh.stl"):
         """Writes the mesh in stl format
         """
-        assert self.is_run, "a mesh reconstruction technique needs to be run first"
+        # assert self.is_run, "a mesh reconstruction technique needs to be run first"
         self.stl_mesh = self.stl_mesh.compute_vertex_normals()
         logger.info(f"Writing to {str(self.output_directory / filename)}")
         o3d.io.write_triangle_mesh(str(self.output_directory / filename), self.stl_mesh)
 
+    def read_stl(self, filename):
+        """Reads a stl file and converts it into a o3d mesh"""
+        self.stl_mesh = o3d.io.read_triangle_mesh(filename)
 
     def crop_bounding_box(self, bbox=None):
         """
@@ -180,3 +184,4 @@ class STLFromPointCloud(BasePreprocessing):
     def output_directory(self):
         self.create_output_directory()
         return Path.cwd() / "output"
+
