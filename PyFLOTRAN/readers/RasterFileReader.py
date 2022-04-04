@@ -94,7 +94,7 @@ class RasterFileReader(BaseReader):
         self.xydata_computed = True
         return self.flatten_data
 
-    def dump_to_csv(self, output_file):
+    def to_csv(self, output_file, z_coord=None):
         """
         Function that writes the ratser data into a csv file
         :param output_file:
@@ -106,12 +106,19 @@ class RasterFileReader(BaseReader):
         else:
             xydata = self.xydata
         f = open(output_file, "w")
+        if z_coord is not None:
+            f.write(f"x,y,z,data\n")
+        else:
+            f.write(f"x,y,data\n")
         for data in xydata:
-            f.write(f"{data[0]},{data[1]},{data[2]}\n")
+            if z_coord is not None:
+                f.write(f"{data[0]},{data[1]},{z_coord},{data[3]}\n")
+            else:
+                f.write(f"{data[0]},{data[1]},{data[2]}\n")
         f.close()
         print(f"The data has been properly exported to the {output_file} file")
 
-    def dump_to_wsv(self, output_file):
+    def to_wsv(self, output_file):
         print(f"Starting dump into {output_file}")
         if not self.xydata_computed:
             xydata = self.dump_to_xydata()
@@ -123,7 +130,7 @@ class RasterFileReader(BaseReader):
         f.close()
         print(f"The data has been properly exported to the {output_file} file")
 
-    def dump_to_asc(self, output_file):
+    def to_asc(self, output_file):
         print(f"Starting dump into {output_file}")
         file = open(output_file, "w")
         self.write_asc_header(file)
