@@ -112,7 +112,7 @@ class RasterFileReader(BaseReader):
             f.write(f"x,y,data\n")
         for data in xydata:
             if z_coord is not None:
-                f.write(f"{data[0]},{data[1]},{z_coord},{data[3]}\n")
+                f.write(f"{data[0]},{data[1]},{z_coord},{data[2]}\n")
             else:
                 f.write(f"{data[0]},{data[1]},{data[2]}\n")
         f.close()
