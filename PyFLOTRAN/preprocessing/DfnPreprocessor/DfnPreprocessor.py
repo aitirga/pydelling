@@ -113,6 +113,13 @@ class DfnPreprocessor(object):
                 dfn_file.write(f'{{{point[0]},{point[1]},{point[2]}}}')
             dfn_file.write('\n')
 
+    def shift_dfn(self, x_shift=0, y_shift=0, z_shift=0):
+        """Shifts the dfn object."""
+        for fracture in self.dfn:
+            fracture.x_centroid += x_shift
+            fracture.y_centroid += y_shift
+            fracture.z_centroid += z_shift
+
 
     def generate_dfn_plotly(self, add_centroid=False, size_color=False, fracture_color='blue'):
         ''' Generates a plotly figure of the dfn object.
@@ -164,6 +171,8 @@ class DfnPreprocessor(object):
     def min_size(self):
         """Returns the minimum size of the dfn object."""
         return min([fracture.size for fracture in self.dfn])
+
+
 
 
 
