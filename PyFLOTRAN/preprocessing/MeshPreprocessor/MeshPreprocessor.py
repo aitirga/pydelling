@@ -19,10 +19,18 @@ class MeshPreprocessor(object):
     cell_data = {}
     _coords = None
     _centroids = None
+    is_intersected = False
 
     def __init__(self):
         self.unordered_nodes = {}
         self.elements = []
+
+        self.find_intersection_stats = {
+            'total_intersections': 0,
+            'intersection_points':
+                {
+                }
+        }
 
     def add_element(self, element: geometry.BaseElement):
         self.elements.append(element)
@@ -242,8 +250,9 @@ class MeshPreprocessor(object):
                 intersections.append(element)
         self.subset_to_vtk(intersections, filename='intersections.vtk')
 
-    def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture):
+    def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture, export_stats=False):
         """Finds the intersection points between a fracture and the mesh"""
+
         intersection_points = []
         kd_tree_filtered_elements = self.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
         for element in kd_tree_filtered_elements:
@@ -260,6 +269,7 @@ class MeshPreprocessor(object):
                 if intersected_point is not None:
                     intersection_points.append(intersected_point)
                     edge_intersections.append(intersected_point)
+
             if len(edge_intersections) >= 3:
                 intersection_area = compute_polygon_area(edge_intersections)
                 fracture.intersection_dictionary[element.local_id] = intersection_area
@@ -268,9 +278,23 @@ class MeshPreprocessor(object):
                     'volume': intersection_area * fracture.aperture,
                     'fracture': fracture,
                 }
+            n_intersections = len(edge_intersections)
+            if not n_intersections in self.find_intersection_stats['intersection_points'].keys():
+                self.find_intersection_stats['intersection_points'][n_intersections] = 0
+            self.find_intersection_stats['intersection_points'][n_intersections] += 1
+            self.find_intersection_stats['total_intersections'] += 1
+
+        self.is_intersected = True
 
         return intersection_points
 
+
+    def export_intersection_stats(self, filename='intersection_stats.txt'):
+        # Export the run_stats dictionary to file
+        assert self.is_intersected, 'The mesh has not been intersected yet.'
+        import json
+        with open('run_stats.json', 'w') as fp:
+            json.dump(self.find_intersection_stats, fp)
 
     @staticmethod
     def intersect_edge_plane(edge: np.ndarray,
