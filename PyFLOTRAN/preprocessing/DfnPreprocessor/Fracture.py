@@ -11,7 +11,6 @@ class Fracture(object):
         self.y_centroid = y
         self.z_centroid = z
         self.size = size
-        self.centroid = np.array([self.x_centroid, self.y_centroid, self.z_centroid])
         self.intersection_dictionary = {}
         self.aperture = aperture
         self.local_id = Fracture.local_id
@@ -175,6 +174,10 @@ class Fracture(object):
             return False
         else:
             return True
+
+    @property
+    def centroid(self):
+        return np.array([self.x_centroid, self.y_centroid, self.z_centroid])
 
 
 
