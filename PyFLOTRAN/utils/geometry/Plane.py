@@ -20,11 +20,14 @@ class Plane(BasePrimitive):
 
     def intersect(self, primitive: BasePrimitive):
         """Returns the intersection of this plane with the given primitive"""
-        from .intersections import intersect_plane_plane, intersect_plane_line
+        from .intersections import intersect_plane_plane, intersect_plane_line, intersect_plane_segment
         if primitive.__class__.__name__ == "Plane":
             return intersect_plane_plane(plane_1=self, plane_2=primitive)
-        if primitive.__class__.__name__ == "Line":
+        elif primitive.__class__.__name__ == "Line":
             return intersect_plane_line(plane=self, line=primitive)
+        elif primitive.__class__.__name__ == 'Segment':
+            return intersect_plane_segment(plane=self, segment=primitive)
+
         else:
             raise NotImplementedError(f"Intersection with {type(primitive)} is not implemented")
 
