@@ -5,12 +5,14 @@ import numpy as np
 from .BasePrimitive import BasePrimitive
 from .Point import Point
 import scipy.linalg as la
-
+from typing import List
 
 class Line(BasePrimitive):
-    def __init__(self, p1: np.ndarray or Point = None, p2: np.ndarray or Point = None,
-                 direction_vector: np.ndarray = None):
+    def __init__(self, p1: np.ndarray or Point or List = None, p2: np.ndarray or Point or List = None,
+                 direction_vector: np.ndarray or List = None):
         if p1 is not None and p2 is not None:
+            p1 = Point(p1)
+            p2 = Point(p2)
             self.direction_vector = (p2 - p1) / np.linalg.norm(p2 - p1)
             if isinstance(p1, Point):
                 self.p = p1
@@ -66,12 +68,6 @@ class Line(BasePrimitive):
                 return None
             else:
                 return self.p + self.direction_vector * x[0][0]
-
-            # # Check if it fits the third dimension
-            # if np.isclose(self.direction_vector[2] * x[0] - line.direction_vector[2] * x[1] - delta_p[2], 0):
-            #     return self.p + self.direction_vector * x[0]
-            # else:
-            #     return None
 
     def __repr__(self):
         return f"Line(p:{self.p}, v:{self.direction_vector})"
