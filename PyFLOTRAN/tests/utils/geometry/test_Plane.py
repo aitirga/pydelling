@@ -7,7 +7,12 @@ from PyFLOTRAN.utils.geometry import Line, Plane, Vector
 class PlaneCase(unittest.TestCase):
     def test_init(self):
         p = Plane(point=[0, 0, 0], normal=Vector([0, 0, 1]))
-        print(p)
+
+    def test_intersection(self):
+        plane_1 = Plane(point=[0, 0, 0], normal=Vector([0, 0, 1]))
+        plane_2 = Plane(point=[0, 0, 0], normal=Vector([0, 1, 0]))
+        intersected_line = plane_1.intersect(plane_2)
+        nptest.assert_array_equal(intersected_line.direction_vector, [-1, 0, 0])
 
 
 
