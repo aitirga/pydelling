@@ -39,6 +39,27 @@ class LineCase(unittest.TestCase):
         intersection_point = line_1.intersect(line_2)
         nptest.assert_array_almost_equal(intersection_point, np.array([0,-1,0]))
 
+    def test_intersection_4(self):
+        line_1 = Line([1, 0, 0], direction_vector=[-1, 0, 1])
+        line_2 = Line(p1=[1, 1, 0], p2=[-1, -1, 2])
+        line_1_line_2_intersection = line_1.intersect(line_2)
+        line_2_line_1_intersection = line_2.intersect(line_1)
+        nptest.assert_array_almost_equal(line_2_line_1_intersection, np.array([0, 0, 1]))
+        nptest.assert_array_almost_equal(line_1_line_2_intersection, line_2_line_1_intersection)
+
+    def test_intersection_5(self):
+        import time
+        line_1 = Line([1, 0, 0], direction_vector=[-1, 0, 1])
+        line_2 = Line(p1=[1, 1, 0], p2=[-1, -1, 2])
+
+        time_1 = time.time()
+        for i in range(1000):
+            line_1_line_2_intersection = line_1.intersect(line_2)
+        time_2 = time.time()
+        delta_time = time_2 - time_1
+        self.assertLess(delta_time, 0.5)
+
+
 
 if __name__ == '__main__':
     unittest.main()
