@@ -44,33 +44,16 @@ class Line(BasePrimitive):
                          (np.linalg.norm(self.direction_vector) * np.linalg.norm(line.direction_vector)))
 
     def intersect(self, primitive: BasePrimitive):
-        if isinstance(primitive, Line):
-            return self._intersect_line_line(primitive)
+        from .intersections import intersect_line_line, intersect_plane_line
+
+        if primitive.__class__.__name__ == "Line":
+            return intersect_line_line(line_1=self, line_2=primitive)
+        elif primitive.__class__.__name__ == "Plane":
+            return intersect_plane_line(line=self, plane=primitive)
 
         else:
             raise NotImplementedError(f"Intersection with {type(primitive)} is not implemented")
 
-    def _intersect_line_line(self, line: Line):
-        if self.is_parallel(line):
-            return None
-        else:
-            delta_p = self.p - line.p
-            a = np.array([
-                [self.direction_vector[0], -line.direction_vector[0]],
-                [self.direction_vector[1], -line.direction_vector[1]],
-                [self.direction_vector[2], -line.direction_vector[2]]
-
-            ])
-            b = - np.array([
-                [delta_p[0]],
-                [delta_p[1]],
-                [delta_p[2]],
-            ])
-            x = np.linalg.lstsq(a, b, rcond=None)
-            if x[1] >= self.eps:
-                return None
-            else:
-                return Point(self.p + self.direction_vector * x[0][0])
 
     def __repr__(self):
         return f"Line(point: {self.p}, direction_vector: {self.direction_vector})"

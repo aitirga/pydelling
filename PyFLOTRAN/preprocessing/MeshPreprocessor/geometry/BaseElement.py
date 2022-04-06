@@ -9,6 +9,7 @@ from natsort import natsorted
 import sympy as sp
 from PyFLOTRAN.utils.geometry import Point, Plane, Line
 from itertools import product, combinations
+from PyFLOTRAN.preprocessing.DfnPreprocessor.Fracture import Fracture
 
 
 class BaseElement(BaseAbstractMeshObject):
@@ -66,6 +67,7 @@ class BaseElement(BaseAbstractMeshObject):
         intersected_points = list(self._full_line_intersections(intersected_lines=intersected_lines,
                                                           intersected_points=intersected_points,
                                                           ))
+        # Check what happens with the fracture points
 
         # Check if the intersected points are inside the element
         intersected_inside_points = []
@@ -75,6 +77,46 @@ class BaseElement(BaseAbstractMeshObject):
         intersected_points = intersected_inside_points.copy()
 
         return intersected_points
+
+
+    def intersect_with_fracture(self, fracture: Fracture):
+        """Intersects an element with a fracture"""
+        intersected_lines = []
+        intersected_points = []
+
+        for face in self.faces:
+            intersection = self.faces[face].intersect_with_plane(fracture.plane)
+            for corner_line in fracture.corner_lines:
+                line_intersection = corner_line.intersect(self.faces[face].plane)
+                if line_intersection is not None:
+                    if self.contains(line_intersection):
+                        intersected_points.append(line_intersection)
+
+            if intersection:
+                intersected_lines.append(intersection)
+
+        # Check if the fracture vertex are inside the element
+        for vertex in fracture.corners:
+            print(self.contains(vertex))
+
+
+        # Intersect the lines within themselves
+        intersected_points = list(self._full_line_intersections(intersected_lines=intersected_lines,
+                                                          intersected_points=intersected_points,
+                                                          ))
+        # Check what happens with the fracture points
+
+        # Check if the intersected points are inside the element
+        intersected_inside_points = []
+        for point in intersected_points:
+            if self.contains(point):
+                intersected_inside_points.append(point)
+        intersected_points = intersected_inside_points.copy()
+        # Test algorithm that moves the corners of the fracture to the closest intersection point
+
+
+        return intersected_points
+
 
     def _full_line_intersections(self, intersected_lines: List, intersected_points: List) -> List:
         """Intersects a list of lines with each other"""
