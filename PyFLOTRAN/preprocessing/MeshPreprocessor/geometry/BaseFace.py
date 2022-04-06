@@ -1,6 +1,7 @@
 from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 from .BaseAbstractMeshObject import BaseAbstractMeshObject
 import sympy as sp
+from PyFLOTRAN.utils.geometry import Plane
 
 class BaseFace(BaseAbstractMeshObject):
     def __init__(self, node_ids, node_coords):
@@ -66,9 +67,9 @@ class BaseFace(BaseAbstractMeshObject):
         ax.axes.set_zlim3d(np.min(self.coords[:, 2]), np.max(self.coords[:, 2]))
         plt.show()
 
-    def intersect_with_plane(self, plane: sp.Plane):
+    def intersect_with_plane(self, plane: Plane):
         '''Returns the intersection of the face with the plane'''
-        return sp.intersection(plane, self.sympy_plane)
+        return self.plane.intersect(plane)
 
 
     @property
@@ -91,3 +92,8 @@ class BaseFace(BaseAbstractMeshObject):
     def sympy_plane(self):
         '''Returns the plane of the face'''
         return sp.Plane(self.centroid, normal_vector=self.unit_normal_vector)
+
+    @property
+    def plane(self):
+        '''Returns the plane of the face'''
+        return Plane(self.centroid, normal=self.unit_normal_vector)

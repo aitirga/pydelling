@@ -29,6 +29,8 @@ class Plane(BasePrimitive):
         """Returns True if this plane is parallel to the given plane"""
         if np.isclose(np.dot(self.n.coords, plane.n.coords), 1):
             return True
+        if np.isclose(np.dot(self.n.coords, plane.n.coords), -1):
+            return True
 
     def _intersect_plane_plane(self, plane: Plane):
         """Performs the intersection of this plane with the given plane"""
@@ -36,9 +38,11 @@ class Plane(BasePrimitive):
             return None
         normal_a = self.n.coords
         normal_b = plane.n.coords
+        d_a = np.dot(self.p.coords, self.n.coords)
+        d_b = np.dot(plane.p.coords, plane.n.coords)
         U = np.cross(normal_a, normal_b)
         M = np.array((normal_a, normal_b, U))
-        X = np.array((-normal_a, -normal_b, np.zeros_like(normal_a)))
+        X = np.array([d_a, d_b, 0.0]).reshape(3, 1)
         # print(M)
         p_inter = np.linalg.solve(M, X).T
         p1 = p_inter[0]

@@ -36,6 +36,8 @@ class Line(BasePrimitive):
     def is_parallel(self, line: Line):
         if np.isclose(np.dot(self.direction_vector, line.direction_vector), 1):
             return True
+        if np.isclose(np.dot(self.direction_vector, line.direction_vector), -1):
+            return True
 
     def angle(self, line: Line):
         return np.arccos(np.dot(self.direction_vector, line.direction_vector) /
@@ -43,16 +45,13 @@ class Line(BasePrimitive):
 
     def intersect(self, primitive: BasePrimitive):
         if isinstance(primitive, Line):
-            return self.intersect_line_line(primitive)
+            return self._intersect_line_line(primitive)
 
         else:
             raise NotImplementedError(f"Intersection with {type(primitive)} is not implemented")
 
-    def intersect_line_line(self, line: Line):
+    def _intersect_line_line(self, line: Line):
         if self.is_parallel(line):
-            print("parallel lines")
-            print(self.direction_vector)
-            print(line.direction_vector)
             return None
         else:
             delta_p = self.p - line.p
@@ -67,14 +66,14 @@ class Line(BasePrimitive):
                 [delta_p[1]],
                 [delta_p[2]],
             ])
-            x = np.linalg.lstsq(a, b)
+            x = np.linalg.lstsq(a, b, rcond=None)
             if x[1] >= self.eps:
                 return None
             else:
                 return Point(self.p + self.direction_vector * x[0][0])
 
     def __repr__(self):
-        return f"Line(p:{self.p}, v:{self.direction_vector})"
+        return f"Line(point: {self.p}, direction_vector: {self.direction_vector})"
 
     def __str__(self):
-        return f"Line(p:{self.p}, v:{self.direction_vector})"
+        return f"Line(point: {self.p}, direction_vector: {self.direction_vector})"

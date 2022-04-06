@@ -45,3 +45,16 @@ class Point(BasePrimitive):
     def __len__(self):
         return len(self.coords)
 
+    @property
+    def x(self):
+        return self.coords[0]
+
+    @property
+    def y(self):
+        return self.coords[1]
+
+    @property
+    def z(self):
+        return self.coords[2]
+
+
