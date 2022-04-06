@@ -10,6 +10,8 @@ import sympy as sp
 
 class BaseElement(BaseAbstractMeshObject):
     local_id = 0
+    eps = 1E-13
+
     def __init__(self, node_ids, node_coords, centroid_coords=None):
         self.nodes: np.ndarray = node_ids  # Node id set
         self.coords: np.ndarray = np.array(node_coords)  # Coordinates of each node
@@ -48,25 +50,51 @@ class BaseElement(BaseAbstractMeshObject):
 
         Returns: Intersection points
         """
-        intersections = []
+        intersected_lines = []
+        intersected_points = []
+
         for face in self.faces:
             intersection = self.faces[face].intersect_with_plane(plane)
             if intersection:
-                intersections.append(intersection[0])
+                intersected_lines.append(intersection[0])
         # Intersect the lines within themselves
-        intersected_points = []
-        for i in range(len(intersections) - 1):
-            line_1 = intersections[i]
-            line_2 = intersections[i + 1]
+        intersected_points = list(self._full_line_intersections(intersected_lines=intersected_lines,
+                                                          intersected_points=intersected_points,
+                                                          ))
+
+        # Check if the intersected points are inside the element
+        intersected_inside_points = []
+        for point in intersected_points:
+            if self.contains(point):
+                intersected_inside_points.append(point)
+        intersected_points = intersected_inside_points.copy()
+
+        return intersected_points
+
+    def _full_line_intersections(self, intersected_lines: List, intersected_points: List) -> List:
+        """Intersects a list of lines with each other"""
+        for i in range(len(intersected_lines) - 1):
+            line_1 = intersected_lines[i]
+            line_2 = intersected_lines[i + 1]
             intersection = line_1.intersect(line_2)
             if intersection:
                 intersected_points.append(list(intersection)[0])
-        line_1 = intersections[-1]
-        line_2 = intersections[0]
+        line_1 = intersected_lines[-1]
+        line_2 = intersected_lines[0]
         intersection = line_1.intersect(line_2)
         if intersection:
             intersected_points.append(list(intersection)[0])
-        return list(intersected_points)
+        return intersected_points
+
+
+    def contains(self, point: np.ndarray) -> bool:
+        """Checks if a point is inside the element"""
+        for face in self.faces:
+            dot_plane_point = np.dot(self.faces[face].unit_normal_vector, point - self.faces[face].centroid)
+            if dot_plane_point > self.eps:
+                return False
+        return True
+
 
     @property
     def n_nodes(self):
