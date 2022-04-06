@@ -255,30 +255,36 @@ class MeshPreprocessor(object):
 
         intersection_points = []
         kd_tree_filtered_elements = self.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
+        counter = 0
         for element in kd_tree_filtered_elements:
             element: geometry.BaseElement
-            edge_intersections = []
-            for edge in element.edges:
-                edge_vector = self.coords[edge[1]] - self.coords[edge[0]]
-                edge_point = self.coords[edge[0]]
-                intersected_point = self.intersect_edge_plane(
-                    edge=edge_vector,
-                    edge_point=edge_point,
-                    plane=fracture,
-                )
-                if intersected_point is not None:
-                    intersection_points.append(intersected_point)
-                    edge_intersections.append(intersected_point)
+            counter += 1
+            if counter > 30:
+                break
+            # edge_intersections = []
+            # for edge in element.edges:
+            #     edge_vector = self.coords[edge[1]] - self.coords[edge[0]]
+            #     edge_point = self.coords[edge[0]]
+            #     intersected_point = self.intersect_edge_plane(
+            #         edge=edge_vector,
+            #         edge_point=edge_point,
+            #         plane=fracture,
+            #     )
+            #     if intersected_point is not None:
+            #         intersection_points.append(intersected_point)
+            #         edge_intersections.append(intersected_point)
+            intersection_points = element.intersect_faces_with_plane(fracture.sympy_plane)
+            # print(intersection_points)
 
-            if len(edge_intersections) >= 3:
-                intersection_area = compute_polygon_area(edge_intersections)
+            if len(intersection_points) >= 3:
+                intersection_area = compute_polygon_area(intersection_points)
                 fracture.intersection_dictionary[element.local_id] = intersection_area
                 element.associated_fractures[fracture.local_id] = {
                     'area': intersection_area,
                     'volume': intersection_area * fracture.aperture,
                     'fracture': fracture,
                 }
-            n_intersections = len(edge_intersections)
+            n_intersections = len(intersection_points)
             if not n_intersections in self.find_intersection_stats['intersection_points'].keys():
                 self.find_intersection_stats['intersection_points'][n_intersections] = 0
             self.find_intersection_stats['intersection_points'][n_intersections] += 1

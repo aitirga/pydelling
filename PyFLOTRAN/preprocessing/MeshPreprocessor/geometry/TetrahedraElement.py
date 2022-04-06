@@ -67,3 +67,10 @@ class TetrahedraElement(BaseElement):
         :return: centroid of the polyhedron
         """
         return np.mean(self.coords, axis=0)
+
+
+
+
+
+
+
