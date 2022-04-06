@@ -1,5 +1,6 @@
 import numpy as np
-
+import shapely.geometry as geom
+import sympy as sp
 
 class Fracture(object):
     local_id = 0
@@ -178,6 +179,17 @@ class Fracture(object):
     @property
     def centroid(self):
         return np.array([self.x_centroid, self.y_centroid, self.z_centroid])
+
+    @property
+    def polygon(self):
+        side_points = self.get_side_points()
+        self._polygon = geom.Polygon(side_points)
+        return self._polygon
+
+    @property
+    def sympy_plane(self):
+        """Returns the plane of the fracture"""
+        return sp.Plane(self.centroid, normal_vector=self.unit_normal_vector)
 
 
 

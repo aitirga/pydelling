@@ -6,6 +6,7 @@ import pandas as pd
 from .BaseAbstractMeshObject import BaseAbstractMeshObject
 from typing import *
 from natsort import natsorted
+import sympy as sp
 
 class BaseElement(BaseAbstractMeshObject):
     local_id = 0
@@ -38,6 +39,35 @@ class BaseElement(BaseAbstractMeshObject):
             print(f"{face}: {self.faces[face].nodes}")
         print("### End face info ###")
 
+    def intersect_faces_with_plane(self, plane: sp.Plane):
+        """Returns the intersection of a face with a plane
+
+        Args:
+            face: Face to intersect
+            plane: Plane to intersect with
+
+        Returns: Intersection points
+        """
+        intersections = []
+        for face in self.faces:
+            intersection = self.faces[face].intersect_with_plane(plane)
+            if intersection:
+                intersections.append(intersection[0])
+        # Intersect the lines within themselves
+        intersected_points = []
+        for i in range(len(intersections) - 1):
+            line_1 = intersections[i]
+            line_2 = intersections[i + 1]
+            intersection = line_1.intersect(line_2)
+            if intersection:
+                intersected_points.append(list(intersection)[0])
+        line_1 = intersections[-1]
+        line_2 = intersections[0]
+        intersection = line_1.intersect(line_2)
+        if intersection:
+            intersected_points.append(list(intersection)[0])
+        return list(intersected_points)
+
     @property
     def n_nodes(self):
         return len(self.nodes)
@@ -61,3 +91,4 @@ class BaseElement(BaseAbstractMeshObject):
         Returns: volume of the hexahedra
         """
         return None
+
