@@ -1,7 +1,7 @@
 import numpy as np
 import shapely.geometry as geom
 import sympy as sp
-from PyFLOTRAN.utils.geometry import Plane
+from PyFLOTRAN.utils.geometry import Plane, Line
 
 
 class Fracture(object):
@@ -196,6 +196,25 @@ class Fracture(object):
     @property
     def plane(self):
         return Plane(self.centroid, normal=self.unit_normal_vector)
+
+    @property
+    def corners(self):
+        """Returns the corners of the fracture"""
+        return self.get_side_points()
+
+    @property
+    def corner_lines(self):
+        """Returns the corner lines of the fracture"""
+        corner_lines = [
+            Line(self.corners[0], self.corners[1]),
+            Line(self.corners[1], self.corners[2]),
+            Line(self.corners[2], self.corners[3]),
+            Line(self.corners[3], self.corners[0])
+        ]
+        return corner_lines
+
+
+
 
 
 

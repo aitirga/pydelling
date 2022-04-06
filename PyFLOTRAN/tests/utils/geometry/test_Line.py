@@ -1,7 +1,7 @@
 import unittest
 import numpy.testing as nptest
 import numpy as np
-from PyFLOTRAN.utils.geometry import Line
+from PyFLOTRAN.utils.geometry import Line, Plane
 
 
 class LineCase(unittest.TestCase):
@@ -59,6 +59,11 @@ class LineCase(unittest.TestCase):
         delta_time = time_2 - time_1
         self.assertLess(delta_time, 0.5)
 
+    def test_intersect_plane_line(self):
+        line = Line(np.array([0,0,0]), np.array([3,0,0]))
+        plane = Plane(point=[2.0, 0.0, 0.0], normal=[1.0, 0.0, 0.0])
+        intersection_point = line.intersect(plane)
+        nptest.assert_array_almost_equal(intersection_point, np.array([2.0, 0.0, 0.0]))
 
 
 if __name__ == '__main__':

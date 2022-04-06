@@ -1,3 +1,4 @@
+from __future__ import annotations
 import numpy as np
 
 from .BasePrimitive import BasePrimitive
@@ -18,6 +19,11 @@ class Point(np.ndarray):
             raise ValueError("Point must have 2 or 3 coordinates")
         return obj
 
+    def distance(self, p: Point):
+        """Computes euclidean distance between two points"""
+        diff = self - p
+        return np.sqrt((diff ** 2).sum())
+
 
     def __repr__(self):
         return f"Point({self})"
@@ -34,3 +40,4 @@ class Point(np.ndarray):
     @property
     def z(self):
         return self[2]
+

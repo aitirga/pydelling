@@ -20,8 +20,11 @@ class Plane(BasePrimitive):
 
     def intersect(self, primitive: BasePrimitive):
         """Returns the intersection of this plane with the given primitive"""
-        if isinstance(primitive, Plane):
-            return self._intersect_plane_plane(plane=primitive)
+        from .intersections import intersect_plane_plane, intersect_plane_line
+        if primitive.__class__.__name__ == "Plane":
+            return intersect_plane_plane(plane_1=self, plane_2=primitive)
+        if primitive.__class__.__name__ == "Line":
+            return intersect_plane_line(plane=self, line=primitive)
         else:
             raise NotImplementedError(f"Intersection with {type(primitive)} is not implemented")
 
@@ -32,21 +35,3 @@ class Plane(BasePrimitive):
         if np.isclose(np.dot(self.n, plane.n), -1):
             return True
 
-    def _intersect_plane_plane(self, plane: Plane):
-        """Performs the intersection of this plane with the given plane"""
-        if self.is_parallel(plane):
-            return None
-        normal_a = self.n
-        normal_b = plane.n
-        d_a = np.dot(self.p, self.n)
-        d_b = np.dot(plane.p, plane.n)
-        U = np.cross(normal_a, normal_b)
-        M = np.array((normal_a, normal_b, U))
-        X = np.array([d_a, d_b, 0.0]).reshape(3, 1)
-        # print(M)
-        p_inter = np.linalg.solve(M, X).T
-        p1 = p_inter[0]
-        p2 = (p_inter + U)[0]
-        intersected_line = Line(p1, p2)
-
-        return intersected_line
