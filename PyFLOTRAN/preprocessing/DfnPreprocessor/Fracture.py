@@ -4,7 +4,7 @@ import sympy as sp
 
 class Fracture(object):
     local_id = 0
-    def __init__(self, dip, dip_dir, x, y, z, size, aperture=0.001):
+    def __init__(self, dip, dip_dir, x, y, z, size, aperture=0.01):
         self.side_points = None
         self.dip = dip
         self.dip_dir = dip_dir

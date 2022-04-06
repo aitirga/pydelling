@@ -68,11 +68,25 @@ class FemReader(MeshPreprocessor):
 
 
                 elif split_line[0] == "COOR":
-                    #TRYING TO FIGURE THIS OUT IN THE NEW FILE
                     line = f.readline()
                     line = line.rstrip().replace(',', '').split()
                     # for np in tqdm(range(0, self.aux_n_nodes), desc='Reading nodes'):
 
+
+                    self.aux_xcoor = []
+                    self.aux_ycoor = []
+                    #self.aux_zcoor = np.zeros([self.aux_n_nodes])  #NOR DEFINITIVE, WE NEED TO READ ELEVATIONS BEFORE CRETING THE NODES.
+                    for l in range(0, self.aux_n_nodes/(self.aux_n_layers+1)):
+                        for i in range(0,12):
+                            self.aux_xcoor.append(float(line[i]))
+                    for l in range(0, self.aux_n_nodes/(self.aux_n_layers+1)):
+                        for i in range(0,12):
+                            self.aux_ycoor.append(float(line[i]))
+                    for n in range(0, self.aux_n_nodes):
+                        self.aux_nodes.append(np.array([self.aux_xcoor[n], self.aux_ycoor[n], self.aux_zcoor[n]]))
+                        #line = f.readline()
+                        #line = line.rstrip().replace(',', '').split()
+                    break
 
                 elif split_line[0] == "XYZCOOR":
                     line = f.readline()
@@ -82,6 +96,22 @@ class FemReader(MeshPreprocessor):
                         self.aux_nodes.append(np.array([float(line[0]), float(line[1]), float(line[2])]))
                         line = f.readline()
                         line = line.rstrip().replace(',', '').split()
+                    break
+
+
+
+                elif split_line[0] == "ELEV_I":
+                    line = f.readline()
+                    line = line.rstrip().replace(',', '').split()
+
+                    self.aux_elevation_value = []
+                    self.nodes_with_this_elevation = []
+
+                    #For each layer:
+                        #LOOP TO READ ELEVATION VALUES [Line[0]]
+                        #READ ELEVATION VALUE, AND MATRIX WITH MAXIMUM OF 13 COLUMNS HAVING ALL NODES WITH THAT ELEVATION.
+                        #                          [Line[1] to Line[14] for I don't know how many lines]
+
                     break
 
                 else:
@@ -119,6 +149,7 @@ class FemReader(MeshPreprocessor):
         for elem in tqdm(self.elements, desc="Upscaling porosity"):
             upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume)# + (
                        # matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
+            if elem.total_fracture_volume > 0:
 
         vtk_porosity = np.asarray(self.elements)
         for local_id in upscaled_porosity:
@@ -130,8 +161,39 @@ class FemReader(MeshPreprocessor):
         return upscaled_porosity
 
 
-    def upscale_mesh_permeability(self, matrix_permeability_tensor=None, rho=1000, g=10, mu=10,
+    def upscale_mesh_permeability(self, matrix_permeability=None, rho=1000, g=9.8, mu=8.9e-4,
                                   mode='full_tensor'):
+
+        matrix_permeability = {}
+
+        for elem in tqdm(self.elements, desc="Creating permeability tensor for dummy anisotropic case"):
+            matrix_permeability[elem.local_id] = np.ones([3,3])*1E-2
+
+        matrix_permeability_tensor = matrix_permeability
+
+        # Check correct size of matrix_permeability.
+        # matrix_permeability_tensor = np.zeros(len(self.elements))
+        #
+        # if len(matrix_permeability) != len(self.elements):
+        #     print("Incorrect size for matrix permeability. Size of variable doesn't match number of elements in the mesh.")
+        #     break
+        # else:
+        #     for elem in tqdm(self.elements, desc="Check size of matrix permeability input"):
+        #         if len(matrix_permeability[elem]) == 3:
+        #             if np.shape(matrix_permeability[elem]) == (3,3):
+        #                 print("Matrix Permeability Tensor (3,3) for Anisotropic case.")
+        #                 continue
+        #             else:
+        #                 print("Matrix Permeability Tensor must be an np.array([3,3]) for Anisotropic case.")
+        #         elif len(matrix_permeability[elem]) == 1:
+        #             print("Matrix Permeability for Isotropic case.")
+        #             matrix_permeability_tensor[elem] = np.zeros([3,3])
+        #             matrix_permeability_tensor[elem][0,0] = matrix_permeability[elem]
+        #             continue
+        #         else:
+        #             print("Incorrect Matrix Permeability Tensor. Must be an np.array([3,3]) for use in Anisotropic case or a single float/int for use in Isotropic case.")
+        #             continue
+
         # UPSCALED PERMEABILITY
         fracture_perm = {}
         upscaled_perm = {}
@@ -144,7 +206,6 @@ class FemReader(MeshPreprocessor):
             for frac_name in elem.associated_fractures:
                 frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
-                perm_tensor = np.zeros([3, 3])
                 # n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
                 # n2 = math.cos(frac.dip * (math.pi / 180)) * math.cos(frac.dip_dir * (math.pi / 180))
                 # n3 = -1 * math.sin(frac.dip * (math.pi / 180))
@@ -152,41 +213,64 @@ class FemReader(MeshPreprocessor):
                 n2 = frac.unit_normal_vector[1]
                 n3 = frac.unit_normal_vector[2]
                 frac.perm = ((frac.aperture ** 3) * rho * g) / (12 * mu)
-                for i in range(1, 4):
-                    for j in range(1, 4):
-                        perm_tensor[0, 0] = frac.perm * ((n2 ** 2) + (n3 ** 2))
-                        perm_tensor[0, 1] = frac.perm * (-1) * n1 * n2
-                        perm_tensor[0, 2] = frac.perm * (-1) * n1 * n3
-                        perm_tensor[1, 1] = frac.perm * ((n3 ** 2) + (n1 ** 2))
-                        perm_tensor[1, 2] = frac.perm * (-1) * n2 * n3
-                        perm_tensor[2, 2] = frac.perm * ((n1 ** 2) + (n2 ** 2))
 
-                #Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                fracture_perm[elem.local_id][0, 0] += (perm_tensor[0, 0] * frac_dict['volume'] / elem.volume)
-                fracture_perm[elem.local_id][0, 1] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                fracture_perm[elem.local_id][0, 2] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                fracture_perm[elem.local_id][1, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                fracture_perm[elem.local_id][1, 1] += (perm_tensor[1, 1] * frac_dict['volume'] / elem.volume)
-                fracture_perm[elem.local_id][1, 2] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
-                fracture_perm[elem.local_id][2, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                fracture_perm[elem.local_id][2, 1] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
-                fracture_perm[elem.local_id][2, 2] += (perm_tensor[2, 2] * frac_dict['volume'] / elem.volume)
+                if 'mode' == 'isotropy':
+                    # Add fracture permeability, weighted by the area that the fracture occupies in the element.
+                    fracture_perm[elem.local_id][0, 0] += frac.perm * frac_dict['volume'] / elem.volume #Kxx
 
-            #Sum permeability contribution from fractures and from matrix.
-            upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] #+ matrix_permeability_tensor[elem.local_id] * (
-                       # 1 - elem.total_fracture_volume / elem.volume)
+                else: #'anisotropy' in 'mode':
+                    perm_tensor = np.zeros([3, 3])
+                    for i in range(1, 4):
+                        for j in range(1, 4):
+                            # Compute tensor
+                            perm_tensor[0, 0] = frac.perm * ((n2 ** 2) + (n3 ** 2))
+                            perm_tensor[0, 1] = frac.perm * (-1) * n1 * n2
+                            perm_tensor[0, 2] = frac.perm * (-1) * n1 * n3
+                            perm_tensor[1, 1] = frac.perm * ((n3 ** 2) + (n1 ** 2))
+                            perm_tensor[1, 2] = frac.perm * (-1) * n2 * n3
+                            perm_tensor[2, 2] = frac.perm * ((n1 ** 2) + (n2 ** 2))
 
-        # EXPORT MODES
-        # if mode == 'full_tensor':
-        #     # mesh_upscaled_perm =
-        #     pass
-        # elif mode == 'tensor_principals':
-        #     eigen_perm = {key: np.zeros([3,3]) for key in elem.ID}
-        #     for elem in intersection_dictionary.frac:
-        #         eigen_perm = np.linalg.eig(upscaled_perm[elem])
-        #     upscaled_perm = eigen_perm
-        # else:
-        #     print("Isotropic case not implemented yet")
+                    if 'mode' == 'anisotropy_principals':
+                        eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])
+                        perm_tensor = eigen_perm_tensor
+
+                    # Add fracture permeability, weighted by the area that the fracture occupies in the element.
+                    fracture_perm[elem.local_id][0, 0] += (perm_tensor[0, 0] * frac_dict['volume'] / elem.volume)
+                    fracture_perm[elem.local_id][0, 1] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_perm[elem.local_id][0, 2] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_perm[elem.local_id][1, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_perm[elem.local_id][1, 1] += (perm_tensor[1, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_perm[elem.local_id][1, 2] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
+                    fracture_perm[elem.local_id][2, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_perm[elem.local_id][2, 1] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
+                    fracture_perm[elem.local_id][2, 2] += (perm_tensor[2, 2] * frac_dict['volume'] / elem.volume)
+
+            # Sum permeability contribution from fractures and from matrix.
+            upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] + matrix_permeability_tensor[elem.local_id] * (1 - (elem.total_fracture_volume / elem.volume))
+
+        #Export values to VTK
+        vtk_kxx = np.asarray(self.elements)
+        vtk_kyy = np.asarray(self.elements)
+        vtk_kzz = np.asarray(self.elements)
+        vtk_kxy = np.asarray(self.elements)
+        vtk_kxz = np.asarray(self.elements)
+        vtk_kyz = np.asarray(self.elements)
+        for local_id in upscaled_perm:
+            vtk_kxx[local_id] = upscaled_perm[local_id][0, 0]
+            vtk_kyy[local_id] = upscaled_perm[local_id][1, 1]
+            vtk_kzz[local_id] = upscaled_perm[local_id][2, 2]
+            vtk_kxy[local_id] = upscaled_perm[local_id][0, 1]
+            vtk_kxz[local_id] = upscaled_perm[local_id][0, 2]
+            vtk_kyz[local_id] = upscaled_perm[local_id][1, 2]
+
+        self.cell_data['Kxx'] = [vtk_kxx.tolist()]
+        self.cell_data['Kyy'] = [vtk_kyy.tolist()]
+        self.cell_data['Kzz'] = [vtk_kzz.tolist()]
+        self.cell_data['Kxy'] = [vtk_kxy.tolist()]
+        self.cell_data['Kxz'] = [vtk_kxz.tolist()]
+        self.cell_data['Kyz'] = [vtk_kyz.tolist()]
+
+        self.upscaled_permeability = upscaled_perm
 
         return upscaled_perm
 
