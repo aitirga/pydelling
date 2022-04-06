@@ -7,7 +7,7 @@ from PyFLOTRAN.utils.geometry import Line
 class LineCase(unittest.TestCase):
     def test_line_init(self):
         line = Line(np.array([0,0,0]), np.array([1,1,0]))
-        nptest.assert_array_almost_equal(line.p.coords, np.array([0, 0, 0]))
+        nptest.assert_array_almost_equal(line.p, np.array([0, 0, 0]))
         nptest.assert_array_almost_equal(line.direction_vector, np.array([np.sqrt(2) / 2.0,np.sqrt(2) / 2.0, 0]))
         nptest.assert_array_equal(line.p, np.array([0, 0, 0]))
 
@@ -25,27 +25,27 @@ class LineCase(unittest.TestCase):
         line_1 = Line(np.array([0,0,0]), np.array([-1,0,0]))
         line_2 = Line(np.array([-1,2,0]), np.array([-1,1,0]))
         intersection_point = line_1.intersect(line_2)
-        nptest.assert_array_almost_equal(intersection_point.coords, np.array([-1,0,0]))
+        nptest.assert_array_almost_equal(intersection_point, np.array([-1,0,0]))
 
     def test_intersection_2(self):
         line_1 = Line(np.array([0,0,0]), np.array([2,2,0]))
         line_2 = Line(np.array([2,0,0]), direction_vector=np.array([-1,1,0]))
         intersection_point = line_1.intersect(line_2)
-        nptest.assert_array_almost_equal(intersection_point.coords, np.array([1,1,0]))
+        nptest.assert_array_almost_equal(intersection_point, np.array([1,1,0]))
 
     def test_intersection_3(self):
         line_1 = Line(np.array([0,0,0]), np.array([0,1,0]))
         line_2 = Line(np.array([0,-1,2]), np.array([0,-1,1]))
         intersection_point = line_1.intersect(line_2)
-        nptest.assert_array_almost_equal(intersection_point.coords, np.array([0,-1,0]))
+        nptest.assert_array_almost_equal(intersection_point, np.array([0,-1,0]))
 
     def test_intersection_4(self):
         line_1 = Line([1, 0, 0], direction_vector=[-1, 0, 1])
         line_2 = Line(p1=[1, 1, 0], p2=[-1, -1, 2])
         line_1_line_2_intersection = line_1.intersect(line_2)
         line_2_line_1_intersection = line_2.intersect(line_1)
-        nptest.assert_array_almost_equal(line_2_line_1_intersection.coords, np.array([0, 0, 1]))
-        nptest.assert_array_almost_equal(line_1_line_2_intersection.coords, line_2_line_1_intersection.coords)
+        nptest.assert_array_almost_equal(line_2_line_1_intersection, np.array([0, 0, 1]))
+        nptest.assert_array_almost_equal(line_1_line_2_intersection, line_2_line_1_intersection)
 
     def test_intersection_5(self):
         import time
