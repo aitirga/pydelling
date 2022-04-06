@@ -42,3 +42,6 @@ class Point(BasePrimitive):
     def __mul__(self, other):
         return self.coords * other
 
+    def __len__(self):
+        return len(self.coords)
+

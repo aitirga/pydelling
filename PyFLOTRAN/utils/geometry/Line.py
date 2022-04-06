@@ -4,7 +4,6 @@ import numpy as np
 
 from .BasePrimitive import BasePrimitive
 from .Point import Point
-import scipy.linalg as la
 from typing import List
 
 
@@ -71,4 +70,7 @@ class Line(BasePrimitive):
                 return Point(self.p + self.direction_vector * x[0][0])
 
     def __repr__(self):
+        return f"Line(p:{self.p}, v:{self.direction_vector})"
+
+    def __str__(self):
         return f"Line(p:{self.p}, v:{self.direction_vector})"
