@@ -86,7 +86,6 @@ class BaseElement(BaseAbstractMeshObject):
             intersected_points.append(list(intersection)[0])
         return intersected_points
 
-
     def contains(self, point: np.ndarray) -> bool:
         """Checks if a point is inside the element"""
         for face in self.faces:
