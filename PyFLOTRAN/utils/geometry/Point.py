@@ -4,57 +4,33 @@ from .BasePrimitive import BasePrimitive
 from typing import *
 
 
-class Point(BasePrimitive):
-    def __init__(self, coords: np.ndarray or List):
-        if len(coords) == 1:
+class Point(np.ndarray):
+    def __new__(cls, input_array):
+        # Input array is an already formed ndarray instance
+        # We first cast to be our class type
+        if len(input_array) == 1:
             raise ValueError("Point must have 2 or 3 coordinates")
-        elif len(coords) == 2:
-            self.coords = np.array([coords[0], coords[1], 0])
-        elif len(coords) == 3:
-            self.coords = np.array(coords)
+        elif len(input_array) == 2:
+            obj = np.asarray(input_array).view(cls)
+        elif len(input_array) == 3:
+            obj = np.asarray(input_array).view(cls)
         else:
             raise ValueError("Point must have 2 or 3 coordinates")
+        return obj
+
 
     def __repr__(self):
-        return f"Point({self.coords})"
+        return f"Point({self})"
 
-    def __str__(self):
-        return f"Point({self.coords})"
-
-    def __eq__(self, other):
-        if isinstance(other, Point):
-            return np.all(self.coords == other.coords)
-        else:
-            return np.all(self.coords == other)
-
-    def __add__(self, other):
-        if isinstance(other, Point):
-            return self.coords + other.coords
-        else:
-            return self.coords + other
-
-    def __sub__(self, other):
-        if isinstance(other, Point):
-            return self.coords - other.coords
-        else:
-            return self.coords - other
-
-    def __mul__(self, other):
-        return self.coords * other
-
-    def __len__(self):
-        return len(self.coords)
 
     @property
     def x(self):
-        return self.coords[0]
+        return self[0]
 
     @property
     def y(self):
-        return self.coords[1]
+        return self[1]
 
     @property
     def z(self):
-        return self.coords[2]
-
-
+        return self[2]

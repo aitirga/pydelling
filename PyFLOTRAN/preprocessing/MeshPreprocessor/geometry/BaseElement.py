@@ -71,7 +71,7 @@ class BaseElement(BaseAbstractMeshObject):
         intersected_inside_points = []
         for point in intersected_points:
             if self.contains(point):
-                intersected_inside_points.append(point.coords)
+                intersected_inside_points.append(point)
         intersected_points = intersected_inside_points.copy()
 
         return intersected_points
@@ -83,7 +83,7 @@ class BaseElement(BaseAbstractMeshObject):
             line_1: Line = line_pair[0]
             line_2: Line = line_pair[1]
             intersection = line_1.intersect(line_2)
-            if intersection:
+            if intersection is not None:
                 intersected_points.append(intersection)
         return intersected_points
 

@@ -27,19 +27,19 @@ class Plane(BasePrimitive):
 
     def is_parallel(self, plane: Plane):
         """Returns True if this plane is parallel to the given plane"""
-        if np.isclose(np.dot(self.n.coords, plane.n.coords), 1):
+        if np.isclose(np.dot(self.n, plane.n), 1):
             return True
-        if np.isclose(np.dot(self.n.coords, plane.n.coords), -1):
+        if np.isclose(np.dot(self.n, plane.n), -1):
             return True
 
     def _intersect_plane_plane(self, plane: Plane):
         """Performs the intersection of this plane with the given plane"""
         if self.is_parallel(plane):
             return None
-        normal_a = self.n.coords
-        normal_b = plane.n.coords
-        d_a = np.dot(self.p.coords, self.n.coords)
-        d_b = np.dot(plane.p.coords, plane.n.coords)
+        normal_a = self.n
+        normal_b = plane.n
+        d_a = np.dot(self.p, self.n)
+        d_b = np.dot(plane.p, plane.n)
         U = np.cross(normal_a, normal_b)
         M = np.array((normal_a, normal_b, U))
         X = np.array([d_a, d_b, 0.0]).reshape(3, 1)
