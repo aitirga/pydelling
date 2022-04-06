@@ -34,7 +34,8 @@ class Line(BasePrimitive):
                     self.p = Point(p2)
 
     def is_parallel(self, line: Line):
-        return np.allclose(self.direction_vector, line.direction_vector)
+        if np.isclose(np.dot(self.direction_vector, line.direction_vector), 1):
+            return True
 
     def angle(self, line: Line):
         return np.arccos(np.dot(self.direction_vector, line.direction_vector) /
@@ -49,6 +50,9 @@ class Line(BasePrimitive):
 
     def intersect_line_line(self, line: Line):
         if self.is_parallel(line):
+            print("parallel lines")
+            print(self.direction_vector)
+            print(line.direction_vector)
             return None
         else:
             delta_p = self.p - line.p
