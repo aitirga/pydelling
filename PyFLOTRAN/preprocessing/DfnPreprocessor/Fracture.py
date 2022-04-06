@@ -1,6 +1,8 @@
 import numpy as np
 import shapely.geometry as geom
 import sympy as sp
+from PyFLOTRAN.utils.geometry import Plane
+
 
 class Fracture(object):
     local_id = 0
@@ -190,6 +192,10 @@ class Fracture(object):
     def sympy_plane(self):
         """Returns the plane of the fracture"""
         return sp.Plane(self.centroid, normal_vector=self.unit_normal_vector)
+
+    @property
+    def plane(self):
+        return Plane(self.centroid, normal=self.unit_normal_vector)
 
 
 

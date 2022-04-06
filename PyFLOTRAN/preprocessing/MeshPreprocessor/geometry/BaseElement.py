@@ -7,6 +7,9 @@ from .BaseAbstractMeshObject import BaseAbstractMeshObject
 from typing import *
 from natsort import natsorted
 import sympy as sp
+from PyFLOTRAN.utils.geometry import Point, Plane, Line
+from itertools import product, combinations
+
 
 class BaseElement(BaseAbstractMeshObject):
     local_id = 0
@@ -41,7 +44,7 @@ class BaseElement(BaseAbstractMeshObject):
             print(f"{face}: {self.faces[face].nodes}")
         print("### End face info ###")
 
-    def intersect_faces_with_plane(self, plane: sp.Plane):
+    def intersect_faces_with_plane(self, plane: Plane):
         """Returns the intersection of a face with a plane
 
         Args:
@@ -56,7 +59,9 @@ class BaseElement(BaseAbstractMeshObject):
         for face in self.faces:
             intersection = self.faces[face].intersect_with_plane(plane)
             if intersection:
-                intersected_lines.append(intersection[0])
+                intersected_lines.append(intersection)
+
+
         # Intersect the lines within themselves
         intersected_points = list(self._full_line_intersections(intersected_lines=intersected_lines,
                                                           intersected_points=intersected_points,
@@ -66,27 +71,23 @@ class BaseElement(BaseAbstractMeshObject):
         intersected_inside_points = []
         for point in intersected_points:
             if self.contains(point):
-                intersected_inside_points.append(point)
+                intersected_inside_points.append(point.coords)
         intersected_points = intersected_inside_points.copy()
 
         return intersected_points
 
     def _full_line_intersections(self, intersected_lines: List, intersected_points: List) -> List:
         """Intersects a list of lines with each other"""
-        for i in range(len(intersected_lines) - 1):
-            line_1 = intersected_lines[i]
-            line_2 = intersected_lines[i + 1]
+        line_combination = list(combinations(intersected_lines, 2))
+        for line_pair in line_combination:
+            line_1: Line = line_pair[0]
+            line_2: Line = line_pair[1]
             intersection = line_1.intersect(line_2)
             if intersection:
-                intersected_points.append(list(intersection)[0])
-        line_1 = intersected_lines[-1]
-        line_2 = intersected_lines[0]
-        intersection = line_1.intersect(line_2)
-        if intersection:
-            intersected_points.append(list(intersection)[0])
+                intersected_points.append(intersection)
         return intersected_points
 
-    def contains(self, point: np.ndarray) -> bool:
+    def contains(self, point: np.ndarray or Point) -> bool:
         """Checks if a point is inside the element"""
         for face in self.faces:
             dot_plane_point = np.dot(self.faces[face].unit_normal_vector, point - self.faces[face].centroid)

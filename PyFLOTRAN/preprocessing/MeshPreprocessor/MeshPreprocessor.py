@@ -259,8 +259,6 @@ class MeshPreprocessor(object):
         for element in kd_tree_filtered_elements:
             element: geometry.BaseElement
             counter += 1
-            if counter > 30:
-                break
             # edge_intersections = []
             # for edge in element.edges:
             #     edge_vector = self.coords[edge[1]] - self.coords[edge[0]]
@@ -273,8 +271,7 @@ class MeshPreprocessor(object):
             #     if intersected_point is not None:
             #         intersection_points.append(intersected_point)
             #         edge_intersections.append(intersected_point)
-            intersection_points = element.intersect_faces_with_plane(fracture.sympy_plane)
-            # print(intersection_points)
+            intersection_points = element.intersect_faces_with_plane(fracture.plane)
 
             if len(intersection_points) >= 3:
                 intersection_area = compute_polygon_area(intersection_points)
