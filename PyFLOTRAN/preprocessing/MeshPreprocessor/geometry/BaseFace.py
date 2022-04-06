@@ -1,6 +1,6 @@
 from PyFLOTRAN.readers.iGPReader.utils.geometry_utils import *
 from .BaseAbstractMeshObject import BaseAbstractMeshObject
-
+import sympy as sp
 
 class BaseFace(BaseAbstractMeshObject):
     def __init__(self, node_ids, node_coords):
@@ -66,11 +66,16 @@ class BaseFace(BaseAbstractMeshObject):
         ax.axes.set_zlim3d(np.min(self.coords[:, 2]), np.max(self.coords[:, 2]))
         plt.show()
 
+    def intersect_with_plane(self, plane: sp.Plane):
+        '''Returns the intersection of the face with the plane'''
+        return sp.intersection(plane, self.sympy_plane)
+
+
     @property
     def unit_normal_vector(self):
         v1 = self.coords[1] - self.coords[0]
         v2 = self.coords[2] - self.coords[0]
-        return np.linalg.norm(np.cross(v1, v2))
+        return np.cross(v1, v2) / np.linalg.norm(np.cross(v1, v2))
 
     @property
     def edges(self):
@@ -81,3 +86,8 @@ class BaseFace(BaseAbstractMeshObject):
     def edge_vectors(self):
         '''Returns the edge vectors of the face'''
         return NotImplementedError('This method is not implemented yet')
+
+    @property
+    def sympy_plane(self):
+        '''Returns the plane of the face'''
+        return sp.Plane(self.centroid, normal_vector=self.unit_normal_vector)

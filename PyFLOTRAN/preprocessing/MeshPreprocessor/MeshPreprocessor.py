@@ -35,7 +35,7 @@ class MeshPreprocessor(object):
     def add_element(self, element: geometry.BaseElement):
         self.elements.append(element)
 
-    def add_tetrahedra(self, node_ids: List[int], node_coords: List[np.ndarray]):
+    def add_tetrahedra(self, node_ids: List[int] or np.ndarray, node_coords: List[np.ndarray]):
         self.elements.append(geometry.TetrahedraElement(node_ids=node_ids, node_coords=node_coords))
         for idx, node in enumerate(node_coords):
             self.unordered_nodes[node_ids[idx]] = node
