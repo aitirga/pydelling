@@ -1,4 +1,4 @@
-from . import Line, Point, Plane
+from . import Line, Point, Plane, Segment
 import numpy as np
 
 
@@ -55,5 +55,24 @@ def intersect_plane_line(plane: Plane, line: Line):
     else:
         lambda_ = dot_n_diff / dot_n_v
         return Point(line.p + lambda_ * line.direction_vector)
+
+
+def intersect_plane_segment(plane: Plane, segment: Segment):
+    """Performs the intersection of this plane with the given segment"""
+    # The point r = q + lambda * v
+    dot_n_diff = np.dot(plane.n, plane.p - segment.p1)
+    dot_n_v = np.dot(plane.n, segment.direction_vector)
+    if dot_n_v == 0: # Plane and line are parallel
+        return None
+    else:
+        lambda_ = dot_n_diff / dot_n_v
+        intersection_point = Point(segment.p1 + lambda_ * segment.direction_vector)
+        if segment.contains(intersection_point):
+            return intersection_point
+        else:
+            return None
+
+
+
 
 

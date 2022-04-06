@@ -51,6 +51,8 @@ class Line(BasePrimitive):
         elif primitive.__class__.__name__ == "Plane":
             return intersect_plane_line(line=self, plane=primitive)
 
+
+
         else:
             raise NotImplementedError(f"Intersection with {type(primitive)} is not implemented")
 

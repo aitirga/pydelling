@@ -96,8 +96,8 @@ class BaseElement(BaseAbstractMeshObject):
                 intersected_lines.append(intersection)
 
         # Check if the fracture vertex are inside the element
-        for vertex in fracture.corners:
-            print(self.contains(vertex))
+        # for vertex in fracture.corners:
+        #     print(self.contains(vertex))
 
 
         # Intersect the lines within themselves
@@ -113,9 +113,20 @@ class BaseElement(BaseAbstractMeshObject):
                 intersected_inside_points.append(point)
         intersected_points = intersected_inside_points.copy()
         # Test algorithm that moves the corners of the fracture to the closest intersection point
+        final_points = []
+        for corner in fracture.corners:
+            distances = []
+            for intersected_point in intersected_points:
+                distances.append(corner.distance(intersected_point))
+            closest_point = min(distances)
+            closest_point_index = distances.index(closest_point)
+            final_points.append(intersected_points[closest_point_index])
+        # final_points = [np.array([point.x, point.y, point.z]) for point in final_points]
 
-
-        return intersected_points
+        final_points = np.unique(np.array(final_points), axis=0)
+        final_points = [Point(point) for point in final_points]
+        # final_points = intersected_points
+        return final_points
 
 
     def _full_line_intersections(self, intersected_lines: List, intersected_points: List) -> List:

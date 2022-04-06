@@ -1,8 +1,8 @@
 import numpy as np
 import shapely.geometry as geom
 import sympy as sp
-from PyFLOTRAN.utils.geometry import Plane, Line
-
+from PyFLOTRAN.utils.geometry import Plane, Segment, Point
+from typing import List
 
 class Fracture(object):
     local_id = 0
@@ -198,18 +198,18 @@ class Fracture(object):
         return Plane(self.centroid, normal=self.unit_normal_vector)
 
     @property
-    def corners(self):
+    def corners(self) -> List[Point]:
         """Returns the corners of the fracture"""
-        return self.get_side_points()
+        return [Point(point) for point in self.get_side_points()]
 
     @property
     def corner_lines(self):
         """Returns the corner lines of the fracture"""
         corner_lines = [
-            Line(self.corners[0], self.corners[1]),
-            Line(self.corners[1], self.corners[2]),
-            Line(self.corners[2], self.corners[3]),
-            Line(self.corners[3], self.corners[0])
+            Segment(self.corners[0], self.corners[1]),
+            Segment(self.corners[1], self.corners[2]),
+            Segment(self.corners[2], self.corners[3]),
+            Segment(self.corners[3], self.corners[0])
         ]
         return corner_lines
 

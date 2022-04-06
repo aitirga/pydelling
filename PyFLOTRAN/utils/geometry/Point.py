@@ -1,6 +1,6 @@
 from __future__ import annotations
 import numpy as np
-
+from . import Scalar
 from .BasePrimitive import BasePrimitive
 from typing import *
 
@@ -22,8 +22,7 @@ class Point(np.ndarray):
     def distance(self, p: Point):
         """Computes euclidean distance between two points"""
         diff = self - p
-        return np.sqrt((diff ** 2).sum())
-
+        return float(np.sqrt((diff ** 2).sum()))
 
     def __repr__(self):
         return f"Point({self})"
