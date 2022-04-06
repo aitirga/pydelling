@@ -7,6 +7,7 @@ from .Point import Point
 import scipy.linalg as la
 from typing import List
 
+
 class Line(BasePrimitive):
     def __init__(self, p1: np.ndarray or Point or List = None, p2: np.ndarray or Point or List = None,
                  direction_vector: np.ndarray or List = None):
@@ -67,7 +68,7 @@ class Line(BasePrimitive):
             if x[1] >= self.eps:
                 return None
             else:
-                return self.p + self.direction_vector * x[0][0]
+                return Point(self.p + self.direction_vector * x[0][0])
 
     def __repr__(self):
         return f"Line(p:{self.p}, v:{self.direction_vector})"
