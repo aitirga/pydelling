@@ -1,3 +1,5 @@
+import numpy as np
+
 from . import Line, Point, BasePrimitive
 
 
@@ -16,7 +18,7 @@ class Segment(Line):
 
     @property
     def length(self):
-        return self.p1.distance(self.p2)
+        return np.sqrt(np.sum(self.displacement ** 2))
 
 
     def intersect(self, primitive: BasePrimitive):
@@ -28,6 +30,11 @@ class Segment(Line):
         else:
             raise NotImplementedError(f"Intersection of {type(self)} with {type(primitive)} is not implemented")
 
-    def contains(self, point: Point):
-        return self.p1.distance(point) + self.p2.distance(point) == self.length
+    def contains(self, point: Point, rel=0.05):
+        value = self.p1.distance(point) + self.p2.distance(point) / self.length
+        if abs(1 - value) < rel:
+            return True
+        else:
+            return False
+
 
