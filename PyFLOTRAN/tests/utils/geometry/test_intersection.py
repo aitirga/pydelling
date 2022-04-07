@@ -83,6 +83,60 @@ class IntersectionCase(unittest.TestCase):
         nptest.assert_array_almost_equal(intersected_points, solution)
 
 
+    def test_partial_intersection_2(self):
+
+        dfn_preprocessor = DfnPreprocessor()
+        dfn_preprocessor.add_fracture(
+            x=0.1, y=0.1, z=0.5, dip=75, dip_dir=85, size=1.5
+        )
+        mesh_preprocessor = MeshPreprocessor()
+        mesh_preprocessor.add_tetrahedra(
+            node_ids=np.array([0, 1, 2, 3]),
+            node_coords=[
+                np.array([0.0, 0.0, -0.5]),
+                np.array([1.0, 0.0, -0.5]),
+                np.array([0.0, 1.0, -0.5]),
+                np.array([0.0, 0.0, 0.5]),
+            ],
+        )
+        # Intersect fracture with mesh
+        intersected_points = mesh_preprocessor.elements[0].intersect_faces_with_plane(
+            dfn_preprocessor[0].plane)
+
+        solution = [
+            np.array([0.14876171, 0.0, 0.35123829]),
+            np.array([0.37772158, 0.0, -0.5]),
+            np.array([0.31805952, 0.68194048, -0.5]),
+        ]
+        nptest.assert_array_almost_equal(intersected_points, solution)
+
+
+    def test_partial_intersection_3(self):
+        dfn_preprocessor = DfnPreprocessor()
+        dfn_preprocessor.add_fracture(
+            x=0.1, y=0.1, z=0.3, dip=75, dip_dir=65, size=1.3
+        )
+        mesh_preprocessor = MeshPreprocessor()
+        mesh_preprocessor.add_tetrahedra(
+            node_ids=np.array([0, 1, 2, 3]),
+            node_coords=[
+                np.array([0.0, 0.0, -0.5]),
+                np.array([1.0, 0.0, -0.5]),
+                np.array([0.0, 1.0, -0.5]),
+                np.array([0.0, 0.0, 0.5]),
+            ],
+        )
+        # Intersect fracture with mesh
+        intersected_points = mesh_preprocessor.elements[0].intersect_faces_with_plane(
+            dfn_preprocessor[0].plane)
+
+        solution = [
+            np.array([0.12422918, 0.0, 0.37577082]),
+            np.array([0.38315014, 0.0, -0.5]),
+            np.array([0.0, 5.12725439e-01, -1.27254385e-02]),
+            np.array([0.0, 0.82166813, -0.5]),
+        ]
+        nptest.assert_array_almost_equal(intersected_points, solution)
 
 
 
