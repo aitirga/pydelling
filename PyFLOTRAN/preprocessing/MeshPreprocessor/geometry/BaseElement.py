@@ -89,8 +89,8 @@ class BaseElement(BaseAbstractMeshObject):
             for corner_line in fracture.corner_lines:
                 line_intersection = corner_line.intersect(self.faces[face].plane)
                 if line_intersection is not None:
-                    if self.contains(line_intersection):
-                        intersected_points.append(line_intersection)
+                    # if self.contains(line_intersection):
+                    intersected_points.append(line_intersection)
 
             if intersection:
                 intersected_lines.append(intersection)
@@ -101,10 +101,9 @@ class BaseElement(BaseAbstractMeshObject):
 
 
         # Intersect the lines within themselves
-        intersected_points = list(self._full_line_intersections(intersected_lines=intersected_lines,
+        intersected_points += list(self._full_line_intersections(intersected_lines=intersected_lines,
                                                           intersected_points=intersected_points,
                                                           ))
-        # Check what happens with the fracture points
 
         # Check if the intersected points are inside the element
         intersected_inside_points = []
@@ -113,19 +112,27 @@ class BaseElement(BaseAbstractMeshObject):
                 intersected_inside_points.append(point)
         intersected_points = intersected_inside_points.copy()
         # Test algorithm that moves the corners of the fracture to the closest intersection point
+        # final_points = []
+        # for corner in fracture.corners:
+        #     distances = []
+        #     for intersected_point in intersected_points:
+        #         distances.append(corner.distance(intersected_point))
+        #     closest_point = min(distances)
+        #     closest_point_index = distances.index(closest_point)
+        #     final_points.append(intersected_points[closest_point_index])
+        # # final_points = [np.array([point.x, point.y, point.z]) for point in final_points]
+        #
+        # final_points = np.unique(np.array(final_points), axis=0)
+
+        # Test algorithm that checks if a point is contained in the fracture
         final_points = []
-        for corner in fracture.corners:
-            distances = []
-            for intersected_point in intersected_points:
-                distances.append(corner.distance(intersected_point))
-            closest_point = min(distances)
-            closest_point_index = distances.index(closest_point)
-            final_points.append(intersected_points[closest_point_index])
-        # final_points = [np.array([point.x, point.y, point.z]) for point in final_points]
+        for point in intersected_points:
+            if fracture.contains(point):
+                final_points.append(point)
 
         final_points = np.unique(np.array(final_points), axis=0)
         final_points = [Point(point) for point in final_points]
-        # final_points = intersected_points
+
         return final_points
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 import shapely.geometry as geom
 import sympy as sp
-from PyFLOTRAN.utils.geometry import Plane, Segment, Point
+from PyFLOTRAN.utils.geometry import Plane, Segment, Point, Line
 from typing import List
 
 class Fracture(object):
@@ -203,15 +203,68 @@ class Fracture(object):
         return [Point(point) for point in self.get_side_points()]
 
     @property
-    def corner_lines(self):
+    def corner_segments(self):
         """Returns the corner lines of the fracture"""
-        corner_lines = [
+        corner_segments = [
             Segment(self.corners[0], self.corners[1]),
             Segment(self.corners[1], self.corners[2]),
             Segment(self.corners[2], self.corners[3]),
             Segment(self.corners[3], self.corners[0])
         ]
-        return corner_lines
+        return corner_segments
+
+    @property
+    def corner_lines(self):
+        """Returns the corner lines of the fracture"""
+        corner_segments = [
+            Line(self.corners[0], self.corners[1]),
+            Line(self.corners[1], self.corners[2]),
+            Line(self.corners[2], self.corners[3]),
+            Line(self.corners[3], self.corners[0])
+        ]
+        return corner_segments
+
+    def contains(self, point: Point):
+        """Returns if a point is inside the fracture"""
+        q1, q2, q3, q4 = self.corners
+        q1: Point
+
+        largest_normal_index = self.largest_index_normal_vector
+        q1_hat = np.delete(q1, largest_normal_index)
+        q2_hat = np.delete(q2, largest_normal_index)
+        q3_hat = np.delete(q3, largest_normal_index)
+        q4_hat = np.delete(q4, largest_normal_index)
+        p_hat = np.delete(point, largest_normal_index)
+        u0 = p_hat[0]
+        u1 = q1_hat[0]
+        u2 = q2_hat[0]
+        u3 = q3_hat[0]
+        u4 = q4_hat[0]
+        v0 = p_hat[1]
+        v1 = q1_hat[1]
+        v2 = q2_hat[1]
+        v3 = q3_hat[1]
+        v4 = q4_hat[1]
+
+
+        s1 = (v1 - v2) * u0 + (u2 - u1) * v0 + v2 * u1 - u2 * v1
+        s2 = (v2 - v3) * u0 + (u3 - u2) * v0 + v3 * u2 - u3 * v2
+        s3 = (v3 - v4) * u0 + (u4 - u3) * v0 + v4 * u3 - u4 * v3
+        s4 = (v4 - v1) * u0 + (u1 - u4) * v0 + v1 * u4 - u1 * v4
+
+        s = np.array([s1, s2, s3, s4])
+
+        equal_sign = np.all(s >= 0) if s[0] >= 0 else np.all(s <= 0)
+
+        if equal_sign:
+            return True
+        else:
+            return False
+
+    @property
+    def largest_index_normal_vector(self):
+        """Returns the largest coordinate index of the normal vector"""
+        return np.argmax(self.unit_normal_vector)
 
 
 
