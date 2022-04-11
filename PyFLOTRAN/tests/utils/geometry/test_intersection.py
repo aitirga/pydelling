@@ -155,15 +155,44 @@ class IntersectionCase(unittest.TestCase):
             ],
         )
         # Intersect fracture with mesh
-        intersected_points = mesh_preprocessor.elements[0].intersect_faces_with_plane(
-            dfn_preprocessor[0].plane)
+        intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
 
         solution = [
-            np.array([0.28086616, 0.0, 0.21913384]),
-            np.array([0.49347752, 0.0, -0.5]),
-            np.array([0.05090922, 0.94909078, -0.5]),
+            np.array([0.16664204, 0.471432, -0.13807404]),
+            np.array([0.25949777, 0.08819276, 0.15230947]),
+            np.array([0.33001579, 0.12107585, -0.13807404]),
         ]
         nptest.assert_array_almost_equal(intersected_points, solution)
+
+
+    def test_no_intersection_fracture_inside(self):
+        dfn_preprocessor = DfnPreprocessor()
+        dfn_preprocessor.add_fracture(
+            x=0.2, y=0.2, z=0.0, dip=60, dip_dir=45, size=0.2
+        )
+        mesh_preprocessor = MeshPreprocessor()
+        mesh_preprocessor.add_tetrahedra(
+            node_ids=np.array([0, 1, 2, 3]),
+            node_coords=[
+                np.array([0.0, 0.0, -0.5]),
+                np.array([1.0, 0.0, -0.5]),
+                np.array([0.0, 1.0, -0.5]),
+                np.array([0.0, 0.0, 0.5]),
+            ],
+        )
+        # Intersect fracture with mesh
+        intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
+
+        solution = [
+            np.array([0.30606602, 0.16464466, -0.08660254]),
+            np.array([0.16464466, 0.30606602, -0.08660254]),
+            np.array([0.09393398, 0.23535534, 0.08660254]),
+            np.array([0.23535534, 0.09393398, 0.08660254]),
+        ]
+        nptest.assert_array_almost_equal(intersected_points, solution)
+
 
 
 if __name__ == "__main__":
