@@ -93,11 +93,6 @@ class BaseElement(BaseAbstractMeshObject):
             if intersection:
                 intersected_lines.append(intersection)
 
-        # Check if the fracture vertex are inside the element
-        # for vertex in fracture.corners:
-        #     print(self.contains(vertex))
-
-
         # Intersect the lines within themselves
         intersected_points += list(self._full_line_intersections(intersected_lines=intersected_lines))
 
