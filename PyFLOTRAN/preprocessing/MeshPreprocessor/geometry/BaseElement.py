@@ -111,18 +111,6 @@ class BaseElement(BaseAbstractMeshObject):
             if self.contains(point):
                 intersected_inside_points.append(point)
         intersected_points = intersected_inside_points.copy()
-        # Test algorithm that moves the corners of the fracture to the closest intersection point
-        # final_points = []
-        # for corner in fracture.corners:
-        #     distances = []
-        #     for intersected_point in intersected_points:
-        #         distances.append(corner.distance(intersected_point))
-        #     closest_point = min(distances)
-        #     closest_point_index = distances.index(closest_point)
-        #     final_points.append(intersected_points[closest_point_index])
-        # # final_points = [np.array([point.x, point.y, point.z]) for point in final_points]
-        #
-        # final_points = np.unique(np.array(final_points), axis=0)
 
         # Test algorithm that checks if a point is contained in the fracture
         final_points = []
@@ -132,6 +120,11 @@ class BaseElement(BaseAbstractMeshObject):
 
         final_points = np.unique(np.array(final_points), axis=0)
         final_points = [Point(point) for point in final_points]
+
+        # Check if any fracture edge is inside the element. If so, add that as intersection point
+        for corner in fracture.corners:
+            if self.contains(corner):
+                final_points.append(corner)
 
         return final_points
 
