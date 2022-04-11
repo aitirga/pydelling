@@ -6,6 +6,7 @@ from typing import List
 
 class Fracture(object):
     local_id = 0
+    eps = 1e-8
     def __init__(self, dip, dip_dir, x, y, z, size, aperture=0.01):
         self.side_points = None
         self.dip = dip
@@ -254,7 +255,7 @@ class Fracture(object):
 
         s = np.array([s1, s2, s3, s4])
 
-        equal_sign = np.all(s >= 0) if s[0] >= 0 else np.all(s <= 0)
+        equal_sign = np.all(s >= -self.eps) if s[0] >= -self.eps else np.all(s <= self.eps)
 
         if equal_sign:
             return True
