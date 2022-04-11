@@ -64,9 +64,7 @@ class BaseElement(BaseAbstractMeshObject):
 
 
         # Intersect the lines within themselves
-        intersected_points = list(self._full_line_intersections(intersected_lines=intersected_lines,
-                                                          intersected_points=intersected_points,
-                                                          ))
+        intersected_points = list(self._full_line_intersections(intersected_lines=intersected_lines))
         # Check what happens with the fracture points
 
         # Check if the intersected points are inside the element
@@ -101,9 +99,7 @@ class BaseElement(BaseAbstractMeshObject):
 
 
         # Intersect the lines within themselves
-        intersected_points += list(self._full_line_intersections(intersected_lines=intersected_lines,
-                                                          intersected_points=intersected_points,
-                                                          ))
+        intersected_points += list(self._full_line_intersections(intersected_lines=intersected_lines))
 
         # Check if the intersected points are inside the element
         intersected_inside_points = []
@@ -130,9 +126,9 @@ class BaseElement(BaseAbstractMeshObject):
 
         return final_points
 
-
-    def _full_line_intersections(self, intersected_lines: List, intersected_points: List) -> List:
+    def _full_line_intersections(self, intersected_lines: List[Line]) -> List:
         """Intersects a list of lines with each other"""
+        intersected_points = []
         line_combination = list(combinations(intersected_lines, 2))
         for line_pair in line_combination:
             line_1: Line = line_pair[0]
