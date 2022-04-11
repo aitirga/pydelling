@@ -126,6 +126,8 @@ class BaseElement(BaseAbstractMeshObject):
             if self.contains(corner):
                 final_points.append(corner)
 
+        # final_points = intersected_points
+
         return final_points
 
 
