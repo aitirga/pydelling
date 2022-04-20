@@ -36,7 +36,26 @@ class MeshPreprocessor(object):
         self.elements.append(element)
 
     def add_tetrahedra(self, node_ids: List[int] or np.ndarray, node_coords: List[np.ndarray]):
+        """Adds a tetrahedron to the mesh"""
         self.elements.append(geometry.TetrahedraElement(node_ids=node_ids, node_coords=node_coords))
+        for idx, node in enumerate(node_coords):
+            self.unordered_nodes[node_ids[idx]] = node
+
+    def add_hexahedra(self, node_ids: List[int], node_coords: List[np.ndarray]):
+        """Adds a hexahedron to the mesh"""
+        self.elements.append(geometry.HexahedraElement(node_ids=node_ids, node_coords=node_coords))
+        for idx, node in enumerate(node_coords):
+            self.unordered_nodes[node_ids[idx]] = node
+
+    def add_wedge(self, node_ids: List[int], node_coords: List[np.ndarray]):
+        """Adds a wedge to the mesh"""
+        self.elements.append(geometry.WedgeElement(node_ids=node_ids, node_coords=node_coords))
+        for idx, node in enumerate(node_coords):
+            self.unordered_nodes[node_ids[idx]] = node
+
+    def add_triangular_prism(self, node_ids: List[int], node_coords: List[np.ndarray]):
+        """Adds a triangular prism to the mesh"""
+        self.elements.append(geometry.WedgeElement(node_ids=node_ids, node_coords=node_coords))
         for idx, node in enumerate(node_coords):
             self.unordered_nodes[node_ids[idx]] = node
 
