@@ -11,34 +11,42 @@ logger = logging.getLogger(__name__)
 
 
 class DfnUpscaler:
-    def __init__(self, dfn: DfnPreprocessor, mesh: MeshPreprocessor):
+    def __init__(self, dfn: DfnPreprocessor, mesh: MeshPreprocessor, parallel=False):
         self.dfn: DfnPreprocessor = dfn
         self.mesh: MeshPreprocessor = mesh
         logger.info('The DFN and mesh objects have been set properly')
-        self._intersect_dfn_with_mesh()
+        self._intersect_dfn_with_mesh(parallel=parallel)
 
-    def _intersect_dfn_with_mesh(self):
+
+    def _intersect_dfn_with_mesh(self, parallel=False):
         """Runs the DfnUpscaler"""
         logger.info('Upscaling the DFN to the mesh')
 
-        for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
-            self.find_intersection_points_between_fracture_and_mesh(fracture)
+        if not parallel:
+            for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
+                self.find_intersection_points_between_fracture_and_mesh(fracture)
+        else:
+            from joblib import Parallel, delayed
+            import multiprocessing
+            num_cores = multiprocessing.cpu_count()
+            logger.info(f'Running using {num_cores} cores')
+            Parallel(n_jobs=num_cores)(delayed(self.find_intersection_points_between_fracture_and_mesh)(fracture) for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)))
 
     def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture, export_stats=False):
         """Finds the intersection points between a fracture and the mesh"""
 
         intersection_points = []
         kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
-        print(len(kd_tree_filtered_elements))
         counter = 0
+        elements_filtered = 0
         for element in kd_tree_filtered_elements:
             element: geometry.BaseElement
             counter += 1
             # Quickly check if the element is in the bounding box of the fracture.
             if not fracture.point_inside_bounding_box(element.centroid):
+                elements_filtered += 1
                 continue
             intersection_points = element.intersect_with_fracture(fracture)
-            print(intersection_points)
 
             if len(intersection_points) >= 3:
                 intersection_area = compute_polygon_area(intersection_points)
