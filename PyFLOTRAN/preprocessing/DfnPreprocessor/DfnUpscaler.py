@@ -201,3 +201,20 @@ class DfnUpscaler:
     def to_vtk(self, filename):
         """Exports the mesh and the upscaled variables to VTK"""
         self.mesh.to_vtk(filename)
+
+
+
+    def porosity_to_csv(self, filename='./porosity.csv'):
+        """Exports porosity values to csv
+
+        Returns:
+
+        """
+        import csv
+        logger.info(f"Exporting porosity to {filename}")
+        with open(filename, 'w') as csvfile:
+            writer = csv.writer(csvfile)
+            for element_id in self.upscaled_porosity:
+                centroid = self.mesh.elements[element_id].centroid
+                porosity = self.upscaled_porosity[element_id]
+                writer.writerow([centroid[0], centroid[1], centroid[2], porosity])
