@@ -29,11 +29,16 @@ class DfnUpscaler:
 
         intersection_points = []
         kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
+        print(len(kd_tree_filtered_elements))
         counter = 0
         for element in kd_tree_filtered_elements:
             element: geometry.BaseElement
             counter += 1
+            # Quickly check if the element is in the bounding box of the fracture.
+            if not fracture.point_inside_bounding_box(element.centroid):
+                continue
             intersection_points = element.intersect_with_fracture(fracture)
+            print(intersection_points)
 
             if len(intersection_points) >= 3:
                 intersection_area = compute_polygon_area(intersection_points)
