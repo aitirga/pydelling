@@ -218,3 +218,10 @@ class DfnUpscaler:
                 centroid = self.mesh.elements[element_id].centroid
                 porosity = self.upscaled_porosity[element_id]
                 writer.writerow([centroid[0], centroid[1], centroid[2], porosity])
+
+    def export_intersection_stats(self, filename='intersection_stats.txt'):
+        # Export the run_stats dictionary to file
+        assert self.mesh.is_intersected, 'The mesh has not been intersected yet.'
+        import json
+        with open('run_stats.json', 'w') as fp:
+            json.dump(self.mesh.find_intersection_stats, fp)
