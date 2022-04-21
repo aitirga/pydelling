@@ -72,7 +72,6 @@ class FemReader(MeshPreprocessor):
                     line = line.rstrip().replace(',', '').split()
                     # for np in tqdm(range(0, self.aux_n_nodes), desc='Reading nodes'):
 
-
                     self.aux_xcoor = []
                     self.aux_ycoor = []
                     #self.aux_zcoor = np.zeros([self.aux_n_nodes])  #NOR DEFINITIVE, WE NEED TO READ ELEVATIONS BEFORE CRETING THE NODES.
