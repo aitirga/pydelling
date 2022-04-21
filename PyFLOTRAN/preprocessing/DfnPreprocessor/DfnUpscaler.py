@@ -5,6 +5,7 @@ import PyFLOTRAN.preprocessing.MeshPreprocessor.geometry as geometry
 from PyFLOTRAN.utils.geometry_utils import compute_polygon_area
 import logging
 from tqdm import tqdm
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +15,9 @@ class DfnUpscaler:
         self.dfn: DfnPreprocessor = dfn
         self.mesh: MeshPreprocessor = mesh
         logger.info('The DFN and mesh objects have been set properly')
+        self._intersect_dfn_with_mesh()
 
-    def run(self):
+    def _intersect_dfn_with_mesh(self):
         """Runs the DfnUpscaler"""
         logger.info('Upscaling the DFN to the mesh')
 
@@ -55,7 +57,7 @@ class DfnUpscaler:
     def _compute_fracture_volume_in_elements(self):
         # Compute volume of fractures in each element.
         #self.elements.total_fracture_volume = np.zeros([len(elements)])
-        for elem in tqdm(self.elements, desc="Computing fracture volume fractions"):
+        for elem in tqdm(self.mesh.elements, desc="Computing fracture volume fractions"):
             for fracture in elem.associated_fractures:
                 fracture_dict = elem.associated_fractures[fracture]
                 # Attribute of the element: portion of element occupied by fractures.
@@ -67,17 +69,17 @@ class DfnUpscaler:
         # Compute upscaled porosity for each element.
         self._compute_fracture_volume_in_elements()
         upscaled_porosity = {}
-        for elem in tqdm(self.elements, desc="Upscaling porosity"):
+        for elem in tqdm(self.mesh.elements, desc="Upscaling porosity"):
             upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume)# + (
                        # matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
             if elem.total_fracture_volume > 0:
                 pass
 
-        vtk_porosity = np.asarray(self.elements)
+        vtk_porosity = np.asarray(self.mesh.elements)
         for local_id in upscaled_porosity:
             vtk_porosity[local_id] = upscaled_porosity[local_id]
 
-        self.cell_data['upscaled_porosity'] = [vtk_porosity.tolist()]
+        self.mesh.cell_data['upscaled_porosity'] = [vtk_porosity.tolist()]
         self.upscaled_porosity = upscaled_porosity
 
         return upscaled_porosity
@@ -88,7 +90,7 @@ class DfnUpscaler:
 
         matrix_permeability = {}
 
-        for elem in tqdm(self.elements, desc="Creating permeability tensor for dummy anisotropic case"):
+        for elem in tqdm(self.mesh.elements, desc="Creating permeability tensor for dummy anisotropic case"):
             matrix_permeability[elem.local_id] = np.ones([3,3])*1E-2
 
         matrix_permeability_tensor = matrix_permeability
@@ -122,7 +124,7 @@ class DfnUpscaler:
 
         # For each fracture, compute permeability tensor,
         # and add it to the elements intersected by the fracture.
-        for elem in tqdm(self.elements, desc="Upscaling permeability"):
+        for elem in tqdm(self.mesh.elements, desc="Upscaling permeability"):
             fracture_perm[elem.local_id] = np.zeros([3, 3])
             upscaled_perm[elem.local_id] = np.zeros([3, 3])
             for frac_name in elem.associated_fractures:
@@ -171,12 +173,12 @@ class DfnUpscaler:
             upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] + matrix_permeability_tensor[elem.local_id] * (1 - (elem.total_fracture_volume / elem.volume))
 
         #Export values to VTK
-        vtk_kxx = np.asarray(self.elements)
-        vtk_kyy = np.asarray(self.elements)
-        vtk_kzz = np.asarray(self.elements)
-        vtk_kxy = np.asarray(self.elements)
-        vtk_kxz = np.asarray(self.elements)
-        vtk_kyz = np.asarray(self.elements)
+        vtk_kxx = np.asarray(self.mesh.elements)
+        vtk_kyy = np.asarray(self.mesh.elements)
+        vtk_kzz = np.asarray(self.mesh.elements)
+        vtk_kxy = np.asarray(self.mesh.elements)
+        vtk_kxz = np.asarray(self.mesh.elements)
+        vtk_kyz = np.asarray(self.mesh.elements)
         for local_id in upscaled_perm:
             vtk_kxx[local_id] = upscaled_perm[local_id][0, 0]
             vtk_kyy[local_id] = upscaled_perm[local_id][1, 1]
@@ -185,13 +187,17 @@ class DfnUpscaler:
             vtk_kxz[local_id] = upscaled_perm[local_id][0, 2]
             vtk_kyz[local_id] = upscaled_perm[local_id][1, 2]
 
-        self.cell_data['Kxx'] = [vtk_kxx.tolist()]
-        self.cell_data['Kyy'] = [vtk_kyy.tolist()]
-        self.cell_data['Kzz'] = [vtk_kzz.tolist()]
-        self.cell_data['Kxy'] = [vtk_kxy.tolist()]
-        self.cell_data['Kxz'] = [vtk_kxz.tolist()]
-        self.cell_data['Kyz'] = [vtk_kyz.tolist()]
+        self.mesh.cell_data['Kxx'] = [vtk_kxx.tolist()]
+        self.mesh.cell_data['Kyy'] = [vtk_kyy.tolist()]
+        self.mesh.cell_data['Kzz'] = [vtk_kzz.tolist()]
+        self.mesh.cell_data['Kxy'] = [vtk_kxy.tolist()]
+        self.mesh.cell_data['Kxz'] = [vtk_kxz.tolist()]
+        self.mesh.cell_data['Kyz'] = [vtk_kyz.tolist()]
 
         self.upscaled_permeability = upscaled_perm
 
         return upscaled_perm
+
+    def to_vtk(self, filename):
+        """Exports the mesh and the upscaled variables to VTK"""
+        self.mesh.to_vtk(filename)
