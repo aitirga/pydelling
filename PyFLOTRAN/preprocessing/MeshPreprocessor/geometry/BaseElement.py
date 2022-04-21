@@ -15,6 +15,7 @@ from PyFLOTRAN.preprocessing.DfnPreprocessor.Fracture import Fracture
 class BaseElement(BaseAbstractMeshObject):
     local_id = 0
     eps = 1E-13
+    __slots__ = ['node_ids', 'node_coords']
 
     def __init__(self, node_ids, node_coords, centroid_coords=None):
         self.nodes: np.ndarray = node_ids  # Node id set

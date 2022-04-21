@@ -4,6 +4,7 @@ import sympy as sp
 from PyFLOTRAN.utils.geometry import Plane
 
 class BaseFace(BaseAbstractMeshObject):
+    __slots__ = ['node_ids', 'node_coords']
     def __init__(self, node_ids, node_coords):
         self.nodes = np.array(node_ids)
         self.coords = np.array(node_coords)
