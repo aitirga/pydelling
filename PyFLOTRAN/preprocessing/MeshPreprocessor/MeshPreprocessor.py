@@ -6,7 +6,9 @@ from scipy.spatial import KDTree
 from PyFLOTRAN.preprocessing.DfnPreprocessor.Fracture import Fracture
 from PyFLOTRAN.utils.geometry_utils import compute_polygon_area
 from tqdm import tqdm
+import logging
 
+logger = logging.getLogger(__name__)
 
 class MeshPreprocessor(object):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
@@ -112,6 +114,7 @@ class MeshPreprocessor(object):
         Args:
             filename: name of the output file
         """
+        logger.info(f'Converting mesh to vtk and exporting to {filename}')
         self.convert_mesh_to_meshio()
         self.meshio_mesh.write(filename)
 
@@ -149,6 +152,10 @@ class MeshPreprocessor(object):
                 if not 'hexahedron' in elements_in_meshio.keys():
                     elements_in_meshio['hexahedron'] = []
                 elements_in_meshio['hexahedron'].append(element.nodes.tolist())
+            elif element.type == 'wedge':
+                if not 'wedge' in elements_in_meshio.keys():
+                    elements_in_meshio['wedge'] = []
+                elements_in_meshio['wedge'].append(element.nodes.tolist())
             elif element.type == 'triangle':
                 if not 'triangle' in elements_in_meshio.keys():
                     elements_in_meshio['triangle'] = []
