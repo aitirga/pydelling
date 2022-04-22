@@ -19,7 +19,6 @@ class DfnUpscaler:
         self.save_intersections = save_intersections
         self._intersect_dfn_with_mesh(parallel=parallel)
 
-
     def _intersect_dfn_with_mesh(self, parallel=False):
         """Runs the DfnUpscaler"""
         logger.info('Upscaling the DFN to the mesh')
@@ -55,22 +54,23 @@ class DfnUpscaler:
         for element in kd_tree_filtered_elements:
             element: geometry.BaseElement
             counter += 1
-            # Quickly check if the element is in the bounding box of the fracture.
-            if not fracture.point_inside_bounding_box(element.centroid):
+            absolute_distance = np.abs(fracture.distance_to_point(element.centroid))
+            characteristic_length = np.power(element.volume, 1/3)
+            if absolute_distance > 1.5 * characteristic_length:
                 elements_filtered += 1
                 continue
+
             intersection_points = element.intersect_with_fracture(fracture)
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
 
-            if len(intersection_points) >= 3:
-                intersection_area = compute_polygon_area(intersection_points)
-                fracture.intersection_dictionary[element.local_id] = intersection_area
-                element.associated_fractures[fracture.local_id] = {
-                    'area': intersection_area,
-                    'volume': intersection_area * fracture.aperture,
-                    'fracture': fracture,
-                }
+            intersection_area = compute_polygon_area(intersection_points)
+            fracture.intersection_dictionary[element.local_id] = intersection_area
+            element.associated_fractures[fracture.local_id] = {
+                'area': intersection_area,
+                'volume': intersection_area * fracture.aperture,
+                'fracture': fracture,
+            }
             n_intersections = len(intersection_points)
             if not n_intersections in self.mesh.find_intersection_stats['intersection_points'].keys():
                 self.mesh.find_intersection_stats['intersection_points'][n_intersections] = 0
@@ -98,8 +98,8 @@ class DfnUpscaler:
         for elem in tqdm(self.mesh.elements, desc="Upscaling porosity"):
             upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume)# + (
                        # matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
-            if elem.total_fracture_volume > 0:
-                pass
+            # if elem.total_fracture_volume > 0:
+            #     pass
 
         vtk_porosity = np.asarray(self.mesh.elements)
         for local_id in upscaled_porosity:

@@ -171,15 +171,18 @@ class Fracture(object):
         z_max = np.max(side_points[:, 2])
         return np.array([x_min, x_max, y_min, y_max, z_min, z_max])
 
-    def point_inside_bounding_box(self, point: np.ndarray, scale_factor=1):
+    def point_inside_bounding_box(self, point: np.ndarray, scale_factor=0.0):
         """Returns if a point is inside the bounding box of the fracture"""
         bounding_box = self.get_bounding_box()
+        lx = bounding_box[1] - bounding_box[0]
+        ly = bounding_box[3] - bounding_box[2]
+        lz = bounding_box[5] - bounding_box[4]
 
-        if point[0] < bounding_box[0] * scale_factor or point[0] > bounding_box[1] * scale_factor:
+        if point[0] < bounding_box[0] - scale_factor * lx or point[0] > bounding_box[1] + scale_factor * lx:
             return False
-        elif point[1] < bounding_box[2] * scale_factor or point[1] > bounding_box[3] * scale_factor:
+        if point[1] < bounding_box[2] - scale_factor * ly or point[1] > bounding_box[3] + scale_factor * ly:
             return False
-        elif point[2] < bounding_box[4] * scale_factor or point[2] > bounding_box[5] * scale_factor:
+        if point[2] < bounding_box[4] - scale_factor * lz or point[2] > bounding_box[5] + scale_factor * lz:
             return False
         else:
             return True
