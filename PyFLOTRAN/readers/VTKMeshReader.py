@@ -29,7 +29,7 @@ class VTKMeshReader(MeshPreprocessor):
         for cell_block in self.meshio_mesh.cells:
             element_type = cell_block.type
             if element_type == "wedge":
-                for element in tqdm(cell_block.data[:300000], desc='Setting up wedge elements'):
+                for element in tqdm(cell_block.data, desc='Setting up wedge elements'):
                     self.add_wedge(element, self._coords[element])
 
             if element_type == 'hexahedron':

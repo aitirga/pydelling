@@ -11,18 +11,21 @@ logger = logging.getLogger(__name__)
 
 
 class DfnUpscaler:
-    def __init__(self, dfn: DfnPreprocessor, mesh: MeshPreprocessor, parallel=False):
+    def __init__(self, dfn: DfnPreprocessor, mesh: MeshPreprocessor, parallel=False, save_intersections=False):
         self.dfn: DfnPreprocessor = dfn
         self.mesh: MeshPreprocessor = mesh
         logger.info('The DFN and mesh objects have been set properly')
+        self.all_intersected_points = []
+        self.save_intersections = save_intersections
         self._intersect_dfn_with_mesh(parallel=parallel)
+
 
     def _intersect_dfn_with_mesh(self, parallel=False):
         """Runs the DfnUpscaler"""
         logger.info('Upscaling the DFN to the mesh')
 
         if not parallel:
-            for fracture in tqdm(self.dfn[:1000], desc='Intersecting fractures with mesh', total=len(self.dfn)):
+            for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
                 self.find_intersection_points_between_fracture_and_mesh(fracture)
         else:
             from joblib import Parallel, delayed
@@ -30,6 +33,17 @@ class DfnUpscaler:
             num_cores = multiprocessing.cpu_count()
             logger.info(f'Running using {num_cores} cores')
             Parallel(n_jobs=num_cores)(delayed(self.find_intersection_points_between_fracture_and_mesh)(fracture) for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)))
+
+        if self.save_intersections:
+            import csv
+            with open('intersections.csv', 'w') as f:
+                writer = csv.writer(f)
+                writer.writerow(['x', 'y', 'z'])
+                for intersection in self.all_intersected_points:
+                    for point in intersection:
+                        writer.writerow([point.x, point.y, point.z])
+
+
 
     def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture, export_stats=False):
         """Finds the intersection points between a fracture and the mesh"""
@@ -46,6 +60,8 @@ class DfnUpscaler:
                 elements_filtered += 1
                 continue
             intersection_points = element.intersect_with_fracture(fracture)
+            if self.save_intersections:
+                self.all_intersected_points.append(intersection_points)
 
             if len(intersection_points) >= 3:
                 intersection_area = compute_polygon_area(intersection_points)
@@ -63,8 +79,8 @@ class DfnUpscaler:
 
         self.mesh.is_intersected = True
 
-        return intersection_points
 
+        return intersection_points
 
     def _compute_fracture_volume_in_elements(self):
         # Compute volume of fractures in each element.
@@ -74,8 +90,6 @@ class DfnUpscaler:
                 fracture_dict = elem.associated_fractures[fracture]
                 # Attribute of the element: portion of element occupied by fractures.
                 elem.total_fracture_volume += fracture_dict['volume']
-
-
 
     def upscale_mesh_porosity(self, matrix_porosity=None):
         # Compute upscaled porosity for each element.
@@ -96,14 +110,13 @@ class DfnUpscaler:
 
         return upscaled_porosity
 
-
     def upscale_mesh_permeability(self, matrix_permeability=None, rho=1000, g=9.8, mu=8.9e-4,
                                   mode='full_tensor'):
 
         matrix_permeability = {}
 
         for elem in tqdm(self.mesh.elements, desc="Creating permeability tensor for dummy anisotropic case"):
-            matrix_permeability[elem.local_id] = np.ones([3,3])*1E-2
+            matrix_permeability[elem.local_id] = np.ones([3, 3])*1E-2
 
         matrix_permeability_tensor = matrix_permeability
 
@@ -213,8 +226,6 @@ class DfnUpscaler:
     def to_vtk(self, filename):
         """Exports the mesh and the upscaled variables to VTK"""
         self.mesh.to_vtk(filename)
-
-
 
     def porosity_to_csv(self, filename='./porosity.csv'):
         """Exports porosity values to csv
