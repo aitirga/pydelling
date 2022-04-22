@@ -75,9 +75,12 @@ class BaseFace(BaseAbstractMeshObject):
 
     @property
     def unit_normal_vector(self):
-        v1 = self.coords[1] - self.coords[0]
-        v2 = self.coords[2] - self.coords[0]
-        return np.cross(v1, v2) / np.linalg.norm(np.cross(v1, v2))
+        if not hasattr(self, '_unit_normal_vector'):
+            v1 = self.coords[1] - self.coords[0]
+            v2 = self.coords[2] - self.coords[0]
+            self._unit_normal_vector = np.cross(v1, v2) / np.linalg.norm(np.cross(v1, v2))
+
+        return self._unit_normal_vector
 
     @property
     def edges(self):

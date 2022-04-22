@@ -146,11 +146,14 @@ class Fracture(object):
     @property
     def unit_normal_vector(self):
         """Returns the normal vector of the fracture"""
-        get_side_points = self.get_side_points()
-        v1 = get_side_points[1] - get_side_points[0]
-        v2 = get_side_points[2] - get_side_points[0]
-        cross = np.cross(v1, v2)
-        return cross / np.linalg.norm(cross)
+        if not hasattr(self, '_unit_normal_vector'):
+            get_side_points = self.get_side_points()
+            v1 = get_side_points[1] - get_side_points[0]
+            v2 = get_side_points[2] - get_side_points[0]
+            cross = np.cross(v1, v2)
+            self._unit_normal_vector = cross / np.linalg.norm(cross)
+        return self._unit_normal_vector
+
 
     def distance_to_point(self, point: np.ndarray):
         """Returns the distance to a point"""
@@ -198,12 +201,18 @@ class Fracture(object):
 
     @property
     def plane(self):
-        return Plane(self.centroid, normal=self.unit_normal_vector)
+        """Returns the plane of the fracture"""
+        if not hasattr(self, '_corners'):
+            self._plane = Plane(self.centroid, normal=self.unit_normal_vector)
+
+        return self._plane
 
     @property
     def corners(self) -> List[Point]:
         """Returns the corners of the fracture"""
-        return [Point(point) for point in self.get_side_points()]
+        if not hasattr(self, '_corners'):
+            self._corners = [Point(point) for point in self.get_side_points()]
+        return self._corners
 
     @property
     def corner_segments(self):
