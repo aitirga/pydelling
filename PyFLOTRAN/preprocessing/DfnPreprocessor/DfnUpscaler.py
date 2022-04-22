@@ -22,7 +22,7 @@ class DfnUpscaler:
         logger.info('Upscaling the DFN to the mesh')
 
         if not parallel:
-            for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
+            for fracture in tqdm(self.dfn[:1000], desc='Intersecting fractures with mesh', total=len(self.dfn)):
                 self.find_intersection_points_between_fracture_and_mesh(fracture)
         else:
             from joblib import Parallel, delayed
