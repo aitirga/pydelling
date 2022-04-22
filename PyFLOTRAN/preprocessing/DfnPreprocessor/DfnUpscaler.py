@@ -17,7 +17,6 @@ class DfnUpscaler:
         logger.info('The DFN and mesh objects have been set properly')
         self._intersect_dfn_with_mesh(parallel=parallel)
 
-
     def _intersect_dfn_with_mesh(self, parallel=False):
         """Runs the DfnUpscaler"""
         logger.info('Upscaling the DFN to the mesh')
