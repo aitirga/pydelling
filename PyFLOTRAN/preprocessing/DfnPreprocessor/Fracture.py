@@ -154,11 +154,17 @@ class Fracture(object):
             self._unit_normal_vector = cross / np.linalg.norm(cross)
         return self._unit_normal_vector
 
-
     def distance_to_point(self, point: np.ndarray):
-        """Returns the distance to a point"""
-        distance_vector = self.centroid - point
-        return np.dot(distance_vector, self.unit_normal_vector)
+        """Returns the minimum distance to a point from the fracture plane"""
+        a = self.unit_normal_vector[0]
+        b = self.unit_normal_vector[1]
+        c = self.unit_normal_vector[2]
+        d = -np.dot(self.unit_normal_vector, self.centroid)
+        return abs(a * point[0] + b * point[1] + c * point[2] + d) / np.sqrt(a ** 2 + b ** 2 + c ** 2)
+
+
+
+
 
     def get_bounding_box(self):
         """Returns the bounding box of the fracture"""
