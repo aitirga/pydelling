@@ -161,7 +161,7 @@ class DfnUpscaler:
                 n1 = frac.unit_normal_vector[0]
                 n2 = frac.unit_normal_vector[1]
                 n3 = frac.unit_normal_vector[2]
-                frac.perm = ((frac.aperture ** 3) * rho * g) / (12 * mu)
+                frac.perm = ((frac.aperture ** 2) * rho * g) / (12 * mu)
 
                 if 'mode' == 'isotropy':
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
