@@ -100,6 +100,7 @@ class BaseElement(BaseAbstractMeshObject):
         # Check if the intersected points are inside the element
         intersected_inside_points = []
         for point in intersected_points:
+            print(point)
             if self.contains(point):
                 intersected_inside_points.append(point)
         intersected_points = intersected_inside_points.copy()
