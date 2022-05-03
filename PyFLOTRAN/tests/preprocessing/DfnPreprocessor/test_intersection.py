@@ -3,6 +3,7 @@ import numpy.testing as nptest
 import numpy as np
 from PyFLOTRAN.utils.geometry import Line
 from PyFLOTRAN.preprocessing import DfnPreprocessor, MeshPreprocessor
+from PyFLOTRAN.preprocessing.DfnPreprocessor import DfnUpscaler
 
 class IntersectionCase(unittest.TestCase):
     def test_full_intersection(self):
@@ -192,6 +193,38 @@ class IntersectionCase(unittest.TestCase):
             np.array([0.23535534, 0.09393398, 0.08660254]),
         ]
         nptest.assert_array_almost_equal(intersected_points, solution)
+
+    def test_intersect_hexahedra_full(self):
+        dfn_preprocessor = DfnPreprocessor()
+        dfn_preprocessor.add_fracture(
+            x=0.0, y=0.0, z=0.0, dip=1, dip_dir=0, size=2.0
+        )
+        mesh_preprocessor = MeshPreprocessor()
+        mesh_preprocessor.add_hexahedra(
+            node_ids=np.array([0, 1, 2, 3, 4, 5, 6, 7]),
+            node_coords=[
+                np.array([-0.5, -0.5, -0.5]),
+                np.array([0.5, -0.5, -0.5]),
+                np.array([0.5, 0.5, -0.5]),
+                np.array([-0.5, 0.5, -0.5]),
+                np.array([-0.5, -0.5, 0.5]),
+                np.array([0.5, -0.5, 0.5]),
+                np.array([0.5, 0.5, 0.5]),
+                np.array([-0.5, 0.5, 0.5])
+            ],
+        )
+
+        intersections = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
+        solution = [
+            np.array([-0.5, -0.5, 0.00872753]),
+            np.array([-0.5, 0.5, -0.00872753]),
+            np.array([0.5, -0.5, 0.00872753]),
+            np.array([0.5, 0.5, -0.00872753]),
+        ]
+        np.testing.assert_array_almost_equal(intersections, solution)
+
+
 
 
 
