@@ -116,7 +116,7 @@ class DfnUpscaler:
         matrix_permeability = {}
 
         for elem in tqdm(self.mesh.elements, desc="Creating permeability tensor for dummy anisotropic case"):
-            matrix_permeability[elem.local_id] = np.ones([3, 3])*1E-2
+            matrix_permeability[elem.local_id] = np.ones([3, 3])*1.0
 
         matrix_permeability_tensor = matrix_permeability
 
@@ -169,15 +169,15 @@ class DfnUpscaler:
 
                 else: #'anisotropy' in 'mode':
                     perm_tensor = np.zeros([3, 3])
-                    for i in range(1, 4):
-                        for j in range(1, 4):
+                    #for i in range(1, 4):
+                    #    for j in range(1, 4):
                             # Compute tensor
-                            perm_tensor[0, 0] = frac.perm * ((n2 ** 2) + (n3 ** 2))
-                            perm_tensor[0, 1] = frac.perm * (-1) * n1 * n2
-                            perm_tensor[0, 2] = frac.perm * (-1) * n1 * n3
-                            perm_tensor[1, 1] = frac.perm * ((n3 ** 2) + (n1 ** 2))
-                            perm_tensor[1, 2] = frac.perm * (-1) * n2 * n3
-                            perm_tensor[2, 2] = frac.perm * ((n1 ** 2) + (n2 ** 2))
+                    perm_tensor[0, 0] = frac.perm * ((n2 ** 2) + (n3 ** 2))
+                    perm_tensor[0, 1] = frac.perm * (-1) * n1 * n2
+                    perm_tensor[0, 2] = frac.perm * (-1) * n1 * n3
+                    perm_tensor[1, 1] = frac.perm * ((n3 ** 2) + (n1 ** 2))
+                    perm_tensor[1, 2] = frac.perm * (-1) * n2 * n3
+                    perm_tensor[2, 2] = frac.perm * ((n1 ** 2) + (n2 ** 2))
 
                     if 'mode' == 'anisotropy_principals':
                         eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])

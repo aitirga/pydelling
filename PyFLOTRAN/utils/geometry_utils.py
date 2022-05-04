@@ -48,7 +48,7 @@ def compute_polygon_area(points) -> float:
         return 0.0
 
     convex_hull = Polygon(points)
-    return convex_hull.area
+    return convex_hull.convex_hull.area
 
     # Compute normal
     # vn = normal_vector(points)
