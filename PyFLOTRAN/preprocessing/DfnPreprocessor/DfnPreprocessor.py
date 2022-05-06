@@ -51,7 +51,7 @@ class DfnPreprocessor(object):
                 size=row[size]
             )
 
-    def add_fracture(self, dip, dip_dir, x, y, z, size):
+    def add_fracture(self,  x, y, z, dip=None, dip_dir=None, size=None, aperture=None):
         """Add individual fracture to the dfn object.
         """
         self.dfn.append(Fracture(
@@ -60,7 +60,8 @@ class DfnPreprocessor(object):
             x=x,
             y=y,
             z=z,
-            size=size
+            size=size,
+            aperture=aperture
         ))
 
     def summary(self):
