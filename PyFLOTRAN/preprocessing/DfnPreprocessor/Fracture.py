@@ -3,22 +3,31 @@ import shapely.geometry as geom
 import sympy as sp
 from PyFLOTRAN.utils.geometry import Plane, Segment, Point, Line
 from typing import List
+from PyFLOTRAN.config import config
 
 
 class Fracture(object):
     local_id = 0
     eps = 1e-8
-    def __init__(self, dip, dip_dir, x, y, z, size, aperture=0.01):
+    def __init__(self, dip, dip_dir, x, y, z, size=None, aperture=None):
         self.side_points = None
+        if dip is not None:
+            assert dip_dir is not None
+        if size is None:
+            assert aperture is not None
+        if aperture is None:
+            assert size is not None
         self.dip = dip
         self.dip_dir = dip_dir
         self.x_centroid = x
         self.y_centroid = y
         self.z_centroid = z
         self.size = size
+        self._aperture = aperture
         self.intersection_dictionary = {}
-        self.aperture = aperture
+        self.aperture = self.compute_aperture()
         self.local_id = Fracture.local_id
+
         Fracture.local_id += 1
 
     def get_side_points_v1(self):
@@ -287,8 +296,14 @@ class Fracture(object):
         """Returns the largest coordinate index of the normal vector"""
         return np.argmax(self.unit_normal_vector)
 
-
-
+    def compute_aperture(self):
+        """Computes the aperture of the fracture"""
+        if self._aperture is not None:
+            return self._aperture
+        else:
+            const = config.globals.constants
+            computed_aperture = np.power(12 * const.mu / (const.rho * const.g) * config.globals.constitutive_laws.transmissivity.a * np.log10(self.size / 2.0) ** 2, 1/3)
+            return computed_aperture
 
 
 
