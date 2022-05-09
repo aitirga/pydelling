@@ -28,10 +28,10 @@ class PlotOverLineFilter(BaseFilter):
         if point_2:
             assert point_1, "Two points need to be defined"
         if point_1 or point_2:
-            self.filter.Source.Point1 = point_1
-            self.filter.Source.Point2 = point_2
+            self.filter.Point1 = point_1
+            self.filter.Point2 = point_2
         if n_line:
-            self.filter.Source.Resolution = n_line
+            self.filter.Resolution = n_line
 
     def set_points(self, point_1, point_2):
         """
@@ -40,8 +40,8 @@ class PlotOverLineFilter(BaseFilter):
             point_1: First point of the line
             point_2: Second point of the line
         """
-        self.filter.Source.Point1 = point_1
-        self.filter.Source.Point2 = point_2
+        self.filter.Point1 = point_1
+        self.filter.Point2 = point_2
 
     def set_line_resolution(self, n):
         """
@@ -49,7 +49,7 @@ class PlotOverLineFilter(BaseFilter):
         Args:
             n: Number specifying the number of divisions of the line used to interpolate the data on.
         """
-        self.filter.Source.Resolution = n
+        self.filter.Resolution = n
 
     @property
     def point_data(self):
