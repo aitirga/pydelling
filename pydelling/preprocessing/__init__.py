@@ -1,6 +1,6 @@
 from .BasePreprocessing import BasePreprocessing
 from .STLFromPointCloud import STLFromPointCloud
-from .DfnPreprocessor import DfnPreprocessor
-from .MeshPreprocessor import MeshPreprocessor
+from .dfn_preprocessor import DfnPreprocessor
+from .mesh_preprocessor import MeshPreprocessor
 
 

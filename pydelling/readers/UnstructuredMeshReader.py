@@ -1,4 +1,4 @@
-from pydelling.preprocessing.MeshPreprocessor import MeshPreprocessor
+from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
 
 
 class UnstructuredMeshReader(MeshPreprocessor):

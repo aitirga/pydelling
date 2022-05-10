@@ -1,9 +1,9 @@
 from typing import *
 import numpy as np
-import pydelling.preprocessing.MeshPreprocessor.geometry as geometry
+import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
 import meshio as msh
 from scipy.spatial import KDTree
-from pydelling.preprocessing.DfnPreprocessor.Fracture import Fracture
+from pydelling.preprocessing.dfn_preprocessor.Fracture import Fracture
 from pydelling.utils.geometry_utils import compute_polygon_area
 from tqdm import tqdm
 import logging

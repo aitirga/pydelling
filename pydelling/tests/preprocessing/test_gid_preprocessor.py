@@ -1,5 +1,5 @@
 import unittest
-from pydelling.preprocessing.GiDPreprocessor import *
+from pydelling.preprocessing.gid_preprocessor import *
 
 
 class GidPreprocessorTest(unittest.TestCase):

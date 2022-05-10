@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from ..preprocessing.MeshPreprocessor import MeshPreprocessor
+from ..preprocessing.mesh_preprocessor import MeshPreprocessor
 import logging
 import vtk
 logger = logging.getLogger(__name__)
