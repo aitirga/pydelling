@@ -1,1 +1,1 @@
-:::pydelling.preprocessing.dfn_preprocessor.DfnPreprocessor
+:::pydelling.preprocessing.dfn_preprocessor.DfnUpscaler

@@ -14,7 +14,6 @@ nav:
       - "Dfn Preprocessor": preprocessing/docs-preprocessing-dfn_preprocessor.md
       - "Dfn Upscaler": preprocessing/docs-preprocessing-dfn_upscaler.md
       - "Mesh preprocessor": preprocessing/docs-preprocessing-mesh_preprocessor.md
-
   - "Utilities":
       - "Geometry operations": utilities/docs-utilities-geometry.md
       - "General utilities": utilities/docs-utilities-general.md
@@ -24,11 +23,10 @@ nav:
       - "FEM reader": readers/docs-readers-fem.md
       - "OpenFOAM reader": readers/docs-readers-openfoam.md
       - "PFLOTRAN observation point reader": readers/docs-readers-pflotran_observation_point.md
-  - 'Writers':
+  - "Writers":
       - "PFLOTRAN HDF5 centroid writer": writers/docs-writers-pflotran_hdf5_centroid.md
       - "PFLOTRAN HDF5 raster writer": writers/docs-writers-pflotran_hdf5_raster.md
       - "OpenFOAM variable writer": writers/docs-writers-openfoam_variable.md
-
   - "Paraview processor":
       - "Filters":
           - "AppendArcLength": paraview_processor/docs-paraview-filters-append_arc_length.md
@@ -36,9 +34,6 @@ nav:
           - "CellDataToPointData": paraview_processor/docs-paraview-filters-cell_data_to_point_data.md
           - "Clip": paraview_processor/docs-paraview-filters-clip.md
           - "StreamTracerWithCustomSource": paraview_processor/docs-paraview-filters-stream_tracer_with_custom_source.md
-
-
-
 
 
 plugins:
