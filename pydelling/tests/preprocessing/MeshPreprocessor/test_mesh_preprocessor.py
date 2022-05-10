@@ -2,10 +2,10 @@ import unittest
 
 import numpy as np
 
-from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
 from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
 from pydelling.readers.FemReader import FemReader
 from pydelling.utils import test_data_path
+from pydelling.preprocessing import DfnPreprocessor
 
 
 class TestMeshPreprocessor(unittest.TestCase):

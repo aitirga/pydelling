@@ -8,11 +8,26 @@ nav:
   - "Getting started": docs-getting_started.md
   - "Usage examples": docs-usage.md
   - "Interpolation":
-      - "Sparse interpolator": docs-paraview-filters-append_arc_length.md
-      - "KDE estimator": docs-interpolation-kde.md
+      - "Sparse interpolator": interpolation/docs-paraview-filters-append_arc_length.md
+      - "KDE estimator": interpolation/docs-interpolation-kde.md
   - "Preprocessing":
-      - "Dfn Preprocessor": docs-preprocessing-dfn_preprocessor.md
-      - "Dfn Upscaler": docs-preprocessing-dfn_upscaler.md
+      - "Dfn Preprocessor": preprocessing/docs-preprocessing-dfn_preprocessor.md
+      - "Dfn Upscaler": preprocessing/docs-preprocessing-dfn_upscaler.md
+      - "Mesh preprocessor": preprocessing/docs-preprocessing-mesh_preprocessor.md
+
+  - "Utilities":
+      - "Geometry operations": utilities/docs-utilities-geometry.md
+      - "General utilities": utilities/docs-utilities-general.md
+  - "Readers":
+      - "Centroid reader": readers/docs-readers-centroid.md
+      - "ConnectFlow reader": readers/docs-readers-connectflow.md
+      - "FEM reader": readers/docs-readers-fem.md
+      - "OpenFOAM reader": readers/docs-readers-openfoam.md
+      - "PFLOTRAN observation point reader": readers/docs-readers-pflotran_observation_point.md
+  - 'Writers':
+      - "PFLOTRAN HDF5 centroid writer": writers/docs-writers-pflotran_hdf5_centroid.md
+      - "PFLOTRAN HDF5 raster writer": writers/docs-writers-pflotran_hdf5_raster.md
+      - "OpenFOAM variable writer": writers/docs-writers-openfoam_variable.md
 
   - "Paraview processor":
       - "Filters":
