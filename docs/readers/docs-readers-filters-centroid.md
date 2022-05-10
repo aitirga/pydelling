@@ -1,0 +1,1 @@
+:::pydelling.readers.CentroidReader
