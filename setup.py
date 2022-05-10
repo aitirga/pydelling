@@ -3,14 +3,13 @@ from setuptools import setup, find_packages
 setup(
     name='pydelling',  # How you named your package folder (MyLib)
     packages=find_packages(),  # Chose the same as "name"
-    version='1.6',  # Start with a small number and increase it with every change you make
+    version='1.6.1',  # Start with a small number and increase it with every change you make
     license='MIT',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
-    description='Package to pre-process PFLOTRAN (and other software) files',
-    # Give a short description about your library
+    description='Package to pre-process and help on mathematical modelling',  # Give a short description about your library
     author='Aitor Iraola Galarza',  # Type in your name
-    author_email='aitor.iraola@amphos21.com',  # Type in your E-Mail
-    url='https://github.com/aitirga/PyFLOTRAN',  # Provide either the link to your github or to your website
-    download_url='https://github.com/aitirga/pydelling/archive/refs/tags/v_1.6.zip',  # I explain this later on
+    author_email='aitirga@gmail.com',  # Type in your E-Mail
+    url='https://github.com/aitirga/pydelling',  # Provide either the link to your github or to your website
+    download_url='https://github.com/aitirga/pydelling/archive/refs/tags/v_1.6.1.zip',  # I explain this later on
     keywords=['PFLOTRAN', 'Preprocessing', 'python', 'modelling'],  # Keywords that define your package best
     include_package_data=True,
     install_requires=[  # I get to this in a second
@@ -35,7 +34,11 @@ setup(
         'munch',
         'meshio',
         'plotly',
-        'shapely'
+        'shapely',
+        'tabulate',
+        'mkdocs',
+        'mkdocs-material',
+        'mkdocstrings',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
