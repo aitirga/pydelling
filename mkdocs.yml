@@ -1,0 +1,22 @@
+site_name: pydelling documentation
+theme:
+  features:
+    - navigation.sections
+    - navigation.expand
+  name: material
+nav:
+  - "Getting started": docs-getting_started.md
+  - "Usage examples": docs-usage.md
+  - "Interpolation":
+      - "Sparse interpolator": docs-interpolation-sparse.md
+      - "KDE estimator": docs-interpolation-kde.md
+
+
+
+
+plugins:
+- mkdocstrings:
+    default_handler: python
+- search
+repo_url: https://github.com/aitirga/edusheets
+repo_name: GitHub repository
