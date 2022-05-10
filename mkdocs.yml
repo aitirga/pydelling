@@ -4,6 +4,9 @@ theme:
     - navigation.sections
     - navigation.expand
   name: material
+  palette:
+    primary: red
+
 nav:
   - "Getting started": docs-getting_started.md
   - "Usage examples": docs-usage.md
