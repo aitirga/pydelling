@@ -1,10 +1,10 @@
 """
 Template to interpolate a set of raster files to a PFLOTRAN mesh
 """
-import PyFLOTRAN.utils.globals as globals
-import PyFLOTRAN.readers as readers
-import PyFLOTRAN.interpolation as interpolation
-import PyFLOTRAN.writers as writers
+import pydelling.utils.globals as globals
+import pydelling.readers as readers
+import pydelling.interpolation as interpolation
+import pydelling.writers as writers
 
 import glob
 import numpy as np

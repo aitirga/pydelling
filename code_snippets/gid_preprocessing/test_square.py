@@ -1,4 +1,4 @@
-from PyFLOTRAN.preprocessing.GiDPreprocessor import *
+from pydelling.preprocessing.GiDPreprocessor import *
 
 
 if __name__ == '__main__':

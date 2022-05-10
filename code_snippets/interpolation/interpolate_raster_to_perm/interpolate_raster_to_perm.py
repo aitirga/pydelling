@@ -1,10 +1,10 @@
 """
 Template to interpolate a set of raster files to a PFLOTRAN mesh
 """
-import PyFLOTRAN.readers as readers
-import PyFLOTRAN.interpolation as interpolation
-from PyFLOTRAN.utils.utils import interpolate_permeability_anisotropic
-from PyFLOTRAN.writers.HDF5CentroidWriter import HDF5CentroidWriter
+import pydelling.readers as readers
+import pydelling.interpolation as interpolation
+from pydelling.utils.utils import interpolate_permeability_anisotropic
+from pydelling.writers.HDF5CentroidWriter import HDF5CentroidWriter
 import glob
 import numpy as np
 import os

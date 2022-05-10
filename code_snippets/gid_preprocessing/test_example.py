@@ -1,4 +1,4 @@
-from PyFLOTRAN.preprocessing.GiDPreprocessor import *
+from pydelling.preprocessing.GiDPreprocessor import *
 
 if __name__ == '__main__':
     point_1 = Point(coords=[0.0, 0.0, 0.0])
