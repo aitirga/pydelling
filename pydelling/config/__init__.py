@@ -32,6 +32,14 @@ if not config.globals.is_globals_loaded:
         config.globals = local_yaml_file
         config.globals.is_globals_loaded = True
 
+# Allow to override the global configuration with a local file
+for key in config:
+    if key in config.globals:
+        if isinstance(config[key], dict):
+            config.globals[key].update(config[key])
+        else:
+            config.globals[key] = config[key]
+
 os.makedirs(config.path.logs if config.path.logs else Path().cwd() / "logs", exist_ok=True)
 with open(Path(__file__).parent / "logger_config.yml", "r") as ymlfile:
     log_config = yaml.safe_load(ymlfile)
