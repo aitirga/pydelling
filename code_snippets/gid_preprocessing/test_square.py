@@ -1,4 +1,4 @@
-from pydelling.preprocessing.GiDPreprocessor import *
+from pydelling.preprocessing.gid_preprocessor import *
 
 
 if __name__ == '__main__':

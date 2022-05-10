@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.qhull import ConvexHull
 
-from pydelling.preprocessing.MeshPreprocessor.geometry import QuadrilateralFace, BaseElement
+from pydelling.preprocessing.mesh_preprocessor.geometry import QuadrilateralFace, BaseElement
 
 
 class HexahedraElement(BaseElement):

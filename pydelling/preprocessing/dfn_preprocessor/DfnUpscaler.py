@@ -1,7 +1,7 @@
-from pydelling.preprocessing.MeshPreprocessor import MeshPreprocessor
-from pydelling.preprocessing.DfnPreprocessor import DfnPreprocessor
-from pydelling.preprocessing.DfnPreprocessor import Fracture
-import pydelling.preprocessing.MeshPreprocessor.geometry as geometry
+from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
+from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
+from pydelling.preprocessing.dfn_preprocessor import Fracture
+import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
 from pydelling.utils.geometry_utils import compute_polygon_area
 import logging
 from tqdm import tqdm

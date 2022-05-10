@@ -8,8 +8,20 @@ nav:
   - "Getting started": docs-getting_started.md
   - "Usage examples": docs-usage.md
   - "Interpolation":
-      - "Sparse interpolator": docs-interpolation-sparse.md
+      - "Sparse interpolator": docs-paraview-filters-append_arc_length.md
       - "KDE estimator": docs-interpolation-kde.md
+  - "Preprocessing":
+      - "Dfn Preprocessor": docs-preprocessing-dfn_preprocessor.md
+      - "Dfn Upscaler": docs-preprocessing-dfn_upscaler.md
+
+  - "Paraview processor":
+      - "Filters":
+          - "AppendArcLength": paraview_processor/docs-paraview-filters-append_arc_length.md
+          - "Calculator": paraview_processor/docs-paraview-filters-calculator.md
+          - "CellDataToPointData": paraview_processor/docs-paraview-filters-cell_data_to_point_data.md
+          - "Clip": paraview_processor/docs-paraview-filters-clip.md
+          - "StreamTracerWithCustomSource": paraview_processor/docs-paraview-filters-stream_tracer_with_custom_source.md
+
 
 
 

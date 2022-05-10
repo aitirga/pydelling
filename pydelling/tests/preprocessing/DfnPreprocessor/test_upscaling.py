@@ -3,7 +3,7 @@ import numpy.testing as nptest
 import numpy as np
 from pydelling.utils.geometry import Line
 from pydelling.preprocessing import DfnPreprocessor, MeshPreprocessor
-from pydelling.preprocessing.DfnPreprocessor import DfnUpscaler
+from pydelling.preprocessing.dfn_preprocessor import DfnUpscaler
 
 
 class UpscalingCase(unittest.TestCase):

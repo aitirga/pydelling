@@ -9,7 +9,7 @@ from natsort import natsorted
 import sympy as sp
 from pydelling.utils.geometry import Point, Plane, Line
 from itertools import product, combinations
-from pydelling.preprocessing.DfnPreprocessor.Fracture import Fracture
+from pydelling.preprocessing.dfn_preprocessor.Fracture import Fracture
 
 
 class BaseElement(BaseAbstractMeshObject):

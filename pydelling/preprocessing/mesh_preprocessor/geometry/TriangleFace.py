@@ -1,6 +1,6 @@
 import numpy as np
 
-from pydelling.preprocessing.MeshPreprocessor.geometry import BaseFace
+from pydelling.preprocessing.mesh_preprocessor.geometry import BaseFace
 
 
 class TriangleFace(BaseFace):
