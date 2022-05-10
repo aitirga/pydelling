@@ -1,1 +1,1 @@
-:::PyFLOTRAN.interpolation.SparseDataInterpolator
+:::pydelling.interpolation.SparseDataInterpolator
