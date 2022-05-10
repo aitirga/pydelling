@@ -1,1 +1,1 @@
-:::PyFLOTRAN.interpolation.KdeEstimator
+:::pydelling.interpolation.KdeEstimator
