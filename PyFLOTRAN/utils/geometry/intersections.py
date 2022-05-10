@@ -1,8 +1,6 @@
 from . import Line, Point, Plane, Segment
 import numpy as np
-from numba import njit, jit
 
-# @jit
 def intersect_line_line(line_1: Line, line_2: Line):
     if line_1.is_parallel(line_2):
         return None
@@ -25,7 +23,6 @@ def intersect_line_line(line_1: Line, line_2: Line):
         else:
             return Point(line_1.p + line_1.direction_vector * x[0][0])
 
-# @jit
 def intersect_plane_plane(plane_1: Plane, plane_2: Plane):
     """Performs the intersection of this plane with the given plane"""
     if plane_1.is_parallel(plane_2):
@@ -45,7 +42,6 @@ def intersect_plane_plane(plane_1: Plane, plane_2: Plane):
 
     return intersected_line
 
-# @jit
 def intersect_plane_line(plane: Plane, line: Line):
     """Performs the intersection of this plane with the given line"""
     # The point r = q + lambda * v
@@ -57,7 +53,6 @@ def intersect_plane_line(plane: Plane, line: Line):
         lambda_ = dot_n_diff / dot_n_v
         return Point(line.p + lambda_ * line.direction_vector)
 
-# @jit
 def intersect_plane_segment(plane: Plane, segment: Segment):
     """Performs the intersection of this plane with the given segment"""
     # The point r = q + lambda * v

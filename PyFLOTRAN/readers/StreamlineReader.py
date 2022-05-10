@@ -47,6 +47,7 @@ class StreamlineReader(BaseReader):
     def compute_arrival_times(self,
                               reason_of_termination=None,
                               min_x=None,
+                              min_y=None,
                               ) -> pd.Series:
         """
         This method computes the arrival times of the streamlines
@@ -60,7 +61,7 @@ class StreamlineReader(BaseReader):
 
         """
         logger.info("Computing arrival times of the streamlines")
-        filtered_streamlines = self.filter_streamlines(reason_of_termination=reason_of_termination, min_x=min_x)
+        filtered_streamlines = self.filter_streamlines(reason_of_termination=reason_of_termination, min_x=min_x, min_y=min_y)
         temp_series: pd.Series = filtered_streamlines.max()["IntegrationTime"]
         return temp_series
 
@@ -311,6 +312,7 @@ class StreamlineReader(BaseReader):
     def filter_streamlines(self,
                            reason_of_termination=None,
                            min_x=None,
+                           min_y=None,
                            ) -> DataFrameGroupBy:
 
 
@@ -324,10 +326,15 @@ class StreamlineReader(BaseReader):
             temp_df = temp_df.groupby("SeedIds")
             logger.info(f"{initial_number_of_streamlines - len(temp_df.groups)} streamlines have been filtered due to 'Reason of termination' filtering (Keeping {len(temp_df.groups) / initial_number_of_streamlines * 100: 2.1f}% of total)")
             # initial_number_of_streamlines = temp_df.shape[0]
-        if min_x:
+        if min_x is not None:
             temp_df = temp_df.filter(lambda x: x.max()["x"] > min_x)
             temp_df = temp_df.groupby("SeedIds")
             logger.info(f"{initial_number_of_streamlines - len(temp_df.groups)} streamlines have been filtered due to 'min_x' filtering (Keeping {len(temp_df.groups) / initial_number_of_streamlines * 100:2.1f}% of total)")
+
+        if min_y is not None:
+            temp_df = temp_df.filter(lambda x: x.max()["y"] > min_y)
+            temp_df = temp_df.groupby("SeedIds")
+            logger.info(f"{initial_number_of_streamlines - len(temp_df.groups)} streamlines have been filtered due to 'min_y' filtering (Keeping {len(temp_df.groups) / initial_number_of_streamlines * 100:2.1f}% of total)")
         return temp_df
 
     @staticmethod

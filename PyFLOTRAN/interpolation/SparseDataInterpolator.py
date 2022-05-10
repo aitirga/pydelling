@@ -23,7 +23,8 @@ class SparseDataInterpolator(BaseInterpolator):
             divide_over_direction: Divides the data into smaller chunks if the data is too large.
             **kwargs:
 
-        Returns: interpolated data
+        Returns:
+            interpolated data
         """
         if not divide_over_direction:
             logger.info(f"Interpolating data based on {self.info}")
