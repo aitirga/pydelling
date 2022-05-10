@@ -21,3 +21,6 @@ meshio
 plotly
 shapely
 tabulate
+mkdocs
+mkdocs-material
+mkdocstrings
