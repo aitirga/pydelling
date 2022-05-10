@@ -5,10 +5,10 @@ Template to interpolate a set of raster files to a PFLOTRAN mesh
 import numpy as np
 import os
 import sys
-from PyFLOTRAN.config import config
-from PyFLOTRAN.readers import StructuredListReader, OpenFoamReader
-from PyFLOTRAN.interpolation import SparseDataInterpolator
-from PyFLOTRAN.writers import HDF5CentroidWriter, OpenFoamVariableWriter
+from pydelling.config import config
+from pydelling.readers import StructuredListReader, OpenFoamReader
+from pydelling.interpolation import SparseDataInterpolator
+from pydelling.writers import HDF5CentroidWriter, OpenFoamVariableWriter
 
 def main(argv):
     # Read grain files with the list reader

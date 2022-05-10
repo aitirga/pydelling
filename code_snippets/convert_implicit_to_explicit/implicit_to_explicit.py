@@ -1,5 +1,5 @@
-from PyFLOTRAN.config import config
-from PyFLOTRAN.readers import iGPReader
+from pydelling.config import config
+from pydelling.readers import iGPReader
 
 
 def main():

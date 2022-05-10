@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='PyFLOTRAN',  # How you named your package folder (MyLib)
+    name='pydelling',  # How you named your package folder (MyLib)
     packages=find_packages(),  # Chose the same as "name"
     version='1.5.4',  # Start with a small number and increase it with every change you make
     license='MIT',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
