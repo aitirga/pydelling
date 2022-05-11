@@ -338,6 +338,29 @@ class MeshPreprocessor(object):
             else:
                 return None
 
+    @property
+    def min_x(self):
+        return self.coords[:, 0].min()
+
+    @property
+    def max_x(self):
+        return self.coords[:, 0].max()
+
+    @property
+    def min_y(self):
+        return self.coords[:, 1].min()
+
+    @property
+    def max_y(self):
+        return self.coords[:, 1].max()
+
+    @property
+    def min_z(self):
+        return self.coords[:, 2].min()
+
+    @property
+    def max_z(self):
+        return self.coords[:, 2].max()
 
 
 

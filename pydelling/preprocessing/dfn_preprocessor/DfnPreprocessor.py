@@ -32,6 +32,7 @@ class DfnPreprocessor(object):
                        y='position-y',
                        z='position-z',
                        size='size',
+                       aperture_constant=None,
                        ):
         """
         Loads the fractures from a pandas dataframe to the dfn object.
@@ -48,10 +49,11 @@ class DfnPreprocessor(object):
                 x=row[x],
                 y=row[y],
                 z=row[z],
-                size=row[size]
+                size=row[size],
+                aperture_constant=aperture_constant,
             )
 
-    def add_fracture(self,  x, y, z, dip=None, dip_dir=None, size=None, aperture=None):
+    def add_fracture(self,  x, y, z, dip=None, dip_dir=None, size=None, aperture=None, aperture_constant=None,):
         """Add individual fracture to the dfn object.
         """
         self.dfn.append(Fracture(
@@ -61,7 +63,8 @@ class DfnPreprocessor(object):
             y=y,
             z=z,
             size=size,
-            aperture=aperture
+            aperture=aperture,
+            aperture_constant=aperture_constant,
         ))
 
     def summary(self):
@@ -114,8 +117,9 @@ class DfnPreprocessor(object):
                 dfn_file.write(f'{{{point[0]},{point[1]},{point[2]}}}')
             dfn_file.write('\n')
 
-    def shift_dfn(self, x_shift=0, y_shift=0, z_shift=0):
+    def shift(self, x_shift=0, y_shift=0, z_shift=0):
         """Shifts the dfn object."""
+        logger.info(f'Shifting dfn object by {x_shift}, {y_shift}, {z_shift}')
         for fracture in self.dfn:
             fracture.x_centroid += x_shift
             fracture.y_centroid += y_shift
@@ -173,6 +177,51 @@ class DfnPreprocessor(object):
         """Returns the minimum size of the dfn object."""
         return min([fracture.size for fracture in self.dfn])
 
+    def plot_aperture_histogram(self, filename='aperture_histogram.png'):
+        """Plots the aperture histogram."""
+        logger.info(f'Plotting aperture histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([fracture.aperture for fracture in self.dfn], bins=100)
+        return fig, ax
+
+    @property
+    def apertures(self):
+        return [fracture.aperture for fracture in self.dfn]
+
+    def __add__(self, other):
+        """Adds two dfn objects."""
+        if not isinstance(other, DfnPreprocessor):
+            raise TypeError(f'{other} is not a DfnPreprocessor object')
+
+        logger.info('Adding dfn objects')
+        new_dfn = DfnPreprocessor()
+        new_dfn.dfn = self.dfn + other.dfn
+        return new_dfn
+
+    @property
+    def min_x(self):
+        return min([fracture.x_centroid for fracture in self.dfn])
+
+    @property
+    def max_x(self):
+        return max([fracture.x_centroid for fracture in self.dfn])
+
+    @property
+    def min_y(self):
+        return min([fracture.y_centroid for fracture in self.dfn])
+
+    @property
+    def max_y(self):
+        return max([fracture.y_centroid for fracture in self.dfn])
+
+    @property
+    def min_z(self):
+        return min([fracture.z_centroid for fracture in self.dfn])
+
+    @property
+    def max_z(self):
+        return max([fracture.z_centroid for fracture in self.dfn])
 
 
 
