@@ -3,7 +3,7 @@ explicit_writer_dict: {4: 6, 6: 8, 8: 9}
 verbose: False
 
 constants:
-  g: 9.
+  g: 9.81
   mu: 8.9E-4
   rho: 1.0E+3
 

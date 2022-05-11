@@ -10,7 +10,7 @@ from typing import Union, List
 
 class GidObject(object):
     """
-    This class could be inherited to create new GiD objects
+    This class can be inherited to create new GiD objects
     It stores different GiD objects and generates batch files to generate the geometry automatically on GiD
     """
     def __init__(self, *args, **kwargs):
@@ -100,4 +100,3 @@ class GidObject(object):
             func_return += 'escape\n'
             return func_return
         return decorator
-

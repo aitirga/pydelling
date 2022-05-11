@@ -9,7 +9,7 @@ from pydelling.config import config
 class Fracture(object):
     local_id = 0
     eps = 1e-8
-    def __init__(self, dip, dip_dir, x, y, z, size=None, aperture=None):
+    def __init__(self, dip, dip_dir, x, y, z, size=None, aperture=None, aperture_constant=None):
         self.side_points = None
         if dip is not None:
             assert dip_dir is not None
@@ -25,6 +25,7 @@ class Fracture(object):
         self.size = size
         self._aperture = aperture
         self.intersection_dictionary = {}
+        self.aperture_constant = aperture_constant
         self.aperture = self.compute_aperture()
         self.local_id = Fracture.local_id
 
@@ -296,14 +297,14 @@ class Fracture(object):
         """Returns the largest coordinate index of the normal vector"""
         return np.argmax(self.unit_normal_vector)
 
-    def compute_aperture(self):
+    def compute_aperture(self, const=3.020E-3):
         """Computes the aperture of the fracture"""
         if self._aperture is not None:
             return self._aperture
         else:
-            const = config.globals.constants
-            computed_aperture = np.power(12 * const.mu / (const.rho * const.g) * config.globals.constitutive_laws.transmissivity.a * np.log10(self.size / 2.0) ** 2, 1/3)
+            # const = config.globals.constants
+            # computed_aperture = np.power((12 * const.mu
+            #                              * config.globals.constitutive_laws.transmissivity.a
+            #                              * np.log10(self.size / 2.0) ** 2) / (const.rho * const.g), 1/3)
+            computed_aperture = self.aperture_constant*np.log10(self.size/2.0)
             return computed_aperture
-
-
-

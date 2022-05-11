@@ -142,7 +142,6 @@ class PostProcessingEngine:
         Nvertices = self.pflotran_vertices - self.n_cells
         Nvertices_pflotran = self.n_vertices
 
-        print(Nelements, Nvertices, Nvertices_pflotran)
 
         # Script to generate the files
         for i in range(0, self.n_output_files):
