@@ -144,14 +144,14 @@ class DfnUpscaler:
         #             continue
 
         # UPSCALED PERMEABILITY
-        fracture_perm = {}
-        upscaled_perm = {}
+        fracture_hk = {}
+        upscaled_hk = {}
 
         # For each fracture, compute permeability tensor,
         # and add it to the elements intersected by the fracture.
         for elem in tqdm(self.mesh.elements, desc="Upscaling permeability"):
-            fracture_perm[elem.local_id] = np.zeros([3, 3])
-            upscaled_perm[elem.local_id] = np.zeros([3, 3])
+            fracture_hk[elem.local_id] = np.zeros([3, 3])
+            upscaled_hk[elem.local_id] = np.zeros([3, 3])
             for frac_name in elem.associated_fractures:
                 frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
@@ -161,41 +161,42 @@ class DfnUpscaler:
                 n1 = frac.unit_normal_vector[0]
                 n2 = frac.unit_normal_vector[1]
                 n3 = frac.unit_normal_vector[2]
-                frac.perm = ((frac.aperture ** 2) * rho * g) / (12 * mu)
+                #frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
+                frac.hk = frac.transmissivity / frac.aperture
 
                 if 'mode' == 'isotropy':
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                    fracture_perm[elem.local_id][0, 0] += frac.perm * frac_dict['volume'] / elem.volume #Kxx
+                    fracture_hk[elem.local_id][0, 0] += frac.hk * frac_dict['volume'] / elem.volume #Kxx
 
                 else: #'anisotropy' in 'mode':
                     perm_tensor = np.zeros([3, 3])
                     #for i in range(1, 4):
                     #    for j in range(1, 4):
                             # Compute tensor
-                    perm_tensor[0, 0] = frac.perm * ((n2 ** 2) + (n3 ** 2))
-                    perm_tensor[0, 1] = frac.perm * (-1) * n1 * n2
-                    perm_tensor[0, 2] = frac.perm * (-1) * n1 * n3
-                    perm_tensor[1, 1] = frac.perm * ((n3 ** 2) + (n1 ** 2))
-                    perm_tensor[1, 2] = frac.perm * (-1) * n2 * n3
-                    perm_tensor[2, 2] = frac.perm * ((n1 ** 2) + (n2 ** 2))
+                    perm_tensor[0, 0] = frac.hk * ((n2 ** 2) + (n3 ** 2))
+                    perm_tensor[0, 1] = frac.hk * (-1) * n1 * n2
+                    perm_tensor[0, 2] = frac.hk * (-1) * n1 * n3
+                    perm_tensor[1, 1] = frac.hk * ((n3 ** 2) + (n1 ** 2))
+                    perm_tensor[1, 2] = frac.hk * (-1) * n2 * n3
+                    perm_tensor[2, 2] = frac.hk * ((n1 ** 2) + (n2 ** 2))
 
                     if 'mode' == 'anisotropy_principals':
                         eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])
                         perm_tensor = eigen_perm_tensor
 
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                    fracture_perm[elem.local_id][0, 0] += (perm_tensor[0, 0] * frac_dict['volume'] / elem.volume)
-                    fracture_perm[elem.local_id][0, 1] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_perm[elem.local_id][0, 2] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_perm[elem.local_id][1, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_perm[elem.local_id][1, 1] += (perm_tensor[1, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_perm[elem.local_id][1, 2] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
-                    fracture_perm[elem.local_id][2, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_perm[elem.local_id][2, 1] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
-                    fracture_perm[elem.local_id][2, 2] += (perm_tensor[2, 2] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][0, 0] += (perm_tensor[0, 0] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][0, 1] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][0, 2] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][1, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][1, 1] += (perm_tensor[1, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][1, 2] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][2, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][2, 1] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][2, 2] += (perm_tensor[2, 2] * frac_dict['volume'] / elem.volume)
 
             # Sum permeability contribution from fractures and from matrix.
-            upscaled_perm[elem.local_id] = fracture_perm[elem.local_id] + matrix_permeability_tensor[elem.local_id] * (1 - (elem.total_fracture_volume / elem.volume))
+            upscaled_hk[elem.local_id] = fracture_hk[elem.local_id] + matrix_permeability_tensor[elem.local_id] * (1 - (elem.total_fracture_volume / elem.volume))
 
         #Export values to VTK
         vtk_kxx = np.asarray(self.mesh.elements)
@@ -204,13 +205,13 @@ class DfnUpscaler:
         vtk_kxy = np.asarray(self.mesh.elements)
         vtk_kxz = np.asarray(self.mesh.elements)
         vtk_kyz = np.asarray(self.mesh.elements)
-        for local_id in upscaled_perm:
-            vtk_kxx[local_id] = upscaled_perm[local_id][0, 0]
-            vtk_kyy[local_id] = upscaled_perm[local_id][1, 1]
-            vtk_kzz[local_id] = upscaled_perm[local_id][2, 2]
-            vtk_kxy[local_id] = upscaled_perm[local_id][0, 1]
-            vtk_kxz[local_id] = upscaled_perm[local_id][0, 2]
-            vtk_kyz[local_id] = upscaled_perm[local_id][1, 2]
+        for local_id in upscaled_hk:
+            vtk_kxx[local_id] = upscaled_hk[local_id][0, 0]
+            vtk_kyy[local_id] = upscaled_hk[local_id][1, 1]
+            vtk_kzz[local_id] = upscaled_hk[local_id][2, 2]
+            vtk_kxy[local_id] = upscaled_hk[local_id][0, 1]
+            vtk_kxz[local_id] = upscaled_hk[local_id][0, 2]
+            vtk_kyz[local_id] = upscaled_hk[local_id][1, 2]
 
         self.mesh.cell_data['Kxx'] = [vtk_kxx.tolist()]
         self.mesh.cell_data['Kyy'] = [vtk_kyy.tolist()]
@@ -219,9 +220,9 @@ class DfnUpscaler:
         self.mesh.cell_data['Kxz'] = [vtk_kxz.tolist()]
         self.mesh.cell_data['Kyz'] = [vtk_kyz.tolist()]
 
-        self.upscaled_permeability = upscaled_perm
+        self.upscaled_permeability = upscaled_hk
 
-        return upscaled_perm
+        return upscaled_hk
 
     def to_vtk(self, filename):
         """Exports the mesh and the upscaled variables to VTK"""
