@@ -53,7 +53,7 @@ class DfnPreprocessor(object):
                 aperture_constant=aperture_constant,
             )
 
-    def add_fracture(self,  x, y, z, dip=None, dip_dir=None, size=None, aperture=None, aperture_constant=None,):
+    def add_fracture(self,  x, y, z, dip=None, dip_dir=None, size=None, aperture=None, aperture_constant=1E-3):
         """Add individual fracture to the dfn object.
         """
         self.dfn.append(Fracture(
