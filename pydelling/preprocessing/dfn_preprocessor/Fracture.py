@@ -309,6 +309,8 @@ class Fracture(object):
         """Returns the transmissivity of the fracture"""
         if self._transmissivity is not None:
             return self._transmissivity
-        else:
+        elif self.transmissivity_constant is not None:
             computed_transmissivity = self.transmissivity_constant * (np.log10(self.size / 2.0)) ** 2
             return computed_transmissivity
+        else:
+            return np.power(self.aperture, 3) / 12
