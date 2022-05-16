@@ -9,7 +9,10 @@ from pydelling.config import config
 class Fracture(object):
     local_id = 0
     eps = 1e-8
-    def __init__(self, dip, dip_dir, x, y, z, size=None, aperture=None, aperture_constant=None):
+    _transmissivity = None
+
+    def __init__(self, dip, dip_dir, x, y, z, size=None, aperture=None, aperture_constant=None,
+                 transmissivity_constant=None, ):
         self.side_points = None
         if dip is not None:
             assert dip_dir is not None
@@ -26,6 +29,7 @@ class Fracture(object):
         self._aperture = aperture
         self.intersection_dictionary = {}
         self.aperture_constant = aperture_constant
+        self.transmissivity_constant = transmissivity_constant
         self.aperture = self.compute_aperture()
         self.local_id = Fracture.local_id
 
@@ -47,11 +51,9 @@ class Fracture(object):
         C = self.centroid - self.size / 2 * (u + v)
         D = self.centroid - self.size / 2 * (u - v)
 
-
         self.side_points = 4
 
         return np.array([A, B, C, D])
-
 
     def get_side_points_v3(self):
         """
@@ -81,7 +83,6 @@ class Fracture(object):
         A[0] = A[0] - np.sin(alpha) * L / 2
         A[1] = A[1] + np.cos(alpha) * L / 2
         A[2] = A[2] + np.sin(delta) * L / 2
-
 
         H = w * np.sin(alpha + np.pi / 2)
         V = w * np.cos(alpha + np.pi / 2)
@@ -131,7 +132,6 @@ class Fracture(object):
 
         return np.array([A, B, C, D])
 
-
     def get_side_points(self, method='v1'):
         if method == 'v1':
             return self.get_side_points_v1()
@@ -140,13 +140,13 @@ class Fracture(object):
         elif method == 'v3':
             return self.get_side_points_v3()
 
-
     def to_obj(self, global_id=0, method='v1'):
         """Converts the fracture to an obj file"""
         side_points = self.get_side_points(method=method)
         obj_string = ''
         for i in range(len(side_points)):
-            obj_string += 'v ' + str(side_points[i][0]) + ' ' + str(side_points[i][1]) + ' ' + str(side_points[i][2]) + '\n'
+            obj_string += 'v ' + str(side_points[i][0]) + ' ' + str(side_points[i][1]) + ' ' + str(
+                side_points[i][2]) + '\n'
         obj_string += f'f '
         for i in range(len(side_points)):
             obj_string += str(global_id + i) + ' '
@@ -171,10 +171,6 @@ class Fracture(object):
         c = self.unit_normal_vector[2]
         d = -np.dot(self.unit_normal_vector, self.centroid)
         return abs(a * point[0] + b * point[1] + c * point[2] + d) / np.sqrt(a ** 2 + b ** 2 + c ** 2)
-
-
-
-
 
     def get_bounding_box(self):
         """Returns the bounding box of the fracture"""
@@ -277,7 +273,6 @@ class Fracture(object):
         v3 = q3_hat[1]
         v4 = q4_hat[1]
 
-
         s1 = (v1 - v2) * u0 + (u2 - u1) * v0 + v2 * u1 - u2 * v1
         s2 = (v2 - v3) * u0 + (u3 - u2) * v0 + v3 * u2 - u3 * v2
         s3 = (v3 - v4) * u0 + (u4 - u3) * v0 + v4 * u3 - u4 * v3
@@ -306,5 +301,14 @@ class Fracture(object):
             # computed_aperture = np.power((12 * const.mu
             #                              * config.globals.constitutive_laws.transmissivity.a
             #                              * np.log10(self.size / 2.0) ** 2) / (const.rho * const.g), 1/3)
-            computed_aperture = self.aperture_constant*np.log10(self.size/2.0)
+            computed_aperture = self.aperture_constant * np.log10(self.size / 2.0)
             return computed_aperture
+
+    @property
+    def transmissivity(self):
+        """Returns the transmissivity of the fracture"""
+        if self._transmissivity is not None:
+            return self._transmissivity
+        else:
+            computed_transmissivity = self.transmissivity_constant * (np.log10(self.size / 2.0)) ** 2
+            return computed_transmissivity
