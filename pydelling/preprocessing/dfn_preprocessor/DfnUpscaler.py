@@ -54,11 +54,11 @@ class DfnUpscaler:
         for element in kd_tree_filtered_elements:
             element: geometry.BaseElement
             counter += 1
-            # absolute_distance = np.abs(fracture.distance_to_point(element.centroid))
-            # characteristic_length = np.power(element.volume, 1/3)
-            # if absolute_distance > 2.0 * characteristic_length:
-            #     elements_filtered += 1
-            #     continue
+            absolute_distance = np.abs(fracture.distance_to_point(element.centroid))
+            characteristic_length = np.power(element.volume, 1/3)
+            if absolute_distance > 1.5 * characteristic_length:
+                elements_filtered += 1
+                continue
 
             intersection_points = element.intersect_with_fracture(fracture)
             if self.save_intersections:
