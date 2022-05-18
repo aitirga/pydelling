@@ -20,6 +20,8 @@ class Fracture(object):
             assert aperture is not None
         if aperture is None:
             assert size is not None
+        # if dip == 90:
+        #     dip = 89.9999
         self.dip = dip
         self.dip_dir = dip_dir
         self.x_centroid = x

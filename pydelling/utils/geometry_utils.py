@@ -4,6 +4,7 @@ from shapely.geometry import Polygon
 
 # Useful geometrical functions
 def normal_vector(points):
+    """Computes normal vector of a co-planar set of points (vertices of a polygon)"""
     assert len(points) >= 3, "Incorrect number of points, more are needed to form a plane"
     v1 = points[1] - points[0]
     v2 = points[2] - points[0]
@@ -47,20 +48,48 @@ def compute_polygon_area(points) -> float:
     if len(points) < 3:
         return 0.0
 
-    convex_hull = Polygon(points)
-    return convex_hull.convex_hull.area
+    # convex_hull = Polygon(points)
+    # return convex_hull.convex_hull.area
 
     # Compute normal
-    # vn = normal_vector(points)
-    # temp_area_v = np.zeros(shape=3)
-    # projected_area = 0.0
-    # n_coords = len(points)
-    # for id, point in enumerate(points):
-    #     # Set-up variables
-    #     v1 = points[id % n_coords]  # Pv1, assuming P=(0,0,0)
-    #     v2 = points[(id + 1) % n_coords]  # Pv2, assuming P=(0,0,0)
-    #     # Compute area
-    #     id_area_v = np.cross(v1, v2)
-    #     projected_area_id = np.dot(vn, id_area_v) / 2.0  # area of small triangle of the face
-    #     projected_area += projected_area_id
-    # return projected_area
+    points = order_points_clockwise(points)
+    vn = normal_vector(points)
+    temp_area_v = np.zeros(shape=3)
+    projected_area = 0.0
+    n_coords = len(points)
+    for id, point in enumerate(points):
+        # Set-up variables
+        v1 = points[id % n_coords]  # Pv1, assuming P=(0,0,0)
+        v2 = points[(id + 1) % n_coords]  # Pv2, assuming P=(0,0,0)
+        # Compute area
+        id_area_v = np.cross(v1, v2)
+        projected_area_id = np.dot(vn, id_area_v) / 2.0  # area of small triangle of the face
+        projected_area += projected_area_id
+    return projected_area
+
+
+def order_points_clockwise(points: np.ndarray) -> list:
+    """Orders set of 3D coplanar points clockwise"""
+    # Compute normal vector
+    vn = normal_vector(points)
+    # Compute centroid
+    centroid = np.mean(points, axis=0)
+    # Project points on normal plane
+    v1 = points[0] - centroid
+    v1 = v1 / np.linalg.norm(v1)
+    v2 = np.cross(vn, v1)
+    v2 = v2 / np.linalg.norm(v2)
+    projected_points = np.zeros(shape=(len(points), 3))
+    for id, point in enumerate(points):
+        projected_points[id] = [np.dot(v1, point), np.dot(v2, point), 0.0]
+    # Order points clockwise, compute angles
+    center = np.mean(projected_points, axis=0)
+    angles = np.zeros(shape=len(projected_points))
+    for id, point in enumerate(projected_points):
+        angles[id] = np.arctan2(point[1] - center[1], point[0] - center[0])
+    # Sort points
+    sorted_points = [points[id] for id in np.argsort(angles)]
+    return sorted_points
+
+
+
