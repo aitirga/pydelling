@@ -66,11 +66,14 @@ class DfnUpscaler:
 
             intersection_area = compute_polygon_area(intersection_points)
             fracture.intersection_dictionary[element.local_id] = intersection_area
-            element.associated_fractures[fracture.local_id] = {
-                'area': intersection_area,
-                'volume': intersection_area * fracture.aperture,
-                'fracture': fracture,
-            }
+            if len(intersection_points) > 0:
+                element.associated_fractures[fracture.local_id] = {
+                    'area': intersection_area,
+                    'volume': intersection_area * fracture.aperture,
+                    'fracture': fracture,
+                }
+                print(intersection_points)
+                print(element.associated_fractures[fracture.local_id])
             n_intersections = len(intersection_points)
             if not n_intersections in self.mesh.find_intersection_stats['intersection_points'].keys():
                 self.mesh.find_intersection_stats['intersection_points'][n_intersections] = 0

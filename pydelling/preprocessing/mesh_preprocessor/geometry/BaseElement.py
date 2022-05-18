@@ -27,7 +27,8 @@ class BaseElement(BaseAbstractMeshObject):
         self.type = None
         self.meshio_type = None
         self.associated_fractures = {}
-        self.total_fracture_volume = 00
+        self.total_fracture_volume = 0
+        self.area = 0
 
     def __repr__(self):
         return f"{self.type} {self.local_id}"
