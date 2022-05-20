@@ -732,6 +732,66 @@ class iGPReader(BaseReader):
     def get_region(self, region_name):
         return self.centroids[self.region_dict[region_name]['centroid_id'] - 1]
 
+    @property
+    def min_x(self):
+        '''Returns the minimum x coordinate of the centroids of the mesh'''
+        return min(self.centroids[:, 0])
+
+    @property
+    def max_x(self):
+        '''Returns the maximum x coordinate of the centroids of the mesh'''
+        return max(self.centroids[:, 0])
+
+    @property
+    def min_y(self):
+        '''Returns the minimum y coordinate of the centroids of the mesh'''
+        return min(self.centroids[:, 1])
+
+    @property
+    def max_y(self):
+        '''Returns the maximum y coordinate of the centroids of the mesh'''
+        return max(self.centroids[:, 1])
+
+    @property
+    def min_z(self):
+        '''Returns the minimum z coordinate of the centroids of the mesh'''
+        return min(self.centroids[:, 2])
+
+    @property
+    def max_z(self):
+        '''Returns the maximum z coordinate of the centroids of the mesh'''
+        return max(self.centroids[:, 2])
+
+    @property
+    def coords_min_x(self):
+        '''Returns the minimum x coordinate of the nodes of the mesh'''
+        return min(self.nodes[:, 0])
+
+    @property
+    def coords_max_x(self):
+        '''Returns the maximum x coordinate of the nodes of the mesh'''
+        return max(self.nodes[:, 0])
+
+    @property
+    def coords_min_y(self):
+        '''Returns the minimum y coordinate of the nodes of the mesh'''
+        return min(self.nodes[:, 1])
+
+    @property
+    def coords_max_y(self):
+        '''Returns the maximum y coordinate of the nodes of the mesh'''
+        return max(self.nodes[:, 1])
+
+    @property
+    def coords_min_z(self):
+        '''Returns the minimum z coordinate of the nodes of the mesh'''
+        return min(self.nodes[:, 2])
+
+    @property
+    def coords_max_z(self):
+        '''Returns the maximum z coordinate of the nodes of the mesh'''
+        return max(self.nodes[:, 2])
+
 
 def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_size, centroids):
     amount_read = 0.0
@@ -766,5 +826,8 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
             amount = id_local / int(len(elements))
             logger.info(f"Process {chunk_index} completed amount: {amount * 100:3.0f} %")
             amount_read += 0.1
+
+
+
 
 
