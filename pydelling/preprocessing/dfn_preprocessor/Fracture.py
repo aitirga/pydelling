@@ -249,7 +249,7 @@ class Fracture(object):
             Line(self.corners[0], self.corners[1]),
             Line(self.corners[1], self.corners[2]),
             Line(self.corners[2], self.corners[3]),
-            Line(self.corners[3], self.corners[0])
+            Line(self.corners[3], self.corners[0]),
         ]
         return corner_segments
 

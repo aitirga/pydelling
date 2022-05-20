@@ -56,7 +56,7 @@ class DfnUpscaler:
             counter += 1
             absolute_distance = np.abs(fracture.distance_to_point(element.centroid))
             characteristic_length = np.power(element.volume, 1/3)
-            if absolute_distance > 1.5 * characteristic_length:
+            if absolute_distance > 1.75 * characteristic_length:
                 elements_filtered += 1
                 continue
 
@@ -72,8 +72,6 @@ class DfnUpscaler:
                     'volume': intersection_area * fracture.aperture,
                     'fracture': fracture,
                 }
-                print(intersection_points)
-                print(element.associated_fractures[fracture.local_id])
             n_intersections = len(intersection_points)
             if not n_intersections in self.mesh.find_intersection_stats['intersection_points'].keys():
                 self.mesh.find_intersection_stats['intersection_points'][n_intersections] = 0
