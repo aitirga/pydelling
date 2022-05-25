@@ -68,13 +68,5 @@ class iGPReaderCase(unittest.TestCase):
         self.assertEqual(max_nodes_z, explicit_max_z_nodes)
 
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     unittest.main()
