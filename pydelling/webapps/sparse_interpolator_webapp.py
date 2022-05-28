@@ -6,6 +6,7 @@ import streamlit as st
 from pydelling.config import config
 from pydelling.interpolation import SparseDataInterpolator
 import numpy as np
+import streamlit.components.v1 as components
 
 
 class SparseInterpolatorWebapp(WebAppRunner):
@@ -85,7 +86,10 @@ class SparseInterpolatorWebapp(WebAppRunner):
                     interpolated_block = np.array([[mesh_data[i, 0], mesh_data[i, 1], mesh_data[i, 2], interpolated_data[i]] for i in range(len(mesh_data))])
                     interpolated_block = pd.DataFrame(interpolated_block, columns=['x', 'y', 'z', target_col])
                     st.session_state['interpolation_done'] = True
+                    st.session_state['interpolated_data'] = interpolated_block
         if st.session_state['interpolation_done']:
+            interpolated_block = st.session_state['interpolated_data']
+
             st.subheader('Step 4: Download interpolated data')
             st.download_button(
                 label="Download data as CSV",
@@ -93,6 +97,31 @@ class SparseInterpolatorWebapp(WebAppRunner):
                 file_name='interpolated_data.csv',
                 mime='text/csv',
             )
+            visualize = st.checkbox('Visualize interpolated data')
+            if visualize:
+                import pyvista as pv
+                from pyvista import examples
+                interpolated_block = st.session_state['interpolated_data']
+                pl = pv.Plotter()
+                point_cloud = pv.PolyData(interpolated_block[['x', 'y', 'z']].values)
+                point_cloud['value'] = interpolated_block[target_col].values
+                point_size = point_cloud.bounds
+                point_size = np.max(point_size) * 0.0075
+
+                pl.add_mesh(point_cloud, point_size=point_size, style='points')
+                pl.background_color = 'white'
+                pl.add_scalar_bar(
+                    'value',
+                    interactive=True, vertical=False,
+                    title_font_size=35,
+                    label_font_size=30,
+                    outline=True, fmt='%10.5f',
+                )
+                pl.export_html('pyvista.html')  # doctest:+SKIP
+
+                HtmlFile = open("pyvista.html", 'r', encoding='utf-8')
+                source_code = HtmlFile.read()
+                components.html(source_code, height=750, width=1000)
 
     @staticmethod
     @st.cache
