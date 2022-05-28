@@ -12,4 +12,7 @@ constitutive_laws:
     # T=a*log10(R)^2
     a: 1.248e-5
 
+webapps:
+  supported_input_data: ['csv', 'dat']
+  supported_mesh_data: ['csv', 'vtk']
 

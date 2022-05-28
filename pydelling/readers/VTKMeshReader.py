@@ -13,8 +13,10 @@ from pathlib import Path
 class VTKMeshReader(MeshPreprocessor):
     has_kd_tree = False
 
-    def __init__(self, filename, kd_tree=True):
+    def __init__(self, filename, kd_tree=True, st_file=False):
         super().__init__()
+        self.is_streamlit = st_file
+
         if Path(filename).suffix == '.vtk':
             self.meshio_mesh: meshio.Mesh = meshio.read(filename)
             self._coords = self.meshio_mesh.points
@@ -25,19 +27,53 @@ class VTKMeshReader(MeshPreprocessor):
         else:
             self.load(filename)
 
+
     def convert_meshio_to_meshpreprocessor(self):
+        if self.is_streamlit:
+            import streamlit as st
         for cell_block in self.meshio_mesh.cells:
+
             element_type = cell_block.type
             if element_type == "wedge":
+                count = 0
+                if self.is_streamlit:
+                    st.write(f'Creating {len(cell_block.data)} wedge elements')
+                    wedge_progress = st.empty()
+                    wedge_progress.progress(0)
                 for element in tqdm(cell_block.data, desc='Setting up wedge elements'):
+                    if self.is_streamlit:
+                        proportion = round(count / len(cell_block.data) * 100)
+                        wedge_progress.progress(proportion)
+                        count += 1
+
                     self.add_wedge(element, self._coords[element])
 
+
             if element_type == 'hexahedron':
+                count = 0
+                if self.is_streamlit:
+                    st.write(f'Creating {len(cell_block.data)} hexahedron elements')
+                    hexahedron_progress = st.empty()
+                    hexahedron_progress.progress(0)
                 for element in tqdm(cell_block.data, desc='Setting up hexahedron elements'):
+                    if self.is_streamlit:
+                        proportion = round(count / len(cell_block.data) * 100)
+                        hexahedron_progress.progress(proportion)
+                        count += 1
                     self.add_hexahedra(element, self._coords[element])
 
             if element_type == 'tetra':
+                count = 0
+                if self.is_streamlit:
+                    st.write(f'Creating {len(cell_block.data)} tetrahedra elements')
+                    tetra_progress = st.empty()
+                    tetra_progress.progress(0)
                 for element in tqdm(cell_block.data, desc='Setting up tetra elements'):
+                    if self.is_streamlit:
+                        proportion = round(count / len(cell_block.data) * 100)
+                        tetra_progress.progress(proportion)
+                        count += 1
+
                     self.add_tetrahedra(element, self._coords[element])
 
     def save(self, filename):
