@@ -24,3 +24,6 @@ tabulate
 mkdocs
 mkdocs-material
 mkdocstrings
+itkwidgets
+pythreejs
+pyvista

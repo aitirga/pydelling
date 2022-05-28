@@ -37,15 +37,16 @@ class InputComponent(BaseComponent):
             # Every form must have a submit button.
             submitted = st.form_submit_button("Upload")
             if submitted:
-                if whitespace_delimiter:
-                    read_data = pd.read_csv(data, delim_whitespace=whitespace_delimiter)
-                else:
-                    read_data = pd.read_csv(data, sep=sep)
-                st.dataframe(read_data.head())
-                self._value = read_data
-                st.session_state[f'{self.key}_done'] = True
-                if not self.key in st.session_state:
-                    st.session_state[f'{self.key}'] = read_data
+                with(st.spinner(f'Loading data')):
+                    if whitespace_delimiter:
+                        read_data = pd.read_csv(data, delim_whitespace=whitespace_delimiter)
+                    else:
+                        read_data = pd.read_csv(data, sep=sep)
+                    st.dataframe(read_data.head())
+                    self._value = read_data
+                    st.session_state[f'{self.key}_done'] = True
+                    if not self.key in st.session_state:
+                        st.session_state[f'{self.key}'] = read_data
 
 
     def run_vtk_input(self):
