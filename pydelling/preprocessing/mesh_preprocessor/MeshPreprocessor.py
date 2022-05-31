@@ -22,10 +22,14 @@ class MeshPreprocessor(object):
     _coords = None
     _centroids = None
     is_intersected = False
+    is_streamlit = False
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.unordered_nodes = {}
         self.elements = []
+        if 'st_file' in kwargs:
+            self.is_streamlit = True
+            import streamlit as st
 
         self.find_intersection_stats = {
             'total_intersections': 0,

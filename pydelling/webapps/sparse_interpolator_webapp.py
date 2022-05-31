@@ -96,6 +96,9 @@ class SparseInterpolatorWebapp(WebAppRunner):
             elif selected_type == 'vtk':
                 InputComponent(input_type='vtk', key='mesh_input')
 
+            elif selected_type == 'fem':
+                InputComponent(input_type='fem', key='mesh_input')
+
         if st.session_state['mesh_input_done']:
             st.subheader('Step 3: Interpolate data')
             input_data = self.input_data[[x_col, y_col, z_col, target_col]]
@@ -104,6 +107,8 @@ class SparseInterpolatorWebapp(WebAppRunner):
                 mesh_data = mesh_data.centroids
             elif selected_type == 'csv':
                 mesh_data = st.session_state['mesh_input'][[x_col, y_col, z_col]].values
+            elif selected_type == 'fem':
+                mesh_data = st.session_state['mesh_input'].centroids
             with st.form('interpolation_step'):
                 st.markdown("""Choose the interpolation method""")
                 interpolation_method = st.selectbox('interpolation method', ['nearest', 'linear', 'cubic'], index=0)

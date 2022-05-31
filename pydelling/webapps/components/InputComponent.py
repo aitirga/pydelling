@@ -4,7 +4,7 @@ from pydelling.webapps.components import BaseComponent
 from pydelling.webapps import WebAppRunner
 from pydelling.config import config
 import streamlit as st
-from pydelling.readers import VTKMeshReader
+from pydelling.readers import VTKMeshReader, FemReader
 from pathlib import Path
 
 class InputComponent(BaseComponent):
@@ -24,6 +24,8 @@ class InputComponent(BaseComponent):
             self.run_csv_input()
         elif self.input_type == 'vtk':
             self.run_vtk_input()
+        elif self.input_type == 'fem':
+            self.run_fem_input()
 
     def run_csv_input(self):
         with st.form(f"{self.key}_form"):
@@ -65,5 +67,17 @@ class InputComponent(BaseComponent):
                 st.session_state[f'{self.key}_done'] = True
 
 
-
-
+    def run_fem_input(self):
+        with st.form(f'{self.key}_form'):
+            st.write("Drop your mesh/centroid data (the mesh/location you want to interpolate into) in the box below")
+            st.markdown('This data must be in FEM ASCII format')
+            data = st.file_uploader("Upload your data", type='fem')
+            new_submit = st.form_submit_button("Upload")
+            if new_submit:
+                # Write file to temp directory
+                with open('temp.vtk', 'wb') as f:
+                    f.write(data.getbuffer())
+                vtk_mesh = FemReader('temp.vtk', st_file=True)
+                Path('temp.vtk').unlink()
+                st.session_state[f'{self.key}'] = vtk_mesh
+                st.session_state[f'{self.key}_done'] = True
