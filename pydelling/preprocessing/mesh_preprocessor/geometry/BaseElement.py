@@ -27,6 +27,7 @@ class BaseElement(BaseAbstractMeshObject):
         self.type = None
         self.meshio_type = None
         self.associated_fractures = {}
+        self.associated_faults = {}
         self.total_fracture_volume = 0
         self.area = 0
 
