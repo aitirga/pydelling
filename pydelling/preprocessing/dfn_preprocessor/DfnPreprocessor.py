@@ -1,12 +1,14 @@
 import numpy as np
 
 from .Fracture import Fracture
+from .Fault import Fault
 from typing import List
 import pandas as pd
 import logging
 from tqdm import tqdm
 import plotly.graph_objects as go
 from tabulate import tabulate
+from pathlib import Path
 
 
 logger = logging.getLogger(__name__)
@@ -14,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class DfnPreprocessor(object):
     dfn: List[Fracture] = []
+    faults: List[Fault] = []
 
     def __getitem__(self, item):
         return self.dfn[item]
@@ -24,6 +27,8 @@ class DfnPreprocessor(object):
     def clean_dfn(self):
         """Removes dfn object"""
         self.dfn = []
+        self.faults = []
+
 
     def load_fractures(self, pd_df: pd,
                        dip='dip',
@@ -70,6 +75,18 @@ class DfnPreprocessor(object):
             transmissivity_constant=transmissivity_constant,
         ))
 
+    def add_fault(self, filename=None,
+                  mesh=None,
+                  aperture=None):
+        """Adds a fault to the dfn object."""
+        if isinstance(filename, Fault):
+            self.faults.append(filename)
+        elif isinstance(filename, str) or isinstance(filename, Path):
+            self.faults.append(Fault(filename=filename, mesh=mesh, aperture=aperture))
+        else:
+            logger.error('Fault filename must be a string or Fault object')
+            raise TypeError('Fault filename must be a string or Fault object')
+
     def summary(self):
         """Prints a summary of the dfn object."""
         print(tabulate(
@@ -106,6 +123,11 @@ class DfnPreprocessor(object):
         for fracture in tqdm(self.dfn):
             obj_file.write(fracture.to_obj(global_id=global_id, method=method))
             global_id += fracture.side_points
+        for fault in self.faults:
+            fault_obj = fault.to_obj(global_id=global_id)
+            obj_file.write(fault_obj)
+            global_id += fault.num_points
+
 
     def to_dfnworks(self, filename='dfn.dat', method='v1'):
         '''Exports the dfn object to dfnworks format.'''
