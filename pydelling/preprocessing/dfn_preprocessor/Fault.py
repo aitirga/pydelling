@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 class Fault:
+    local_id = 0
     def __init__(self, filename=None,
                  mesh=None,
                  polygon=None,
@@ -21,6 +22,7 @@ class Fault:
             self.meshio_mesh: meshio.Mesh = mesh
         self.trimesh_mesh: trimesh.Trimesh = trimesh.load_mesh(filename)
         self.aperture = aperture
+        Fault.local_id += 1
 
     def distance(self, points: np.ndarray):
         if points.shape[0] == 3:
@@ -41,7 +43,7 @@ class Fault:
             str_obj += "\n"
         return str_obj
 
-    def to_obj(self, filename=None, global_id=0):
+    def to_obj(self, filename=None, global_id=1):
         str_obj = self._to_obj(global_id=global_id)
         if filename is not None:
             with open(filename, 'w') as f:
@@ -64,6 +66,15 @@ class Fault:
     @property
     def num_cells(self):
         return self.meshio_mesh.cells[0].data.shape[0]
+
+    @property
+    def centroid(self):
+        return self.trimesh_mesh.centroid
+
+    @property
+    def size(self):
+        return np.sqrt(self.trimesh_mesh.area)
+
 
 
 

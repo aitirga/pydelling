@@ -26,6 +26,7 @@ class DfnUpscaler:
         if not parallel:
             for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
                 self.find_intersection_points_between_fracture_and_mesh(fracture)
+            self.find_fault_cells()
         else:
             from joblib import Parallel, delayed
             import multiprocessing
@@ -41,7 +42,6 @@ class DfnUpscaler:
                 for intersection in self.all_intersected_points:
                     for point in intersection:
                         writer.writerow([point.x, point.y, point.z])
-
 
 
     def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture, export_stats=False):
@@ -79,9 +79,26 @@ class DfnUpscaler:
             self.mesh.find_intersection_stats['total_intersections'] += 1
 
         self.mesh.is_intersected = True
-
-
         return intersection_points
+
+    def find_fault_cells(self):
+        """Finds the fault cells in the mesh"""
+        logger.info('Finding fault cells')
+        for fault in self.dfn.faults:
+            kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fault.centroid, distance=fault.size)
+            print(len(kd_tree_filtered_elements))
+            if len(kd_tree_filtered_elements) == 0:
+                continue
+            kd_tree_centroids = np.array([elem.centroid for elem in kd_tree_filtered_elements])
+            print(kd_tree_centroids)
+            distances = fault.distance(kd_tree_centroids)
+            for element, distance in zip(kd_tree_filtered_elements, distances):
+                distance = np.abs(distance)
+                element.associated_faults[fault.local_id] = {
+                    'distance': distance,
+                }
+
+
 
     def _compute_fracture_volume_in_elements(self):
         # Compute volume of fractures in each element.
@@ -110,6 +127,23 @@ class DfnUpscaler:
         self.upscaled_porosity = upscaled_porosity
 
         return upscaled_porosity
+
+    def export_fault_distances(self):
+        """Exports the fault distances"""
+        distance = {}
+
+        for elem in tqdm(self.mesh.elements, desc="Computing distances"):
+            distance[elem.local_id] = 0
+            for fault in elem.associated_faults:
+                fault_dict = elem.associated_faults[fault]
+                distance[elem.local_id] += fault_dict['distance'] if 'distance' in fault_dict else 0
+
+        vtk_porosity = np.asarray(self.mesh.elements)
+        for local_id in distance:
+            vtk_porosity[local_id] = distance[local_id]
+
+        self.mesh.cell_data['distance'] = [vtk_porosity.tolist()]
+        self.distance = distance
 
     def upscale_mesh_permeability(self, matrix_permeability=None, rho=1000, g=9.8, mu=8.9e-4,
                                   mode='full_tensor'):
