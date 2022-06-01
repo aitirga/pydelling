@@ -14,6 +14,9 @@ class Fault:
                  mesh=None,
                  polygon=None,
                  aperture=None,
+                 transmissivity=None,
+                 porosity=None,
+                 storativity=None,
                  ):
 
         if filename is not None:
@@ -23,6 +26,10 @@ class Fault:
         self.trimesh_mesh: trimesh.Trimesh = trimesh.load_mesh(filename)
         self.aperture = aperture
         self.associated_elements = []
+        self.transmissivity = transmissivity
+        self.porosity = porosity
+        self.storativity = storativity
+
         Fault.local_id += 1
 
     def distance(self, points: np.ndarray):
