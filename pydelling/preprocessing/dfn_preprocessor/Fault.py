@@ -22,6 +22,7 @@ class Fault:
             self.meshio_mesh: meshio.Mesh = mesh
         self.trimesh_mesh: trimesh.Trimesh = trimesh.load_mesh(filename)
         self.aperture = aperture
+        self.associated_elements = []
         Fault.local_id += 1
 
     def distance(self, points: np.ndarray):

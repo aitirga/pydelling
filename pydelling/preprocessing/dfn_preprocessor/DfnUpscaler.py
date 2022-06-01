@@ -86,19 +86,17 @@ class DfnUpscaler:
         logger.info('Finding fault cells')
         for fault in self.dfn.faults:
             kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fault.centroid, distance=fault.size)
-            print(len(kd_tree_filtered_elements))
             if len(kd_tree_filtered_elements) == 0:
                 continue
             kd_tree_centroids = np.array([elem.centroid for elem in kd_tree_filtered_elements])
-            print(kd_tree_centroids)
             distances = fault.distance(kd_tree_centroids)
             for element, distance in zip(kd_tree_filtered_elements, distances):
                 distance = np.abs(distance)
-                element.associated_faults[fault.local_id] = {
-                    'distance': distance,
-                }
-
-
+                if distance < fault.aperture / 2:
+                    element.associated_faults[fault.local_id] = {
+                        'distance': distance,
+                    }
+                    fault.associated_elements.append(element)
 
     def _compute_fracture_volume_in_elements(self):
         # Compute volume of fractures in each element.
@@ -138,11 +136,11 @@ class DfnUpscaler:
                 fault_dict = elem.associated_faults[fault]
                 distance[elem.local_id] += fault_dict['distance'] if 'distance' in fault_dict else 0
 
-        vtk_porosity = np.asarray(self.mesh.elements)
+        vtk_distance = np.asarray(self.mesh.elements)
         for local_id in distance:
-            vtk_porosity[local_id] = distance[local_id]
+            vtk_distance[local_id] = distance[local_id]
 
-        self.mesh.cell_data['distance'] = [vtk_porosity.tolist()]
+        self.mesh.cell_data['distance'] = [vtk_distance.tolist()]
         self.distance = distance
 
     def upscale_mesh_permeability(self, matrix_permeability=None, rho=1000, g=9.8, mu=8.9e-4,
