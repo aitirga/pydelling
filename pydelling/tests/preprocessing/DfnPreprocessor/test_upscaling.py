@@ -50,7 +50,7 @@ class UpscalingCase(unittest.TestCase):
         porosity_solution = 0.0125
         #self.assertEqual(porosity, porosity_solution)
         self.assertAlmostEqual(porosity[0], porosity_solution)
-        permeability_solution = np.array([[1.147004,0,0],[0,1.147004,0],[0,0,0]])
+        permeability_solution = np.array([[114.70037453,0,0],[0,114.70037453,0],[0,0,0]])
         nptest.assert_array_almost_equal(permeability[0], permeability_solution)
 
 
