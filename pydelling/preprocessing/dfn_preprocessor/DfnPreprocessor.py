@@ -37,6 +37,7 @@ class DfnPreprocessor(object):
                        y='position-y',
                        z='position-z',
                        size='size',
+                       aperture=None,
                        aperture_constant=None,
                        transmissivity_constant=None,
                        ):
@@ -57,6 +58,7 @@ class DfnPreprocessor(object):
                 z=row[z],
                 size=row[size],
                 aperture_constant=aperture_constant,
+                aperture=aperture,
                 transmissivity_constant=transmissivity_constant,
             )
 
