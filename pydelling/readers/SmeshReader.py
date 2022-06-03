@@ -34,20 +34,26 @@ class SmeshReader(MeshPreprocessor):
                 st.write(f'Reading {number_of_nodes} nodes')
             for _ in tqdm(range(number_of_nodes), desc='Reading nodes'):
                 node_info = f.readline().split()
+                prop = int(np.ceil(_ / number_of_nodes * 100))
+                if prop > 100:
+                    prop = 100
                 if self.is_streamlit:
-                    prop = _ / number_of_nodes * 100
-                    empty_progress.progress(prop)
+                    if prop % 10 == 0:
+                        empty_progress.progress(prop)
                 self.aux_nodes[int(node_info[0])] = np.array([float(node_info[1]), float(node_info[2]), float(node_info[3])])
             # Read elements
             number_of_elements = int(f.readline().split()[0])
             if self.is_streamlit:
-                empty_progress = st.empty()
-                empty_progress.progress(0)
+                empty_progress_elements = st.empty()
+                empty_progress_elements.progress(0)
                 st.write(f'Generating {number_of_elements} elements')
             for _ in tqdm(range(number_of_elements), desc='Reading elements'):
+                prop = int(np.ceil(_ / number_of_elements * 100))
+                if prop > 100:
+                    prop = 100
                 if self.is_streamlit:
-                    prop = _ / number_of_elements * 100
-                    empty_progress.progress(prop)
+                    if prop % 5 == 0:
+                        empty_progress_elements.progress(prop)
                 element_info = f.readline().split()
                 element_type = int(element_info[0])
                 element_node_ids = np.array([int(node_id) for node_id in element_info[1:element_type + 1]])

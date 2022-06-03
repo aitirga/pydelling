@@ -391,3 +391,6 @@ class MeshPreprocessor(object):
             self._coords = save_dictionary['coords']
             self.kd_tree = save_dictionary['kd_tree']
             self.has_kd_tree = save_dictionary['has_kd_tree']
+
+    def __repr__(self):
+        return f'Mesh with {len(self.elements)} elements and {len(self.coords)} nodes.'
