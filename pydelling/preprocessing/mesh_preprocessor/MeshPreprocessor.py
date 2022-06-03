@@ -23,6 +23,7 @@ class MeshPreprocessor(object):
     _centroids = None
     is_intersected = False
     is_streamlit = False
+    aux_nodes = {}
 
     def __init__(self, *args, **kwargs):
         self.unordered_nodes = {}
@@ -367,4 +368,26 @@ class MeshPreprocessor(object):
         return self.coords[:, 2].max()
 
 
+    def save(self, filename):
+        """Save the mesh to a file."""
+        import pickle
+        logger.info(f'Saving mesh to {filename}')
+        with open(filename, 'wb') as f:
+            save_dictionary = {
+                'elements': self.elements,
+                'coords': self.coords,
+                'kd_tree': self.kd_tree,
+                'has_kd_tree': self.has_kd_tree,
+            }
+            pickle.dump(save_dictionary, f)
 
+    def load(self, filename):
+        """Load the mesh from a file."""
+        logger.info(f'Loading mesh from {filename}')
+        import pickle
+        with open(filename, 'rb') as f:
+            save_dictionary = pickle.load(f)
+            self.elements = save_dictionary['elements']
+            self._coords = save_dictionary['coords']
+            self.kd_tree = save_dictionary['kd_tree']
+            self.has_kd_tree = save_dictionary['has_kd_tree']
