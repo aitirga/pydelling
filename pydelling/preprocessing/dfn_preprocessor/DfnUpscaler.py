@@ -118,19 +118,44 @@ class DfnUpscaler:
             #     pass
             #     #print(elem.total_fracture_volume, elem.volume, matrix_porosity[elem])
 
+        for fault in self.dfn.faults:
+            for element in fault.associated_elements:
+                upscaled_porosity[elem.local_id] = fault.porosity
+
         vtk_porosity = np.asarray(self.mesh.elements)
         for local_id in upscaled_porosity:
             vtk_porosity[local_id] = upscaled_porosity[local_id]
-
-        for fault in self.dfn.faults:
-            for element in fault.associated_elements:
-                vtk_porosity[element.local_id] = fault.porosity
-
 
         self.mesh.cell_data['upscaled_porosity'] = [vtk_porosity.tolist()]
         self.upscaled_porosity = upscaled_porosity
 
         return upscaled_porosity
+
+    def upscale_mesh_storativity(self, matrix_storativity=None):
+        # Compute upscaled storativity for each element.
+        self._compute_fracture_volume_in_elements()
+
+        upscaled_storativity = {}
+
+        for elem in tqdm(self.mesh.elements, desc="Upscaling fractures storativity"):
+            upscaled_storativity[elem.local_id] = 0
+            for frac_name in elem.associated_fractures:
+                frac_dict = elem.associated_fractures[frac_name]
+                frac = frac_dict['fracture']
+                upscaled_storativity[elem.local_id] += frac.storativity * frac_dict['volume'] / elem.volume
+
+        for fault in self.dfn.faults:
+            for element in fault.associated_elements:
+                upscaled_storativity[elem.local_id] = fault.storativity
+
+        vtk_storativity = np.asarray(self.mesh.elements)
+        for local_id in upscaled_storativity:
+            vtk_storativity[local_id] = upscaled_storativity[local_id]
+
+        self.mesh.cell_data['upscaled_storativity'] = [vtk_storativity.tolist()]
+        self.upscaled_storativity = upscaled_storativity
+
+        return upscaled_storativity
 
     def export_fault_distances(self):
         """Exports the fault distances"""
@@ -184,11 +209,13 @@ class DfnUpscaler:
 
         # UPSCALED PERMEABILITY
         fracture_hk = {}
+        fault_hk = {}
         upscaled_hk = {}
+
 
         # For each fracture, compute permeability tensor,
         # and add it to the elements intersected by the fracture.
-        for elem in tqdm(self.mesh.elements, desc="Upscaling permeability"):
+        for elem in tqdm(self.mesh.elements, desc="Upscaling fractures permeability"):
             fracture_hk[elem.local_id] = np.zeros([3, 3])
             upscaled_hk[elem.local_id] = np.zeros([3, 3])
             for frac_name in elem.associated_fractures:
@@ -236,6 +263,57 @@ class DfnUpscaler:
 
             # Sum permeability contribution from fractures and from matrix.
             upscaled_hk[elem.local_id] = fracture_hk[elem.local_id] + matrix_permeability_tensor[elem.local_id] * (1 - (elem.total_fracture_volume / elem.volume))
+
+        # For each fault, compute permeability tensor,
+        # and add it to the elements intersected by the fault.
+        for elem in tqdm(self.mesh.elements, desc="Upscaling faults permeability"):
+            fracture_hk[elem.local_id] = np.zeros([3, 3])
+            upscaled_hk[elem.local_id] = np.zeros([3, 3])
+            for fault_name in elem.associated_faults:
+                fault_dict = elem.associated_faults[fault_name]
+                fault = fault_dict['fault']
+                # n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
+                # n2 = math.cos(frac.dip * (math.pi / 180)) * math.cos(frac.dip_dir * (math.pi / 180))
+                # n3 = -1 * math.sin(frac.dip * (math.pi / 180))
+                n1 = fault.unit_normal_vector[0]
+                n2 = fault.unit_normal_vector[1]
+                n3 = fault.unit_normal_vector[2]
+                #frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
+                fault.hk = fault.transmissivity / fault.aperture
+
+            if 'mode' == 'isotropy':
+                # Add fault permeability. Element porosity equals to 1 when intersected by faults.
+                fracture_hk[elem.local_id][0, 0] += fault.hk
+
+            else:  # 'anisotropy' in 'mode':
+                perm_tensor = np.zeros([3, 3])
+                # for i in range(1, 4):
+                #    for j in range(1, 4):
+                # Compute tensor
+                perm_tensor[0, 0] = fault.hk * ((n2 ** 2) + (n3 ** 2))
+                perm_tensor[0, 1] = fault.hk * (-1) * n1 * n2
+                perm_tensor[0, 2] = fault.hk * (-1) * n1 * n3
+                perm_tensor[1, 1] = fault.hk * ((n3 ** 2) + (n1 ** 2))
+                perm_tensor[1, 2] = fault.hk * (-1) * n2 * n3
+                perm_tensor[2, 2] = fault.hk * ((n1 ** 2) + (n2 ** 2))
+
+                if 'mode' == 'anisotropy_principals':
+                    eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])
+                    perm_tensor = eigen_perm_tensor
+
+                # Add fault permeability. Element porosity equals to 1 when intersected by faults.
+                fault_hk[elem.local_id][0, 0] += perm_tensor[0, 0]
+                fault_hk[elem.local_id][0, 1] += perm_tensor[0, 1]
+                fault_hk[elem.local_id][0, 2] += perm_tensor[0, 1]
+                fault_hk[elem.local_id][1, 0] += perm_tensor[0, 1]
+                fault_hk[elem.local_id][1, 1] += perm_tensor[1, 1]
+                fault_hk[elem.local_id][1, 2] += perm_tensor[1, 2]
+                fault_hk[elem.local_id][2, 0] += perm_tensor[0, 1]
+                fault_hk[elem.local_id][2, 1] += perm_tensor[1, 2]
+                fault_hk[elem.local_id][2, 2] += perm_tensor[2, 2]
+
+            # Sum permeability contribution from faults.
+            upscaled_hk[elem.local_id] = upscaled_hk[elem.local_id] + fault_hk[elem.local_id]
 
         #Export values to VTK
         vtk_kxx = np.asarray(self.mesh.elements)

@@ -1,3 +1,4 @@
+
 """
 Base interface for a reader class
 """
