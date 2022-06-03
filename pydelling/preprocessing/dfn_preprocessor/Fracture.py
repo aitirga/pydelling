@@ -10,9 +10,10 @@ class Fracture(object):
     local_id = 0
     eps = 1e-8
     _transmissivity = None
+    _storativity = None
 
     def __init__(self, dip, dip_dir, x, y, z, size=None, aperture=None, aperture_constant=None,
-                 transmissivity_constant=None, ):
+                 transmissivity_constant=None, storativity_constant=None):
         self.side_points = None
         if dip is not None:
             assert dip_dir is not None
@@ -32,6 +33,7 @@ class Fracture(object):
         self.intersection_dictionary = {}
         self.aperture_constant = aperture_constant
         self.transmissivity_constant = transmissivity_constant
+        self.storativity_constant = storativity_constant
         self.aperture = self.compute_aperture()
         self.local_id = Fracture.local_id
 
@@ -314,5 +316,15 @@ class Fracture(object):
         elif self.transmissivity_constant is not None:
             computed_transmissivity = self.transmissivity_constant * (np.log10(self.size / 2.0)) ** 2
             return computed_transmissivity
+        else:
+            return np.power(self.aperture, 3) / 12
+
+    def storativity(self):
+        """Returns the storativity of the fracture"""
+        if self._storativity is not None:
+            return self._storativity
+        elif self.storativity_constant is not None:
+            computed_storativity = self.storativity_constant * np.log10(self.size / 2.0)
+            return computed_storativity
         else:
             return np.power(self.aperture, 3) / 12
