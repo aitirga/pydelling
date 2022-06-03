@@ -4,17 +4,24 @@ from pydelling.webapps.components import BaseComponent
 from pydelling.webapps import WebAppRunner
 from pydelling.config import config
 import streamlit as st
-from pydelling.readers import VTKMeshReader, FemReader
+from pydelling.readers import VTKMeshReader, FemReader, SmeshReader
 from pathlib import Path
+from translate import Translator
+
 
 class InputComponent(BaseComponent):
     """Creates a streamlit block in which the user can drag and drop a file and the resulting object is returned"""
-    def __init__(self, input_type: str, key: str, webapp: WebAppRunner=None):
+    def __init__(self, input_type: str, key: str, webapp: WebAppRunner=None, lang=None):
         self.key = key
         if not f'{self.key}_done' in st.session_state:
             st.session_state[f'{self.key}_done'] = False
+        self.translate = False
 
         self.input_type = input_type
+        if lang is not None:
+            self.translator = Translator(to_lang=lang)
+            self.translate = True
+
         super().__init__(webapp)
 
 
@@ -26,6 +33,8 @@ class InputComponent(BaseComponent):
             self.run_vtk_input()
         elif self.input_type == 'fem':
             self.run_fem_input()
+        elif self.input_type == 'smesh':
+            self.run_smesh_input()
 
     def run_csv_input(self):
         with st.form(f"{self.key}_form"):
@@ -52,11 +61,21 @@ class InputComponent(BaseComponent):
 
 
     def run_vtk_input(self):
+        desc = "Drop your mesh/centroid data (the mesh/location you want to interpolate into) in the box below"
+        format_desc = 'This data must be in VTK format'
+        upload_desc = 'Upload your data'
+        upload_button = 'Upload'
+        if self.translate:
+            desc = self.translator.translate(desc)
+            format_desc = self.translator.translate(format_desc)
+            upload_desc = self.translator.translate(upload_desc)
+            upload_button = self.translator.translate(upload_button)
+
         with st.form(f'{self.key}_form'):
-            st.write("Drop your mesh/centroid data (the mesh/location you want to interpolate into) in the box below")
-            st.markdown('This data must be in VTK format')
-            data = st.file_uploader("Upload your data", type='vtk')
-            new_submit = st.form_submit_button("Upload")
+            st.write(desc)
+            st.markdown(format_desc)
+            data = st.file_uploader(upload_desc, type='vtk')
+            new_submit = st.form_submit_button(upload_button)
             if new_submit:
                 # Write file to temp directory
                 with open('temp.vtk', 'wb') as f:
@@ -68,16 +87,51 @@ class InputComponent(BaseComponent):
 
 
     def run_fem_input(self):
+        desc = "Drop your mesh/centroid data (the mesh/location you want to interpolate into) in the box below"
+        format_desc = 'This data must be in FEM ASCII format'
+        upload_desc = 'Upload your data'
+        upload_button = 'Upload'
+        if self.translate:
+            desc = self.translator.translate(desc)
+            format_desc = self.translator.translate(format_desc)
+            upload_desc = self.translator.translate(upload_desc)
+            upload_button = self.translator.translate(upload_button)
+
         with st.form(f'{self.key}_form'):
-            st.write("Drop your mesh/centroid data (the mesh/location you want to interpolate into) in the box below")
-            st.markdown('This data must be in FEM ASCII format')
-            data = st.file_uploader("Upload your data", type='fem')
-            new_submit = st.form_submit_button("Upload")
+            st.write(desc)
+            st.markdown(format_desc)
+            data = st.file_uploader(upload_desc, type='fem')
+            new_submit = st.form_submit_button(upload_button)
             if new_submit:
                 # Write file to temp directory
-                with open('temp.vtk', 'wb') as f:
+                with open('temp.fem', 'wb') as f:
                     f.write(data.getbuffer())
-                vtk_mesh = FemReader('temp.vtk', st_file=True)
-                Path('temp.vtk').unlink()
+                vtk_mesh = FemReader('temp.fem', st_file=True)
+                Path('temp.fem').unlink()
+                st.session_state[f'{self.key}'] = vtk_mesh
+                st.session_state[f'{self.key}_done'] = True
+
+
+    def run_smesh_input(self):
+        desc = "Drop your mesh/centroid data (the mesh/location you want to interpolate into) in the box below"
+        format_desc = 'This data must be in SMesh ASCII format'
+        upload_desc = 'Upload your data'
+        upload_button = 'Upload'
+        if self.translate:
+            desc = self.translator.translate(desc)
+            format_desc = self.translator.translate(format_desc)
+            upload_desc = self.translator.translate(upload_desc)
+            upload_button = self.translator.translate(upload_button)
+        with st.form(f'{self.key}_form'):
+            st.write(desc)
+            st.markdown(format_desc)
+            data = st.file_uploader(upload_desc, type='smesh')
+            new_submit = st.form_submit_button(upload_button)
+            if new_submit:
+                # Write file to temp directory
+                with open('temp.smesh', 'wb') as f:
+                    f.write(data.getbuffer())
+                vtk_mesh = SmeshReader('temp.smesh', st_file=True)
+                Path('temp.smesh').unlink()
                 st.session_state[f'{self.key}'] = vtk_mesh
                 st.session_state[f'{self.key}_done'] = True

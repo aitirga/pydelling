@@ -14,5 +14,5 @@ constitutive_laws:
 
 webapps:
   supported_input_data: ['csv', 'dat']
-  supported_mesh_data: ['csv', 'vtk', 'fem']
+  supported_mesh_data: ['csv', 'vtk', 'fem', 'smesh']
 

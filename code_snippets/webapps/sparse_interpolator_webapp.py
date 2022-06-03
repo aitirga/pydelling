@@ -98,23 +98,30 @@ class SparseInterpolatorWebapp(WebAppRunner):
 
             elif selected_type == 'fem':
                 InputComponent(input_type='fem', key='mesh_input')
+            elif selected_type == 'smesh':
+                InputComponent(input_type='smesh', key='mesh_input')
+
 
         if st.session_state['mesh_input_done']:
             st.subheader('Step 3: Interpolate data')
             input_data = self.input_data[[x_col, y_col, z_col, target_col]]
-            if selected_type == 'vtk':
-                mesh_data = st.session_state['mesh_input']
-                mesh_data = mesh_data.centroids
-            elif selected_type == 'csv':
-                mesh_data = st.session_state['mesh_input'][[x_col, y_col, z_col]].values
-            elif selected_type == 'fem':
-                mesh_data = st.session_state['mesh_input'].centroids
+            with st.spinner('Computing mesh centroids'):
+                if selected_type == 'vtk':
+                    mesh_data = st.session_state['mesh_input'].centroids
+                elif selected_type == 'csv':
+                    mesh_data = st.session_state['mesh_input'][[x_col, y_col, z_col]].values
+                elif selected_type == 'fem':
+                    mesh_data = st.session_state['mesh_input'].centroids
+                elif selected_type == 'smesh':
+                    mesh_data = st.session_state['mesh_input'].centroids
+
             with st.form('interpolation_step'):
                 st.markdown("""Choose the interpolation method""")
                 interpolation_method = st.selectbox('interpolation method', ['nearest', 'linear', 'cubic'], index=0)
 
-                interpolator = SparseDataInterpolator(interpolation_data=input_data, mesh_data=mesh_data)
-                submit = st.form_submit_button()
+                with st.spinner('Setting up interpolation engine'):
+                    interpolator = SparseDataInterpolator(interpolation_data=input_data, mesh_data=mesh_data)
+                submit = st.form_submit_button('Interpolate')
                 if submit:
                     with st.spinner('interpolating data'):
                         interpolator.run(method=interpolation_method)
@@ -128,12 +135,13 @@ class SparseInterpolatorWebapp(WebAppRunner):
             interpolated_block = st.session_state['interpolated_data']
 
             st.subheader('Step 4: Download interpolated data')
-            st.download_button(
-                label="Download data as CSV",
-                data=self.convert_df(interpolated_block),
-                file_name='interpolated_data.csv',
-                mime='text/csv',
-            )
+            with st.spinner('Generating download link'):
+                st.download_button(
+                    label="Download data as CSV",
+                    data=self.convert_df(interpolated_block),
+                    file_name='interpolated_data.csv',
+                    mime='text/csv',
+                )
             visualize = st.checkbox('Visualize interpolated data')
             if visualize:
                 import pyvista as pv
