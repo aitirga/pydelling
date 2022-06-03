@@ -212,6 +212,22 @@ class DfnPreprocessor(object):
         plt.hist([fracture.aperture for fracture in self.dfn], bins=100)
         return fig, ax
 
+    def plot_transmissivity_histogram(self, filename='transmissivity_histogram.png'):
+        """Plots the transmissivity histogram."""
+        logger.info(f'Plotting aperture histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([fracture.transmissivity for fracture in self.dfn], bins=100)
+        return fig, ax
+
+    def plot_storativity_histogram(self, filename='storativity_histogram.png'):
+        """Plots the storativity histogram."""
+        logger.info(f'Plotting aperture histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([fracture.storativity for fracture in self.dfn], bins=100)
+        return fig, ax
+
     @property
     def apertures(self):
         return [fracture.aperture for fracture in self.dfn]
