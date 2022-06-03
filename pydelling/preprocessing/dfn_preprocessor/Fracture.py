@@ -317,7 +317,10 @@ class Fracture(object):
             computed_transmissivity = self.transmissivity_constant * (np.log10(self.size / 2.0)) ** 2
             return computed_transmissivity
         else:
-            return np.power(self.aperture, 3) / 12
+            rho = 1000
+            g = 9.8
+            mu = 8.9E-4
+            return (np.power(self.aperture, 2) * rho * g) / (12 * mu)
 
     def storativity(self):
         """Returns the storativity of the fracture"""
@@ -327,4 +330,4 @@ class Fracture(object):
             computed_storativity = self.storativity_constant * np.log10(self.size / 2.0)
             return computed_storativity
         else:
-            return np.power(self.aperture, 3) / 12
+            return 0.0
