@@ -40,6 +40,7 @@ class DfnPreprocessor(object):
                        aperture=None,
                        aperture_constant=None,
                        transmissivity_constant=None,
+                       storativity_constant=None
                        ):
         """
         Loads the fractures from a pandas dataframe to the dfn object.
@@ -58,11 +59,12 @@ class DfnPreprocessor(object):
                 z=row[z],
                 size=row[size],
                 aperture_constant=aperture_constant,
-                aperture=aperture,
+                aperture=row[aperture],
                 transmissivity_constant=transmissivity_constant,
+                storativity_constant=storativity_constant
             )
 
-    def add_fracture(self,  x, y, z, dip=None, dip_dir=None, size=None, aperture=None, aperture_constant=1E-3, transmissivity_constant=None,):
+    def add_fracture(self,  x, y, z, dip=None, dip_dir=None, size=None, aperture=None, aperture_constant=1E-3, transmissivity_constant=None, storativity_constant=None):
         """Add individual fracture to the dfn object.
         """
         self.dfn.append(Fracture(
@@ -75,6 +77,7 @@ class DfnPreprocessor(object):
             aperture=aperture,
             aperture_constant=aperture_constant,
             transmissivity_constant=transmissivity_constant,
+            storativity_constant=storativity_constant
         ))
 
     def add_fault(self, filename=None,

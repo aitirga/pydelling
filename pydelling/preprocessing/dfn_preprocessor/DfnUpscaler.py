@@ -132,8 +132,6 @@ class DfnUpscaler:
         return upscaled_porosity
 
     def upscale_mesh_storativity(self, matrix_storativity=None):
-        # Compute upscaled storativity for each element.
-        self._compute_fracture_volume_in_elements()
 
         upscaled_storativity = {}
 

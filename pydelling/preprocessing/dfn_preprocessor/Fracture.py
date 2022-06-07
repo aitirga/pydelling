@@ -322,6 +322,7 @@ class Fracture(object):
             mu = 8.9E-4
             return (np.power(self.aperture, 2) * rho * g) / (12 * mu)
 
+    @property
     def storativity(self):
         """Returns the storativity of the fracture"""
         if self._storativity is not None:
