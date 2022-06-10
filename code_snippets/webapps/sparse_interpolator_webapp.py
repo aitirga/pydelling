@@ -95,7 +95,6 @@ class SparseInterpolatorWebapp(WebAppRunner):
 
             elif selected_type == 'vtk':
                 InputComponent(input_type='vtk', key='mesh_input')
-
             elif selected_type == 'fem':
                 InputComponent(input_type='fem', key='mesh_input')
             elif selected_type == 'smesh':
@@ -142,6 +141,7 @@ class SparseInterpolatorWebapp(WebAppRunner):
                     file_name='interpolated_data.csv',
                     mime='text/csv',
                 )
+
             visualize = st.checkbox('Visualize interpolated data')
             if visualize:
                 import pyvista as pv

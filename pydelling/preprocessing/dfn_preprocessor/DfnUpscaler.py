@@ -85,9 +85,14 @@ class DfnUpscaler:
         """Finds the fault cells in the mesh"""
         logger.info('Finding fault cells')
         for fault in self.dfn.faults:
+
+
             kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fault.centroid, distance=fault.size)
             if len(kd_tree_filtered_elements) == 0:
                 continue
+            logger.info(f'Processing fault {fault}')
+            logger.info(f'Number of elements in the fault: {len(kd_tree_filtered_elements)}')
+
             kd_tree_centroids = np.array([elem.centroid for elem in kd_tree_filtered_elements])
             distances = fault.distance(kd_tree_centroids)
             for element, distance in zip(kd_tree_filtered_elements, distances):

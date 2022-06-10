@@ -84,6 +84,8 @@ class DfnPreprocessor(object):
                   mesh=None,
                   aperture=None):
         """Adds a fault to the dfn object."""
+        if aperture is None:
+            logger.warning(f'No aperture specified for fault {filename}')
         if isinstance(filename, Fault):
             self.faults.append(filename)
         elif isinstance(filename, str) or isinstance(filename, Path):
