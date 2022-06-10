@@ -30,3 +30,4 @@ streamlit
 sympy
 trimesh
 translate
+altair
