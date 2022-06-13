@@ -1,3 +1,7 @@
+import pathlib
+
+import pandas as pd
+
 from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import Fracture
@@ -6,35 +10,41 @@ from pydelling.utils.geometry_utils import compute_polygon_area
 import logging
 from tqdm import tqdm
 import numpy as np
+import dill
 
 logger = logging.getLogger(__name__)
 
 
 class DfnUpscaler:
-    def __init__(self, dfn: DfnPreprocessor, mesh: MeshPreprocessor, parallel=False, save_intersections=False):
+    def __init__(self, dfn: DfnPreprocessor,
+                 mesh: MeshPreprocessor,
+                 parallel=False,
+                 save_intersections=False,
+                 load_faults:str or pathlib.Path=None,
+                 ):
         self.dfn: DfnPreprocessor = dfn
         self.mesh: MeshPreprocessor = mesh
         logger.info('The DFN and mesh objects have been set properly')
         self.all_intersected_points = []
         self.save_intersections = save_intersections
+        self.load_faults = load_faults
         self._intersect_dfn_with_mesh(parallel=parallel)
 
     def _intersect_dfn_with_mesh(self, parallel=False):
         """Runs the DfnUpscaler"""
         logger.info('Upscaling the DFN to the mesh')
 
-        if not parallel:
-            for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
-                self.find_intersection_points_between_fracture_and_mesh(fracture)
+        for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
+            self.find_intersection_points_between_fracture_and_mesh(fracture)
+        if not self.load_faults:
             self.find_fault_cells()
         else:
-            from joblib import Parallel, delayed
-            import multiprocessing
-            num_cores = multiprocessing.cpu_count()
-            logger.info(f'Running using {num_cores} cores')
-            Parallel(n_jobs=num_cores)(
-                delayed(self.find_intersection_points_between_fracture_and_mesh)(fracture) for fracture in
-                tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)))
+            logger.info(f'Loading fault assignment information from {self.load_faults}')
+            with open(self.load_faults, 'rb') as f:
+                fault_info = dill.load(f)
+                for element in self.mesh.elements:
+                    element.associated_faults = fault_info[element.local_id]
+
 
         if self.save_intersections:
             import csv
@@ -82,12 +92,16 @@ class DfnUpscaler:
         self.mesh.is_intersected = True
         return intersection_points
 
-    def find_fault_cells(self):
+    def find_fault_cells(self, save_fault_cells=True):
         """Finds the fault cells in the mesh"""
         logger.info('Finding fault cells')
+        fault_cells = {}
         for fault in self.dfn.faults:
 
             kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fault.centroid, distance=fault.size)
+
+            if len(kd_tree_filtered_elements) == 0:
+                continue
 
             logger.info(f'Processing fault {fault}')
             logger.info(f'Number of elements in the fault: {len(kd_tree_filtered_elements)}')
@@ -105,23 +119,29 @@ class DfnUpscaler:
             # Filter distances
             distance_vec = np.array(distance_vec)
             distance_vec = np.abs(distance_vec)
-            distance_vec = distance_vec[distance_vec < fault.aperture / 1.75]
-            distance_index = np.where(distance_vec < fault.aperture / 1.75)
-            kd_tree_centroids = kd_tree_centroids[distance_index]
+            distance_vec = pd.DataFrame(distance_vec)
+            distance_vec = distance_vec[distance_vec < fault.aperture * 2].dropna()
+            kd_tree_filtered_elements = [kd_tree_filtered_elements[i] for i in distance_vec.index]
+            distances = distance_vec.values
 
-
-            if len(kd_tree_filtered_elements) == 0:
-                continue
-            # Compute mean normal vector of the fault
-
-            distances = fault.distance(kd_tree_centroids)
+            # distances = fault.distance(kd_tree_centroids)
             for element, distance in zip(kd_tree_filtered_elements, distances):
                 distance = np.abs(distance)
                 if distance < fault.aperture / 2:
                     element.associated_faults[fault.local_id] = {
-                        'distance': distance,
+                        'distance': distance[0],
                     }
                     fault.associated_elements.append(element)
+
+        if save_fault_cells:
+            import dill
+            for element in self.mesh.elements:
+                fault_cells[element.local_id] = element.associated_faults
+            with open('fault_cells.pkl', 'wb') as f:
+                dill.dump(fault_cells, f)
+
+
+
 
     def _compute_fracture_volume_in_elements(self):
         # Compute volume of fractures in each element.

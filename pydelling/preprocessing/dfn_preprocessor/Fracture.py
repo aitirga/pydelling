@@ -62,6 +62,9 @@ class Fracture(object):
         self.storativity_constant = storativity_constant
         self.aperture = self.compute_aperture()
         self.local_id = Fracture.local_id
+        self.side_points = self.get_side_points()
+        self.n_side_points = len(self.side_points)
+
 
         Fracture.local_id += 1
 
@@ -176,6 +179,8 @@ class Fracture(object):
     def to_obj(self, global_id=0, method='v1'):
         """Converts the fracture to an obj file"""
         side_points = self.get_side_points(method=method)
+        if isinstance(side_points[0], np.ndarray):
+            side_points = [side_point.tolist() for side_point in side_points]
         obj_string = ''
         for i in range(len(side_points)):
             obj_string += 'v ' + str(side_points[i][0]) + ' ' + str(side_points[i][1]) + ' ' + str(
@@ -361,3 +366,4 @@ class Fracture(object):
             return computed_storativity
         else:
             return 0.0
+

@@ -33,7 +33,7 @@ class Fault:
 
         Fault.local_id += 1
 
-    def distance(self, points: np.ndarray, n_max: int = 5000):
+    def distance(self, points: np.ndarray, n_max: int = 2500):
         if points.shape[0] == 3:
             points = points.reshape(1, 3)
         # Divide the points into chunks of n_max
