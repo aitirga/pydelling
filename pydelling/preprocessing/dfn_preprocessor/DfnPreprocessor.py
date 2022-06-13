@@ -64,7 +64,35 @@ class DfnPreprocessor(object):
                 storativity_constant=storativity_constant
             )
 
-    def add_fracture(self,  x, y, z, dip=None, dip_dir=None, size=None, aperture=None, aperture_constant=1E-3, transmissivity_constant=None, storativity_constant=None):
+    def load_fractures_from_polygons_and_apertures(self,
+                       polygons,
+                       apertures,
+                       aperture_constant=None,
+                       transmissivity_constant=None,
+                       storativity_constant=None):
+        for idx, polygon in enumerate(polygons):
+            self.add_fracture(
+                polygon=polygon,
+                aperture=apertures[idx],
+                aperture_constant=aperture_constant,
+                transmissivity_constant=transmissivity_constant,
+                storativity_constant=storativity_constant,
+            )
+
+
+    def add_fracture(self,
+                     x=None,
+                     y=None,
+                     z=None,
+                     dip=None,
+                     dip_dir=None,
+                     size=None,
+                     aperture=None,
+                     aperture_constant=1E-3,
+                     transmissivity_constant=None,
+                     storativity_constant=None,
+                     polygon=None,
+                     ):
         """Add individual fracture to the dfn object.
         """
         self.dfn.append(Fracture(
@@ -77,7 +105,8 @@ class DfnPreprocessor(object):
             aperture=aperture,
             aperture_constant=aperture_constant,
             transmissivity_constant=transmissivity_constant,
-            storativity_constant=storativity_constant
+            storativity_constant=storativity_constant,
+            polygon=polygon,
         ))
 
     def add_fault(self, filename=None,
@@ -129,7 +158,7 @@ class DfnPreprocessor(object):
         global_id = 1
         for fracture in tqdm(self.dfn):
             obj_file.write(fracture.to_obj(global_id=global_id, method=method))
-            global_id += fracture.side_points
+            global_id += fracture.n_side_points
         for fault in self.faults:
             fault_obj = fault.to_obj(global_id=global_id)
             obj_file.write(fault_obj)
