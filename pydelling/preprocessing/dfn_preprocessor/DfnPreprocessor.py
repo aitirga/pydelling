@@ -59,7 +59,7 @@ class DfnPreprocessor(object):
                 z=row[z],
                 size=row[size],
                 aperture_constant=aperture_constant,
-                aperture=row[aperture],
+                aperture=aperture,
                 transmissivity_constant=transmissivity_constant,
                 storativity_constant=storativity_constant
             )
@@ -245,6 +245,7 @@ class DfnPreprocessor(object):
         logger.info('Adding dfn objects')
         new_dfn = DfnPreprocessor()
         new_dfn.dfn = self.dfn + other.dfn
+        new_dfn.faults = self.faults + other.faults
         return new_dfn
 
     @property

@@ -83,6 +83,10 @@ class Fault:
     def size(self):
         return np.sqrt(self.trimesh_mesh.area)
 
+    @property
+    def normal_vector(self):
+        return np.mean(self.trimesh_mesh.face_normals, axis=0)
+
 
 
 
