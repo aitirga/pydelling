@@ -12,8 +12,21 @@ class Fracture(object):
     _transmissivity = None
     _storativity = None
 
-    def __init__(self, dip, dip_dir, x, y, z, size=None, aperture=None, aperture_constant=None,
-                 transmissivity_constant=None, storativity_constant=None):
+    def __init__(self,
+                 x,
+                 y,
+                 z,
+                 dip=None,
+                 dip_dir=None,
+                 size=None,
+                 aperture=None,
+                 aperture_constant=None,
+                 transmissivity_constant=None,
+                 storativity_constant=None,
+                 normal_vector=None,
+                 ):
+        if normal_vector is not None:
+            self._unit_normal_vector = normal_vector
         self.side_points = None
         if dip is not None:
             assert dip_dir is not None
