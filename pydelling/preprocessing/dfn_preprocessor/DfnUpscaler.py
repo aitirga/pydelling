@@ -102,20 +102,26 @@ class DfnUpscaler:
             distance_vec = []
             for kd_centroid in kd_tree_centroids:
                 distance_vec.append(fault_plane.distance_to_point(kd_centroid))
-            print(distance_vec)
+            # Filter distances
+            distance_vec = np.array(distance_vec)
+            distance_vec = np.abs(distance_vec)
+            distance_vec = distance_vec[distance_vec < fault.aperture / 1.75]
+            distance_index = np.where(distance_vec < fault.aperture / 1.75)
+            kd_tree_centroids = kd_tree_centroids[distance_index]
+
 
             if len(kd_tree_filtered_elements) == 0:
                 continue
             # Compute mean normal vector of the fault
 
-            # distances = fault.distance(kd_tree_centroids)
-            # for element, distance in zip(kd_tree_filtered_elements, distances):
-            #     distance = np.abs(distance)
-            #     if distance < fault.aperture / 2:
-            #         element.associated_faults[fault.local_id] = {
-            #             'distance': distance,
-            #         }
-            #         fault.associated_elements.append(element)
+            distances = fault.distance(kd_tree_centroids)
+            for element, distance in zip(kd_tree_filtered_elements, distances):
+                distance = np.abs(distance)
+                if distance < fault.aperture / 2:
+                    element.associated_faults[fault.local_id] = {
+                        'distance': distance,
+                    }
+                    fault.associated_elements.append(element)
 
     def _compute_fracture_volume_in_elements(self):
         # Compute volume of fractures in each element.
