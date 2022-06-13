@@ -31,3 +31,4 @@ sympy
 trimesh
 translate
 altair
+pyembree
