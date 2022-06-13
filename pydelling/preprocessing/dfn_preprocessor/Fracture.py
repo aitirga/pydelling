@@ -11,11 +11,12 @@ class Fracture(object):
     eps = 1e-8
     _transmissivity = None
     _storativity = None
+    _side_points = None
 
     def __init__(self,
-                 x,
-                 y,
-                 z,
+                 x=None,
+                 y=None,
+                 z=None,
                  dip=None,
                  dip_dir=None,
                  size=None,
@@ -24,6 +25,7 @@ class Fracture(object):
                  transmissivity_constant=None,
                  storativity_constant=None,
                  normal_vector=None,
+                 polygon: List[np.ndarray]=None,
                  ):
         if normal_vector is not None:
             self._unit_normal_vector = normal_vector
@@ -34,8 +36,19 @@ class Fracture(object):
             assert aperture is not None
         if aperture is None:
             assert size is not None
-        # if dip == 90:
-        #     dip = 89.9999
+        # Allow definition of a Fracture object based on a polygon
+        if polygon is not None:
+            # Assert x, y, z are not provided
+            assert x is None
+            assert y is None
+            assert z is None
+            self._side_points = polygon
+            centroid = np.mean(polygon, axis=0)
+            x = centroid[0]
+            y = centroid[1]
+            z = centroid[2]
+
+
         self.dip = dip
         self.dip_dir = dip_dir
         self.x_centroid = x
@@ -150,12 +163,15 @@ class Fracture(object):
         return np.array([A, B, C, D])
 
     def get_side_points(self, method='v1'):
+        if self._side_points is not None:
+            return self._side_points
         if method == 'v1':
             return self.get_side_points_v1()
         elif method == 'v2':
             return self.get_side_points_v2()
         elif method == 'v3':
             return self.get_side_points_v3()
+
 
     def to_obj(self, global_id=0, method='v1'):
         """Converts the fracture to an obj file"""

@@ -6,6 +6,7 @@ import trimesh
 from trimesh.exchange.misc import load_meshio
 import trimesh.proximity as proximity
 from pathlib import Path
+from tqdm import tqdm
 
 
 class Fault:
@@ -32,11 +33,17 @@ class Fault:
 
         Fault.local_id += 1
 
-    def distance(self, points: np.ndarray):
+    def distance(self, points: np.ndarray, n_max: int = 5000):
         if points.shape[0] == 3:
             points = points.reshape(1, 3)
-        d = proximity.signed_distance(self.trimesh_mesh, points)
-        return d
+        # Divide the points into chunks of n_max
+        n_chunks = int(points.shape[0] / n_max)
+        if n_chunks == 0:
+            n_chunks = 1
+        distances = []
+        for i in tqdm(range(n_chunks), desc=f"Computing {len(points)} distances"):
+            distances.append(proximity.signed_distance(self.trimesh_mesh, points[i * n_max:(i + 1) * n_max]))
+        return np.concatenate(distances)
 
     def _to_obj(self, global_id=0):
         """Converts the fault to an obj file"""
