@@ -67,6 +67,7 @@ class DfnPreprocessor(object):
     def load_fractures_from_polygons_and_apertures(self,
                        polygons,
                        apertures,
+                       radii=None,
                        aperture_constant=None,
                        transmissivity_constant=None,
                        storativity_constant=None):
@@ -74,6 +75,7 @@ class DfnPreprocessor(object):
             self.add_fracture(
                 polygon=polygon,
                 aperture=apertures[idx],
+                size=radii[idx] * 2 if radii is not None else None,
                 aperture_constant=aperture_constant,
                 transmissivity_constant=transmissivity_constant,
                 storativity_constant=storativity_constant,
