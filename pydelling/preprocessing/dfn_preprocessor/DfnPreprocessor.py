@@ -66,7 +66,7 @@ class DfnPreprocessor(object):
 
     def load_fractures_from_polygons_and_apertures(self,
                        polygons,
-                       apertures,
+                       apertures=None,
                        radii=None,
                        aperture_constant=None,
                        transmissivity_constant=None,
@@ -74,7 +74,7 @@ class DfnPreprocessor(object):
         for idx, polygon in enumerate(polygons):
             self.add_fracture(
                 polygon=polygon,
-                aperture=apertures[idx],
+                aperture=None, #aperture=apertures[idx],
                 size=radii[idx] * 2 if radii is not None else None,
                 aperture_constant=aperture_constant,
                 transmissivity_constant=transmissivity_constant,
@@ -263,6 +263,15 @@ class DfnPreprocessor(object):
         fig, ax = plt.subplots()
         plt.hist([fracture.transmissivity for fracture in self.dfn], bins=100)
         return fig, ax
+
+    def plot_hkx_histogram(self, filename='hkx_histogram.png'):
+        """Plots the x-hydraulic conductivity histogram."""
+        logger.info(f'Plotting hk_x histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([(fracture.transmissivity / fracture.aperture) for fracture in self.dfn], bins=100)
+        return fig, ax
+
 
     def plot_storativity_histogram(self, filename='storativity_histogram.png'):
         """Plots the storativity histogram."""
