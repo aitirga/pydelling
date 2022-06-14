@@ -184,9 +184,7 @@ class DfnPreprocessor(object):
         """Shifts the dfn object."""
         logger.info(f'Shifting dfn object by {x_shift}, {y_shift}, {z_shift}')
         for fracture in self.dfn:
-            fracture.x_centroid += x_shift
-            fracture.y_centroid += y_shift
-            fracture.z_centroid += z_shift
+            fracture.shift(x_shift, y_shift, z_shift)
 
 
     def generate_dfn_plotly(self, add_centroid=False, size_color=False, fracture_color='blue'):
