@@ -240,6 +240,14 @@ class DfnPreprocessor(object):
         """Returns the minimum size of the dfn object."""
         return min([fracture.size for fracture in self.dfn])
 
+    def plot_radii_histogram(self, filename='radii_histogram.png'):
+        """Plots the radii histogram."""
+        logger.info(f'Plotting radii histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([(fracture.size / 2) for fracture in self.dfn], bins=100)
+        return fig, ax
+
     def plot_aperture_histogram(self, filename='aperture_histogram.png'):
         """Plots the aperture histogram."""
         logger.info(f'Plotting aperture histogram to {filename}')
