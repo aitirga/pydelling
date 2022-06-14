@@ -402,6 +402,30 @@ class DfnUpscaler:
                 porosity = self.upscaled_porosity[element_id]
                 writer.writerow([centroid[0], centroid[1], centroid[2], porosity])
 
+    def plot_porosity_histogram(self, filename='upscaled_porosity_histogram.png'):
+        """Plots the upscaled porosity histogram."""
+        logger.info(f'Plotting upscaled porosity histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([self.upscaled_porosity[element_id] for element_id in self.upscaled_porosity], bins=100)
+        return fig, ax
+
+    def plot_hkx_histogram(self, filename='upscaled_hkx_histogram.png'):
+        """Plots the upscaled hkx histogram."""
+        logger.info(f'Plotting upscaled hkx histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([self.upscaled_permeability[element_id][0, 0] for element_id in self.upscaled_permeability], bins=100)
+        return fig, ax
+
+    def plot_storativity_histogram(self, filename='upscaled_storativity_histogram.png'):
+        """Plots the upscaled storativity histogram."""
+        logger.info(f'Plotting upscaled storativity histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([self.upscaled_storativity[element_id] for element_id in self.upscaled_storativity], bins=100)
+        return fig, ax
+
     def export_intersection_stats(self, filename='intersection_stats.txt'):
         # Export the run_stats dictionary to file
         assert self.mesh.is_intersected, 'The mesh has not been intersected yet.'
