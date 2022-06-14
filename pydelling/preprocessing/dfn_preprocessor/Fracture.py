@@ -325,6 +325,14 @@ class Fracture(object):
         else:
             return False
 
+    def shift(self, x, y, z):
+        """Shifts the fracture"""
+        self.x_centroid += x
+        self.y_centroid += y
+        self.z_centroid += z
+        if self._side_points is not None:
+            self._side_points = [point + np.array([x, y, z]) for point in self._side_points]
+
     @property
     def largest_index_normal_vector(self):
         """Returns the largest coordinate index of the normal vector"""
@@ -366,4 +374,5 @@ class Fracture(object):
             return computed_storativity
         else:
             return 0.0
+
 
