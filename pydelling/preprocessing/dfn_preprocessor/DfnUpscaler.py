@@ -181,7 +181,7 @@ class DfnUpscaler:
         upscaled_storativity = {}
 
         for elem in tqdm(self.mesh.elements, desc="Upscaling fractures storativity"):
-            upscaled_storativity[elem.local_id] = 0
+            upscaled_storativity[elem.local_id] = 0.0
             for frac_name in elem.associated_fractures:
                 frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
