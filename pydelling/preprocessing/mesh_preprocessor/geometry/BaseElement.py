@@ -124,7 +124,6 @@ class BaseElement(BaseAbstractMeshObject):
         # final_points = intersected_points
         final_points = filter_unique_points(final_points)
 
-
         return final_points
 
     def _full_line_intersections(self, intersected_lines: List[Line]) -> List:
