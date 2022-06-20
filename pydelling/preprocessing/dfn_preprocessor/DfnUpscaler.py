@@ -74,8 +74,6 @@ class DfnUpscaler:
             intersection_points = element.intersect_with_fracture(fracture)
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
-            # Get only unique points
-            intersection_points = filter_unique_points(intersection_points)
 
 
             intersection_area = compute_polygon_area(intersection_points)
