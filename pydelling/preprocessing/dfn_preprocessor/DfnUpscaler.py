@@ -6,7 +6,7 @@ from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import Fracture
 import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
-from pydelling.utils.geometry_utils import compute_polygon_area
+from pydelling.utils.geometry_utils import compute_polygon_area, filter_unique_points
 import logging
 from tqdm import tqdm
 import numpy as np
@@ -75,6 +75,7 @@ class DfnUpscaler:
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
             # Get only unique points
+            intersection_points = filter_unique_points(intersection_points)
 
 
             intersection_area = compute_polygon_area(intersection_points)

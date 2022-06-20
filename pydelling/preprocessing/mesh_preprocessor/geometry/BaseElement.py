@@ -10,6 +10,7 @@ import sympy as sp
 from pydelling.utils.geometry import Point, Plane, Line
 from itertools import product, combinations
 from pydelling.preprocessing.dfn_preprocessor.Fracture import Fracture
+from pydelling.utils.geometry_utils import filter_unique_points
 
 
 class BaseElement(BaseAbstractMeshObject):
@@ -121,6 +122,8 @@ class BaseElement(BaseAbstractMeshObject):
                 final_points.append(corner)
 
         # final_points = intersected_points
+        final_points = filter_unique_points(final_points)
+
 
         return final_points
 
