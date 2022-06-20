@@ -46,6 +46,14 @@ class GeometryUtilsCase(unittest.TestCase):
                   Point([0.0, 1.0, 2.0])]
         self.assertEqual(compute_polygon_area(points), 4.0)
 
+    def test_filter_unique_points(self):
+        point_test = [Point([0.0, 0.0, 0.0]), Point([1.0, 0.0, 0.0]), Point([0.0, 0.0, 0.0]), Point([0.0, 0.0, 0.0]), Point([1.0, 0.0, 0.0])]
+        unique_points = filter_unique_points(point_test)
+        self.assertEqual(len(unique_points), 2)
+        point_test = [Point([2.0, 2.0001, 0.0]), Point([2.0, 2.0000001, 0.0]), Point([2.0, 2.00000001, 0.0]), Point([3.0, 1.0, 1.0])]
+        unique_points = filter_unique_points(point_test)
+        self.assertEqual(len(unique_points), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

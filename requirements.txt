@@ -32,3 +32,4 @@ trimesh
 translate
 altair
 pyembree
+dill
