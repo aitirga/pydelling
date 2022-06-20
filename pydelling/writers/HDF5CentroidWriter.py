@@ -5,7 +5,7 @@ import numpy as np
 from pathlib import Path
 import logging
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 class HDF5CentroidWriter(BaseWriter):
     def run(self, filename=None, remove_if_exists=True, include_cell_id=True):

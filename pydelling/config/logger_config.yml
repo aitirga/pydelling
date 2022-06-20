@@ -18,7 +18,6 @@ handlers:
     formatter: simple
     stream: ext://sys.stdout
 
-
   info_file_handler:
     class: logging.FileHandler
     level: DEBUG

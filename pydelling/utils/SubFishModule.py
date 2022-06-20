@@ -6,7 +6,7 @@ import mpmath as mp
 import scipy.special as scsp
 import logging
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 class SubfishException(Exception):
     pass

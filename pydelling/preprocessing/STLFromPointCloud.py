@@ -10,7 +10,7 @@ import logging
 import vtk
 from pathlib import Path
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__
 
 class STLFromPointCloud(BasePreprocessing):
     preprocessed_data: np.ndarray

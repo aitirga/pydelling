@@ -4,7 +4,7 @@ from ._AbstractGidObject import _AbstractGidObject
 from .Point import Point
 import logging
 from typing import List
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 class Line(_AbstractGidObject):
     local_id: int = 1
