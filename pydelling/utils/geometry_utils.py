@@ -92,4 +92,21 @@ def order_points_clockwise(points: np.ndarray) -> list:
     return sorted_points
 
 
+def filter_unique_points(points: list or np.ndarray, tolerance: float = 1e-4) -> list:
+    """Filters out duplicate points"""
+    # Convert to numpy array
+    if isinstance(points, list):
+        points = np.array(points)
+    # Filter unique points
+    unique_points = []
+    for point in points:
+        if len(unique_points) == 0:
+            unique_points.append(point)
+        uniqueness = True
+        for unique_point in unique_points:
+            if np.linalg.norm(point - unique_point) < tolerance:
+                uniqueness = False
+        if uniqueness:
+            unique_points.append(point)
+    return unique_points
 

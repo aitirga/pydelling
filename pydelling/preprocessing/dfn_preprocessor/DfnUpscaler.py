@@ -74,8 +74,25 @@ class DfnUpscaler:
             intersection_points = element.intersect_with_fracture(fracture)
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
+            # Get only unique points
+
 
             intersection_area = compute_polygon_area(intersection_points)
+            if intersection_area == None:
+                if hasattr(self, 'none_written'):
+                    continue
+                with open('none_intersections.txt', 'a') as f:
+                    for intersection_point in intersection_points:
+                        f.write(f'{intersection_point[0]},{intersection_point[1]},{intersection_point[2]}\n')
+                self.none_written = True
+            elif intersection_area < 0:
+                if hasattr(self, 'negative_written'):
+                    continue
+                with open('negative_intersections.txt', 'a') as f:
+                    for intersection_point in intersection_points:
+                        f.write(f'{intersection_point[0]},{intersection_point[1]},{intersection_point[2]}\n')
+                self.negative_written = True
+
             fracture.intersection_dictionary[element.local_id] = intersection_area
             if len(intersection_points) > 0:
                 element.associated_fractures[fracture.local_id] = {
