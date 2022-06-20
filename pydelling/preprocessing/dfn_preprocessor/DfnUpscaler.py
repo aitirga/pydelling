@@ -75,7 +75,6 @@ class DfnUpscaler:
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
 
-
             intersection_area = compute_polygon_area(intersection_points)
             if intersection_area == None:
                 if hasattr(self, 'none_written'):

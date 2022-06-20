@@ -113,9 +113,6 @@ class BaseElement(BaseAbstractMeshObject):
             if fracture.contains(point):
                 final_points.append(point)
 
-        final_points = np.unique(np.array(final_points), axis=0)
-        final_points = [Point(point) for point in final_points]
-
         # Check if any fracture edge is inside the element. If so, add that as intersection point
         for corner in fracture.corners:
             if self.contains(corner):
@@ -123,6 +120,7 @@ class BaseElement(BaseAbstractMeshObject):
 
         # final_points = intersected_points
         final_points = filter_unique_points(final_points)
+        final_points = [Point(point) for point in final_points]
 
         return final_points
 
