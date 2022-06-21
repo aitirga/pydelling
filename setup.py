@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='pydelling',  # How you named your package folder (MyLib)
     packages=find_packages(),  # Chose the same as "name"
-    version='1.6.2',  # Start with a small number and increase it with every change you make
+    version='1.6.3',  # Start with a small number and increase it with every change you make
     license='MIT',  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description='Package to pre-process and help on mathematical modelling',  # Give a short description about your library
     author='Aitor Iraola Galarza',  # Type in your name
