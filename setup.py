@@ -41,6 +41,8 @@ setup(
         'mkdocstrings',
         'streamlit',
         'dill'
+        'sympy'
+        'trimesh'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
