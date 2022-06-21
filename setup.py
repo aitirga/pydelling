@@ -9,8 +9,8 @@ setup(
     author='Aitor Iraola Galarza',  # Type in your name
     author_email='aitirga@gmail.com',  # Type in your E-Mail
     url='https://github.com/aitirga/pydelling',  # Provide either the link to your github or to your website
-    download_url='https://github.com/aitirga/pydelling/archive/refs/tags/v_1.6.2.zip',  # I explain this later on
-    keywords=['PFLOTRAN', 'Preprocessing', 'python', 'modelling'],  # Keywords that define your package best
+    download_url='https://github.com/aitirga/pydelling/archive/refs/tags/v_1.6.3.zip',  # I explain this later on
+    keywords=['PFLOTRAN', 'Preprocessing', 'python', 'modelling', 'postprocessing', 'math'],  # Keywords that define your package best
     include_package_data=True,
     install_requires=[  # I get to this in a second
         'ofpp',
