@@ -178,9 +178,14 @@ class DfnUpscaler:
             #     pass
             #     #print(elem.total_fracture_volume, elem.volume, matrix_porosity[elem])
 
+
         for fault in self.dfn.faults:
             for element in fault.associated_elements:
                 upscaled_porosity[elem.local_id] = fault.porosity
+
+        #POROSITY POST-PROCESSING
+        for elem in tqdm(self.mesh.elements, desc="Post processing upscaled porosity"):
+            upscaled_porosity[elem.local_id] = upscaled_porosity[elem.local_id] * (1 / 1.53) * 1 / 0.3842
 
         vtk_porosity = np.asarray(self.mesh.elements)
         for local_id in upscaled_porosity:
