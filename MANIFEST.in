@@ -1,1 +1,1 @@
-include PyFLOTRAN/config/*.yml
+include pydelling/config/*.yml

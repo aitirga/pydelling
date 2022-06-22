@@ -5,7 +5,7 @@ from .Line import Line
 from .Surface import Surface
 import logging
 import functools
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 from typing import Union, List
 
 class GidObject(object):

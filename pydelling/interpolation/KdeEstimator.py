@@ -5,7 +5,7 @@ from pydelling.utils.decorators import set_run
 import numpy as np
 import logging
 import matplotlib.pyplot as plt
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 import seaborn as sns
 
 class KdeEstimator:

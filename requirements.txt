@@ -33,3 +33,4 @@ translate
 altair
 pyembree
 dill
+streamlit
