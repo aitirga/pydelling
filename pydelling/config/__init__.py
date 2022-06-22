@@ -45,3 +45,12 @@ with open(Path(__file__).parent / "logger_config.yml", "r") as ymlfile:
     log_config = yaml.safe_load(ymlfile)
 logging.config.dictConfig(log_config)
 
+
+# Fix logging issue caused by streamlit
+import streamlit.logger
+loggers = [handler for handler in logging.root.handlers if isinstance(handler, logging.StreamHandler)]
+strange_logger = loggers[-1]
+strange_logger.setLevel(logging.ERROR)
+
+
+
