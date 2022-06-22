@@ -200,7 +200,7 @@ class DfnUpscaler:
             for frac_name in elem.associated_fractures:
                 frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
-                upscaled_storativity[elem.local_id] += frac.storativity * frac_dict['volume'] / elem.volume
+                upscaled_storativity[elem.local_id] += frac.storativity
 
         for fault in self.dfn.faults:
             for element in fault.associated_elements:
@@ -230,6 +230,7 @@ class DfnUpscaler:
             vtk_distance[local_id] = distance[local_id]
 
         self.mesh.cell_data['distance'] = [vtk_distance.tolist()]
+
         self.distance = distance
 
     def upscale_mesh_permeability(self, matrix_permeability=None, rho=1000, g=9.8, mu=8.9e-4,
