@@ -185,7 +185,7 @@ class DfnUpscaler:
 
         #POROSITY POST-PROCESSING
         for elem in tqdm(self.mesh.elements, desc="Post processing upscaled porosity"):
-            upscaled_porosity[elem.local_id] = upscaled_porosity[elem.local_id] * (1 / 1.53) * 1 / 0.3842
+            upscaled_porosity[elem.local_id] = upscaled_porosity[elem.local_id] * (1.53) * 1 / 0.3842
 
         vtk_porosity = np.asarray(self.mesh.elements)
         for local_id in upscaled_porosity:
@@ -297,7 +297,7 @@ class DfnUpscaler:
 
                 if 'mode' == 'isotropy':
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                    fracture_hk[elem.local_id][0, 0] += frac.hk * frac_dict['volume'] / elem.volume  # Kxx
+                    fracture_hk[elem.local_id][0, 0] += frac.hk * (frac_dict['volume'] / elem.volume)  # Kxx
 
                 else:  # 'anisotropy' in 'mode':
                     perm_tensor = np.zeros([3, 3])
