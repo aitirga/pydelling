@@ -211,6 +211,11 @@ class DfnUpscaler:
             for element in fault.associated_elements:
                 upscaled_storativity[elem.local_id] = fault.storativity
 
+
+        #STORATIVITY POST-PROCESSING
+        for elem in tqdm(self.mesh.elements, desc="Post processing upscaled porosity"):
+            upscaled_storativity[elem.local_id] = upscaled_storativity[elem.local_id] * (1.53) * 0.998 / 0.187
+
         vtk_storativity = np.asarray(self.mesh.elements)
         for local_id in upscaled_storativity:
             vtk_storativity[local_id] = upscaled_storativity[local_id]
