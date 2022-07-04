@@ -62,6 +62,8 @@ class SmeshReader(MeshPreprocessor):
                 if element_type == 4:
                     self.add_tetrahedra(node_ids=element_node_ids, node_coords=element_coords)
                 elif element_type == 5:
-                    self.add_wedge(node_ids=element_node_ids, node_coords=element_coords)
+                    self.add_pyramid(node_ids=element_node_ids, node_coords=element_coords)
                 elif element_type == 6:
+                    self.add_wedge(node_ids=element_node_ids, node_coords=element_coords)
+                elif element_type == 8:
                     self.add_hexahedra(node_ids=element_node_ids, node_coords=element_coords)
