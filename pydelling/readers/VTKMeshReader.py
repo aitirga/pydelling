@@ -32,7 +32,6 @@ class VTKMeshReader(MeshPreprocessor):
         if self.is_streamlit:
             import streamlit as st
         for cell_block in self.meshio_mesh.cells:
-
             element_type = cell_block.type
             if element_type == "wedge":
                 count = 0
@@ -49,7 +48,7 @@ class VTKMeshReader(MeshPreprocessor):
                     self.add_wedge(element, self._coords[element])
 
 
-            if element_type == 'hexahedron':
+            elif element_type == 'hexahedron':
                 count = 0
                 if self.is_streamlit:
                     st.write(f'Creating {len(cell_block.data)} hexahedron elements')
@@ -62,7 +61,7 @@ class VTKMeshReader(MeshPreprocessor):
                         count += 1
                     self.add_hexahedra(element, self._coords[element])
 
-            if element_type == 'tetra':
+            elif element_type == 'tetra':
                 count = 0
                 if self.is_streamlit:
                     st.write(f'Creating {len(cell_block.data)} tetrahedra elements')
@@ -75,6 +74,21 @@ class VTKMeshReader(MeshPreprocessor):
                         count += 1
 
                     self.add_tetrahedra(element, self._coords[element])
+
+            elif element_type == 'pyramid':
+                count = 0
+                if self.is_streamlit:
+                    st.write(f'Creating {len(cell_block.data)} pyramid elements')
+                    pyramid_progress = st.empty()
+                    pyramid_progress.progress(0)
+                for element in tqdm(cell_block.data, desc='Setting up pyramid elements'):
+                    if self.is_streamlit:
+                        proportion = round(count / len(cell_block.data) * 100)
+                        pyramid_progress.progress(proportion)
+                        count += 1
+                    self.add_pyramid(element, self._coords[element])
+
+
 
     def save(self, filename):
         """Save the mesh to a file."""

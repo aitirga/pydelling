@@ -125,7 +125,6 @@ class FemReader(MeshPreprocessor):
             count = 0
 
 
-
         for e in range(0, self.aux_n_elements):
             if self.is_streamlit:
                 proportion = round(count / self.aux_n_elements * 100)
@@ -142,6 +141,7 @@ class FemReader(MeshPreprocessor):
                                         self.aux_nodes[nodes_elem[e, 3]],
                                     ]
                                     )
+
             else:
                 logger.warning(f"Element type {element_type[e]} not supported")
 
