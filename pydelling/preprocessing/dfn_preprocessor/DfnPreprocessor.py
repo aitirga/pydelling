@@ -71,10 +71,11 @@ class DfnPreprocessor(object):
                        aperture_constant=None,
                        transmissivity_constant=None,
                        storativity_constant=None):
-        for idx, polygon in enumerate(polygons):
+        logger.info('Loading fractures from polygons and apertures')
+        for idx, polygon in tqdm(enumerate(polygons), desc='Loading fractures into the DFN', total=len(polygons)):
             self.add_fracture(
                 polygon=polygon,
-                aperture=None, #aperture=apertures[idx],
+                aperture=apertures[idx] if apertures is not None else None,
                 size=radii[idx] * 2 if radii is not None else None,
                 aperture_constant=aperture_constant,
                 transmissivity_constant=transmissivity_constant,
