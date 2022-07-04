@@ -60,6 +60,12 @@ class MeshPreprocessor(object):
         for idx, node in enumerate(node_coords):
             self.unordered_nodes[node_ids[idx]] = node
 
+    def add_pyramid(self, node_ids: List[int] or np.ndarray, node_coords: List[np.ndarray]):
+        """Adds a pyramid to the mesh"""
+        self.elements.append(geometry.PyramidElement(node_ids=node_ids, node_coords=node_coords))
+        for idx, node in enumerate(node_coords):
+            self.unordered_nodes[node_ids[idx]] = node
+
     def add_triangular_prism(self, node_ids: List[int] or np.ndarray, node_coords: List[np.ndarray]):
         """Adds a triangular prism to the mesh"""
         self.elements.append(geometry.WedgeElement(node_ids=node_ids, node_coords=node_coords))
@@ -169,6 +175,10 @@ class MeshPreprocessor(object):
                 if not 'quad' in elements_in_meshio.keys():
                     elements_in_meshio['quad'] = []
                 elements_in_meshio['quad'].append(element.nodes.tolist())
+            elif element.type == 'pyramid':
+                if not 'pyramid' in elements_in_meshio.keys():
+                    elements_in_meshio['pyramid'] = []
+                elements_in_meshio['pyramid'].append(element.nodes.tolist())
 
         return elements_in_meshio
 

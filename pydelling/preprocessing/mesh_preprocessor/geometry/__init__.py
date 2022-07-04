@@ -5,4 +5,5 @@ from .TriangleFace import TriangleFace
 from .QuadrilateralFace import QuadrilateralFace
 from .HexahedraElement import HexahedraElement
 from .TetrahedraElement import TetrahedraElement
+from .PyramidElement import PyramidElement
 from .WedgeElement import WedgeElement
