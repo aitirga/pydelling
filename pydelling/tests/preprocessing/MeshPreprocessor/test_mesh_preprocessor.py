@@ -22,7 +22,13 @@ class TestMeshPreprocessor(unittest.TestCase):
         # fem_reader.find_the_intersection_between_fracture_and_mesh(dfn_test[0])
         fem_reader.find_intersection_points_between_fracture_and_mesh(dfn_test[0])
 
-
+    def test_read_pyramid(self):
+        mesh_preprocessor = MeshPreprocessor()
+        mesh_preprocessor.add_pyramid(node_ids=np.array([0, 1, 2, 3, 4]),
+                                      node_coords=[np.array([0.0, 0.0, 0.0]), np.array([1.0, 0.0, 0.0]),
+                                                   np.array([1.0, 1.0, 0.0]), np.array([0.0, 1.0, 0.0]),
+                                                   np.array([0.0, 0.0, 1.0])])
+        self.assertEqual(mesh_preprocessor.n_nodes, 5)
 
 
     def test_normal_vector(self):
