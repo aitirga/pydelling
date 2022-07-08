@@ -9,7 +9,7 @@ from tqdm import tqdm
 import plotly.graph_objects as go
 from tabulate import tabulate
 from pathlib import Path
-
+import meshio
 
 logger = logging.getLogger(__name__)
 
@@ -167,6 +167,16 @@ class DfnPreprocessor(object):
             obj_file.write(fault_obj)
             global_id += fault.num_points
 
+    def to_vtk(self, filename='dfn.vtk', method='v1'):
+        from pathlib import Path
+        self.to_obj('buffer.obj', method=method)
+        meshio_mesh: meshio.Mesh = meshio.read('buffer.obj')
+        meshio_mesh.cell_data = {'aperture': self.apertures}
+        meshio.write(filename, meshio_mesh, file_format='vtk')
+        Path('buffer.obj').unlink()
+
+
+
 
     def to_dfnworks(self, filename='dfn.dat', method='v1'):
         '''Exports the dfn object to dfnworks format.'''
@@ -281,8 +291,8 @@ class DfnPreprocessor(object):
         return fig, ax
 
     @property
-    def apertures(self):
-        return [fracture.aperture for fracture in self.dfn]
+    def apertures(self) -> np.ndarray:
+        return np.array([fracture.aperture for fracture in self.dfn])
 
     def __add__(self, other):
         """Adds two dfn objects."""
