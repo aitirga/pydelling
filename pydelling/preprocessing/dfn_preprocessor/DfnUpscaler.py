@@ -458,3 +458,19 @@ class DfnUpscaler:
         import json
         with open('run_stats.json', 'w') as fp:
             json.dump(self.mesh.find_intersection_stats, fp)
+
+    def save(self, filename):
+        """Save a copy of the class on a serialized pickle object"""
+        import pickle
+        with open(filename, 'wb') as f:
+            pickle.dump(self, f)
+
+    def load(self, filename):
+        """Load a serialized pickle object"""
+        import pickle
+        with open(filename, 'rb') as f:
+            cls_data = pickle.load(f)
+        self.__dict__.update(cls_data.__dict__)
+
+
+
