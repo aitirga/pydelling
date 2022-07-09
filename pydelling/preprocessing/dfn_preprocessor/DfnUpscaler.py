@@ -465,12 +465,11 @@ class DfnUpscaler:
         with open(filename, 'wb') as f:
             pickle.dump(self, f)
 
-    def load(self, filename):
+    @classmethod
+    def load(cls, filename):
         """Load a serialized pickle object"""
         import pickle
         with open(filename, 'rb') as f:
-            cls_data = pickle.load(f)
-        self.__dict__.update(cls_data.__dict__)
-
+            return pickle.load(f)
 
 
