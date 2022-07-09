@@ -39,15 +39,11 @@ class UpscalingCase(unittest.TestCase):
             mesh=self.mesh_preprocessor,
             save_intersections=True,
         )
-
-    def test_upscale_porosity_and_permeability(self):
-
-        porosity = self.dfn_upscaler.upscale_mesh_porosity()
-
+        self.dfn_upscaler.upscale_mesh_porosity()
         # Upscale permeability
+        self.dfn_upscaler.upscale_mesh_permeability()
 
-        permeability = self.dfn_upscaler.upscale_mesh_permeability()
-
+    def test_porosity_and_permeability(self):
         porosity_solution = 0.0125
         # #self.assertEqual(porosity, porosity_solution)
         # self.assertAlmostEqual(porosity[0], porosity_solution)
@@ -55,14 +51,17 @@ class UpscalingCase(unittest.TestCase):
         # nptest.assert_array_almost_equal(permeability[0], permeability_solution)
 
     def test_save_load_upscaler(self):
+
         self.dfn_upscaler.save('upscaler.pkl')
         new_upscaler = DfnUpscaler.load('upscaler.pkl')
         self.assertEqual(len(self.dfn_upscaler.mesh.elements), len(new_upscaler.mesh.elements))
         self.assertEqual(len(self.dfn_upscaler.dfn.dfn), len(new_upscaler.dfn.dfn))
         self.assertEqual(len(self.dfn_upscaler.dfn.dfn[0].intersection_dictionary), len(new_upscaler.dfn.dfn[0].intersection_dictionary))
         self.assertEqual(len(self.dfn_upscaler.dfn.faults), len(new_upscaler.dfn.faults))
+        self.assertEqual(len(self.dfn_upscaler.upscaled_porosity), len(new_upscaler.upscaled_porosity))
         from pathlib import Path
         Path('upscaler.pkl').unlink()
+
 
 
 if __name__ == '__main__':
