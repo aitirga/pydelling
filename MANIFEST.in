@@ -1,1 +1,1 @@
-include pydelling/config/*.yml
+include pydelling/config/*.yaml
