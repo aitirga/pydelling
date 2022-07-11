@@ -63,6 +63,5 @@ class UpscalingCase(unittest.TestCase):
         Path('upscaler.pkl').unlink()
 
 
-
 if __name__ == '__main__':
     unittest.main()
