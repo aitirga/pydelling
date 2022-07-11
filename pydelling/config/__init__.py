@@ -7,7 +7,7 @@ from pathlib import Path
 from pydelling.utils.configuration_utils import get_config_path
 
 
-def read_config(config_file: Path="./config.yaml"):
+def read_config(config_file: Path="./local_config.yml"):
     """
     Reads the configuration file
     :param config_file:
@@ -20,7 +20,7 @@ def read_config(config_file: Path="./config.yaml"):
 
 _config_file = list(Path.cwd().glob("*config*"))
 if not _config_file:
-    _config_file = [get_config_path() / 'config.yml']
+    _config_file = [get_config_path() / 'local_config.yml']
     logging.warning('Using default configuration file (not the user defined one)')
 assert len(_config_file) >= 1, "Please provide a configuration file that has a '*config.yaml' name structure"
 config = read_config(config_file=_config_file[0])
