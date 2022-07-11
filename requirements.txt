@@ -13,7 +13,6 @@ openpyxl
 tqdm
 seaborn
 open3d
-mpmath
 natsort
 pytecplot
 sklearn
