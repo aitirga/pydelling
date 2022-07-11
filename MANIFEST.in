@@ -1,3 +1,1 @@
 include pydelling/config/*.yaml
-recursive-include pydelling/config/
-recursive-include config
