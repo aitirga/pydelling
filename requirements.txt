@@ -26,11 +26,11 @@ mkdocs-material
 mkdocstrings
 pythreejs
 pyvista
-streamlit
-sympy
 trimesh
 translate
 altair
 pyembree
 dill
 streamlit
+mpmath
+simpy
