@@ -461,15 +461,15 @@ class DfnUpscaler:
 
     def save(self, filename):
         """Save a copy of the class on a serialized pickle object"""
-        import pickle
+        import dill
         with open(filename, 'wb') as f:
-            pickle.dump(self, f)
+            dill.dump(self, f)
 
     @classmethod
     def load(cls, filename):
         """Load a serialized pickle object"""
-        import pickle
+        import dill
         with open(filename, 'rb') as f:
-            return pickle.load(f)
+            return dill.load(f)
 
 
