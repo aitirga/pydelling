@@ -216,13 +216,20 @@ class IntersectionCase(unittest.TestCase):
 
         intersections = mesh_preprocessor.elements[0].intersect_with_fracture(
             dfn_preprocessor[0])
-        solution = [
+        solution = np.array([
             np.array([-0.5, -0.5, 0.00872753]),
             np.array([-0.5, 0.5, -0.00872753]),
             np.array([0.5, -0.5, 0.00872753]),
             np.array([0.5, 0.5, -0.00872753]),
-        ]
-        np.testing.assert_array_almost_equal(intersections, solution)
+        ])
+        # Sort intersections to make them comparable
+        intersections = np.sort(intersections, axis=0)
+        solution = np.sort(solution, axis=0)
+
+        nptest.assert_array_almost_equal(intersections, solution)
+
+
+
 
 
 
