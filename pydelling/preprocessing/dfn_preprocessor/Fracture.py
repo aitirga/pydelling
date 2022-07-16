@@ -255,7 +255,7 @@ class Fracture(object):
     @property
     def plane(self):
         """Returns the plane of the fracture"""
-        if not hasattr(self, '_corners'):
+        if not hasattr(self, '_plane'):
             self._plane = Plane(self.centroid, normal=self.unit_normal_vector)
 
         return self._plane
