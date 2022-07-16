@@ -15,7 +15,7 @@ from pydelling.utils.geometry_utils import filter_unique_points
 
 class BaseElement(BaseAbstractMeshObject):
     local_id = 0
-    eps = 1E-13
+    eps = 1E-6
     __slots__ = ['node_ids', 'node_coords']
 
     def __init__(self, node_ids, node_coords, centroid_coords=None):
@@ -31,6 +31,7 @@ class BaseElement(BaseAbstractMeshObject):
         self.associated_faults = {}
         self.total_fracture_volume = 0
         self.area = 0
+        self.is_strange = 0.0
 
     def __repr__(self):
         return f"{self.type} {self.local_id}"
@@ -85,6 +86,16 @@ class BaseElement(BaseAbstractMeshObject):
         """Intersects an element with a fracture"""
         intersected_lines = []
         intersected_points = []
+        final_points = []
+
+        # First thing, check if the fracture is inside the element
+        for corner in fracture.corners:
+            if self.contains(corner):
+                final_points.append(corner)
+
+        if len(final_points) == fracture.n_side_points:
+            final_points = [Point(point) for point in final_points]
+            return final_points
 
         for face in self.faces:
             intersection = self.faces[face].intersect_with_plane(fracture.plane)
@@ -96,10 +107,8 @@ class BaseElement(BaseAbstractMeshObject):
 
             if intersection:
                 intersected_lines.append(intersection)
-
         # Intersect the lines within themselves
         intersected_points += list(self._full_line_intersections(intersected_lines=intersected_lines))
-
         # Check if the intersected points are inside the element
         intersected_inside_points = []
         for point in intersected_points:
@@ -108,15 +117,15 @@ class BaseElement(BaseAbstractMeshObject):
         intersected_points = intersected_inside_points.copy()
 
         # Test algorithm that checks if a point is contained in the fracture
-        final_points = []
         for point in intersected_points:
             if fracture.contains(point):
                 final_points.append(point)
 
+
         # Check if any fracture edge is inside the element. If so, add that as intersection point
-        for corner in fracture.corners:
-            if self.contains(corner):
-                final_points.append(corner)
+        # for corner in fracture.corners:
+        #     if self.contains(corner):
+        #         final_points.append(corner)
 
         # final_points = intersected_points
         final_points = filter_unique_points(final_points)

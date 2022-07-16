@@ -50,16 +50,18 @@ class DfnUpscaler:
             import csv
             with open('intersections.csv', 'w') as f:
                 writer = csv.writer(f)
-                writer.writerow(['x', 'y', 'z'])
+                writer.writerow(['x', 'y', 'z', 'value'])
+                local_id = 0
                 for intersection in self.all_intersected_points:
                     for point in intersection:
-                        writer.writerow([point.x, point.y, point.z])
+                        writer.writerow([point.x, point.y, point.z, local_id])
+                    local_id += 1
 
     def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture, export_stats=False):
         """Finds the intersection points between a fracture and the mesh"""
 
         intersection_points = []
-        kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
+        kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fracture.centroid, distance=fracture.size * 2)
         counter = 0
         elements_filtered = 0
         for element in kd_tree_filtered_elements:
@@ -67,7 +69,7 @@ class DfnUpscaler:
             counter += 1
             absolute_distance = np.abs(fracture.distance_to_point(element.centroid))
             characteristic_length = np.power(element.volume, 1 / 3)
-            if absolute_distance > 1.75 * characteristic_length:
+            if absolute_distance > 1.5 * characteristic_length:
                 elements_filtered += 1
                 continue
 
@@ -76,20 +78,21 @@ class DfnUpscaler:
                 self.all_intersected_points.append(intersection_points)
 
             intersection_area = compute_polygon_area(intersection_points)
-            if intersection_area == None:
-                if hasattr(self, 'none_written'):
-                    continue
-                with open('none_intersections.txt', 'a') as f:
-                    for intersection_point in intersection_points:
-                        f.write(f'{intersection_point[0]},{intersection_point[1]},{intersection_point[2]}\n')
-                self.none_written = True
-            elif intersection_area < 0:
-                if hasattr(self, 'negative_written'):
-                    continue
-                with open('negative_intersections.txt', 'a') as f:
-                    for intersection_point in intersection_points:
-                        f.write(f'{intersection_point[0]},{intersection_point[1]},{intersection_point[2]}\n')
-                self.negative_written = True
+
+            # if intersection_area == None:
+            #     if hasattr(self, 'none_written'):
+            #         continue
+            #     with open('none_intersections.txt', 'a') as f:
+            #         for intersection_point in intersection_points:
+            #             f.write(f'{intersection_point[0]},{intersection_point[1]},{intersection_point[2]}\n')
+            #     self.none_written = True
+            # elif intersection_area < 0:
+            #     if hasattr(self, 'negative_written'):
+            #         continue
+            #     with open('negative_intersections.txt', 'a') as f:
+            #         for intersection_point in intersection_points:
+            #             f.write(f'{intersection_point[0]},{intersection_point[1]},{intersection_point[2]}\n')
+            #     self.negative_written = True
 
             fracture.intersection_dictionary[element.local_id] = intersection_area
             if len(intersection_points) > 0:
@@ -242,6 +245,22 @@ class DfnUpscaler:
         self.mesh.cell_data['distance'] = [vtk_distance.tolist()]
 
         self.distance = distance
+
+    def export_fracture_property(self, property='area'):
+        property_dict = {}
+        for elem in tqdm(self.mesh.elements, desc="Computing fracture properties"):
+            property_dict[elem.local_id] = 0
+            # print(elem.associated_fractures)
+            for fracture in elem.associated_fractures:
+                fracture_dict = elem.associated_fractures[fracture]
+                property_dict[elem.local_id] += fracture_dict[property]
+
+        vtk_property = np.asarray(self.mesh.elements)
+        for local_id in property_dict:
+            vtk_property[local_id] = property_dict[local_id]
+
+        self.mesh.cell_data[property] = [vtk_property.tolist()]
+        self.property_dict = property_dict
 
     def upscale_mesh_permeability(self, matrix_permeability=None, rho=1000, g=9.8, mu=8.9e-4,
                                   mode='full_tensor'):

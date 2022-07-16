@@ -164,6 +164,9 @@ class IntersectionCase(unittest.TestCase):
             np.array([0.25949777, 0.08819276, 0.15230947]),
             np.array([0.33001579, 0.12107585, -0.13807404]),
         ]
+        # Sort arrays before comparing
+        intersected_points = np.sort(intersected_points, axis=0)
+        solution = np.sort(solution, axis=0)
         nptest.assert_array_almost_equal(intersected_points, solution)
 
 
