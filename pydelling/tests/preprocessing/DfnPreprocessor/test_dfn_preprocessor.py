@@ -1,5 +1,6 @@
 import unittest
 from pydelling.preprocessing import DfnPreprocessor
+from pydelling.utils import test_data_path
 
 
 class DfnPreprocessorCase(unittest.TestCase):
@@ -29,11 +30,11 @@ class DfnPreprocessorCase(unittest.TestCase):
 
     def test_fault_save_load(self):
         dfn_one = DfnPreprocessor()
-        dfn_one.add_fault()
-        dfn_one.to_json('test.json')
+        dfn_one.add_fault(filename=test_data_path() / 'test_fault.stl', aperture=5.0)
+        dfn_one.to_json('./test.json')
         dfn_one_loaded = DfnPreprocessor.from_json('test.json')
-
-
+        self.assertEqual(len(dfn_one_loaded.faults), 1)
+        self.assertEqual(dfn_one_loaded.faults[0].aperture, 5.0)
 
     def tearDown(self) -> None:
         import os
