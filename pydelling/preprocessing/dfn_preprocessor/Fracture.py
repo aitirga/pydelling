@@ -12,6 +12,7 @@ class Fracture(object):
     _transmissivity = None
     _storativity = None
     _side_points = None
+    _unit_normal_vector = None
 
     def __init__(self,
                  x=None,
@@ -28,7 +29,7 @@ class Fracture(object):
                  polygon: List[np.ndarray]=None,
                  ):
         if normal_vector is not None:
-            self._unit_normal_vector = normal_vector
+            self._unit_normal_vector: np.ndarray = normal_vector
         self.side_points = None
         if dip is not None:
             assert dip_dir is not None
@@ -47,6 +48,7 @@ class Fracture(object):
             x = centroid[0]
             y = centroid[1]
             z = centroid[2]
+        self.polygon_points = polygon
 
 
         self.dip = dip
@@ -374,5 +376,25 @@ class Fracture(object):
             return computed_storativity
         else:
             return 0.0
+
+    def get_json(self):
+        print(self.polygon_points)
+        cur_dict = {
+            'x': self.x_centroid,
+            'y': self.y_centroid,
+            'z': self.z_centroid,
+            'size': self.size,
+            'aperture': self.aperture,
+            'dip': self.dip,
+            'dip_dir': self.dip_dir,
+            'aperture_constant': self.aperture_constant,
+            'transmissivity_constant': self.transmissivity_constant,
+            'storativity_constant': self.storativity_constant,
+            'normal_vector': self._unit_normal_vector.tolist() if self._unit_normal_vector is not None else None,
+            'polygon': [point.tolist() for point in self.polygon_points] if self.polygon_points is not None else None,
+        }
+        return cur_dict
+
+
 
 

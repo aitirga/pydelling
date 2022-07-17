@@ -30,6 +30,7 @@ class Fault:
         self.transmissivity = transmissivity
         self.porosity = porosity
         self.storativity = storativity
+        self.filename = filename
 
         Fault.local_id += 1
 
@@ -93,6 +94,16 @@ class Fault:
     @property
     def normal_vector(self):
         return np.mean(self.trimesh_mesh.face_normals, axis=0)
+
+    def get_json(self):
+        save_dict = {
+            "aperture": self.aperture,
+            "transmissivity": self.transmissivity,
+            "porosity": self.porosity,
+            "storativity": self.storativity,
+            "filename": self.filename
+        }
+        return save_dict
 
 
 
