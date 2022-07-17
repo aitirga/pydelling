@@ -31,9 +31,14 @@ class TestMeshPreprocessor(unittest.TestCase):
         self.assertEqual(mesh_preprocessor.n_nodes, 5)
 
 
-    def test_normal_vector(self):
-        pass
-
+    def test_save_load(self):
+        mesh_preprocessor = MeshPreprocessor()
+        mesh_preprocessor.add_tetrahedra(node_ids=np.array([0, 1, 2, 3]),
+                                            node_coords=[np.array([0.0, 0.0, -0.5]),
+                                                            np.array([1.0, 0.0, -0.5]),
+                                                            np.array([0.0, 1.0, -0.5]),
+                                                            np.array([0.0, 0.0, 0.5])])
+        print(mesh_preprocessor.get_json())
 
 
 if __name__ == '__main__':
