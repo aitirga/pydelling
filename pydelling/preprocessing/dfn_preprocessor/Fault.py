@@ -96,12 +96,13 @@ class Fault:
         return np.mean(self.trimesh_mesh.face_normals, axis=0)
 
     def get_json(self):
+        self.filename: Path
         save_dict = {
             "aperture": self.aperture,
             "transmissivity": self.transmissivity,
             "porosity": self.porosity,
             "storativity": self.storativity,
-            "filename": self.filename
+            "filename": str(self.filename),
         }
         return save_dict
 
