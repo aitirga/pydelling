@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import *
 import numpy as np
 import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
@@ -7,8 +8,11 @@ from pydelling.preprocessing.dfn_preprocessor.Fracture import Fracture
 from pydelling.utils.geometry_utils import compute_polygon_area
 from tqdm import tqdm
 import logging
+from pydelling.preprocessing.mesh_preprocessor.geometry import BaseElement
+
 
 logger = logging.getLogger(__name__)
+
 
 class MeshPreprocessor(object):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
@@ -24,7 +28,7 @@ class MeshPreprocessor(object):
     is_intersected = False
     is_streamlit = False
     aux_nodes = {}
-
+    has_kd_tree: bool = False
 
     def __init__(self, *args, **kwargs):
         self.unordered_nodes = {}
@@ -406,10 +410,44 @@ class MeshPreprocessor(object):
     def get_json(self):
         """Export the mesh to a json file."""
         save_dictionary = {}
+        self.elements = [element.get_json() for element in self.elements]
         save_dictionary['elements'] = self.elements
-        save_dictionary['coords'] = self.coords
-        save_dictionary['kd_tree'] = self.kd_tree
+        save_dictionary['coords'] = self.coords.tolist()
         save_dictionary['has_kd_tree'] = self.has_kd_tree
+        return save_dictionary
+
+    def to_json(self, filename='mesh.json'):
+        """Export the mesh to a json file."""
+        import json
+        with open(filename, 'w') as f:
+            json.dump(self.get_json(), f)
+
+    @classmethod
+    def load_json(self, filename='mesh.json'):
+        """Load the mesh from a json file."""
+        BaseElement.local_id = 0
+        import json
+        with open(filename, 'r') as f:
+            save_dictionary = json.load(f)
+            mesh = MeshPreprocessor()
+            mesh._coords = np.array(save_dictionary['coords'])
+            mesh.has_kd_tree = save_dictionary['has_kd_tree']
+            MeshPreprocessor.load_elements(mesh, save_dictionary['elements'])
+            if mesh.has_kd_tree:
+                mesh.create_kd_tree()
+            return mesh
+
+    @staticmethod
+    def load_elements(mesh: MeshPreprocessor, element_dict):
+        """Load the elements from a dictionary."""
+        elements = []
+        for element in tqdm(element_dict, desc='Loading elements'):
+            if element['type'] == 'tetrahedra':
+                mesh.add_tetrahedra(node_ids=element['nodes'],
+                                    node_coords=mesh._coords[element['nodes']])
+
+
+
 
     def __repr__(self):
         return f'Mesh with {len(self.elements)} elements and {len(self.coords)} nodes.'
