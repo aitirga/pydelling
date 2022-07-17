@@ -16,7 +16,7 @@ class MeshPreprocessor(object):
     coords: List[np.ndarray]
     centroids: List[np.ndarray]
     meshio_mesh: msh.Mesh = None
-    kd_tree: KDTree
+    kd_tree: KDTree = None
     point_data = {}
     cell_data = {}
     _coords = None
@@ -24,6 +24,7 @@ class MeshPreprocessor(object):
     is_intersected = False
     is_streamlit = False
     aux_nodes = {}
+
 
     def __init__(self, *args, **kwargs):
         self.unordered_nodes = {}
@@ -401,6 +402,14 @@ class MeshPreprocessor(object):
             self._coords = save_dictionary['coords']
             self.kd_tree = save_dictionary['kd_tree']
             self.has_kd_tree = save_dictionary['has_kd_tree']
+
+    def get_json(self):
+        """Export the mesh to a json file."""
+        save_dictionary = {}
+        save_dictionary['elements'] = self.elements
+        save_dictionary['coords'] = self.coords
+        save_dictionary['kd_tree'] = self.kd_tree
+        save_dictionary['has_kd_tree'] = self.has_kd_tree
 
     def __repr__(self):
         return f'Mesh with {len(self.elements)} elements and {len(self.coords)} nodes.'
