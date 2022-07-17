@@ -32,13 +32,21 @@ class TestMeshPreprocessor(unittest.TestCase):
 
 
     def test_save_load(self):
+
         mesh_preprocessor = MeshPreprocessor()
         mesh_preprocessor.add_tetrahedra(node_ids=np.array([0, 1, 2, 3]),
                                             node_coords=[np.array([0.0, 0.0, -0.5]),
                                                             np.array([1.0, 0.0, -0.5]),
                                                             np.array([0.0, 1.0, -0.5]),
                                                             np.array([0.0, 0.0, 0.5])])
-        print(mesh_preprocessor.get_json())
+        mesh_preprocessor.add_tetrahedra(node_ids=np.array([0, 1, 2, 3]),
+                                            node_coords=[np.array([0.0, 0.0, -0.5]),
+                                                            np.array([1.0, 0.0, -0.5]),
+                                                            np.array([0.0, 1.0, -0.5]),
+                                                            np.array([0.0, 0.0, 0.5])])
+        mesh_preprocessor.to_json(filename='./test.json')
+        mesh_preprocessor_2 = MeshPreprocessor.load_json(filename='./test.json')
+        print(mesh_preprocessor_2)
 
 
 if __name__ == '__main__':
