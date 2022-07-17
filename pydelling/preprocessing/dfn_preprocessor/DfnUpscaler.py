@@ -61,7 +61,7 @@ class DfnUpscaler:
         """Finds the intersection points between a fracture and the mesh"""
 
         intersection_points = []
-        kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fracture.centroid, distance=fracture.size * 2)
+        kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fracture.centroid, distance=fracture.size)
         counter = 0
         elements_filtered = 0
         for element in kd_tree_filtered_elements:
@@ -69,7 +69,7 @@ class DfnUpscaler:
             counter += 1
             absolute_distance = np.abs(fracture.distance_to_point(element.centroid))
             characteristic_length = np.power(element.volume, 1 / 3)
-            if absolute_distance > 1.5 * characteristic_length:
+            if absolute_distance > 1.25 * characteristic_length:
                 elements_filtered += 1
                 continue
 

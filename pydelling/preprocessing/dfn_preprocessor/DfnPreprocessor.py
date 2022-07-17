@@ -329,6 +329,40 @@ class DfnPreprocessor(object):
     def max_z(self):
         return max([fracture.z_centroid for fracture in self.dfn])
 
+    def get_json(self):
+        """Returns a json representation of the dfn object."""
+        export_dict = {}
+        export_dict['dfn'] = [fracture.get_json() for fracture in self.dfn]
+        export_dict['faults'] = [fault.get_json() for fault in self.faults]
+        return export_dict
+
+    def to_json(self, filename):
+        """Writes the dfn object to a json file."""
+        import json
+        with open(filename, 'w') as f:
+            json.dump(self.get_json(), f)
+
+    @classmethod
+    def from_json(cls, filename='dfn.json'):
+        """Loads a dfn object from a json file."""
+        import json
+        with open(filename, 'r') as f:
+            Fracture.local_id = 0  # Be careful with this
+            Fault.local_id = 0  # Be careful with this
+            dfn_dict = json.load(f)
+            dfn_object = cls()
+            dfn_object.dfn = [Fracture(**fracture) for fracture in dfn_dict['dfn']]
+            dfn_object.faults = [Fault(**fault) for fault in dfn_dict['faults']]
+            return dfn_object
+
+    def __repr__(self):
+        return f'DFN with {len(self.dfn)} fractures and {len(self.faults)} faults'
+
+    def __str__(self):
+        return self.__repr__()
+
+
+
 
 
 

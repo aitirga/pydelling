@@ -15,6 +15,33 @@ class DfnPreprocessorCase(unittest.TestCase):
         dfn_three = dfn_one + dfn_two
         self.assertEqual(len(dfn_three.dfn), 2)
 
+    def test_dfn_save_load(self):
+        dfn_one = DfnPreprocessor()
+        dfn_one.add_fracture(
+            x=0, y=0, z=0, dip=0, dip_dir=0, aperture=0.1, size=1.2
+        )
+        dfn_one.to_json('test.json')
+        dfn_one_loaded = DfnPreprocessor.from_json('test.json')
+        self.assertEqual(len(dfn_one_loaded.dfn), 1)
+        self.assertEqual(dfn_one_loaded.dfn[0].x_centroid, 0)
+        self.assertEqual(dfn_one_loaded.dfn[0].aperture, 0.1)
+        self.assertEqual(dfn_one_loaded.dfn[0].size, 1.2)
+
+    def test_fault_save_load(self):
+        dfn_one = DfnPreprocessor()
+        dfn_one.add_fault()
+        dfn_one.to_json('test.json')
+        dfn_one_loaded = DfnPreprocessor.from_json('test.json')
+
+
+
+    def tearDown(self) -> None:
+        import os
+        try:
+            os.remove('test.json')
+        except FileNotFoundError:
+            pass
+
 
 if __name__ == '__main__':
     unittest.main()
