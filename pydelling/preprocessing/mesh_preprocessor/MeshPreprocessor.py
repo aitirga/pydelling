@@ -409,6 +409,7 @@ class MeshPreprocessor(object):
 
     def get_json(self):
         """Export the mesh to a json file."""
+        logger.info('Exporting mesh to json')
         save_dictionary = {}
         self.elements = [element.get_json() for element in self.elements]
         save_dictionary['elements'] = self.elements
@@ -425,6 +426,7 @@ class MeshPreprocessor(object):
     @classmethod
     def load_json(self, filename='mesh.json'):
         """Load the mesh from a json file."""
+        logger.info(f'Loading mesh from {filename}')
         BaseElement.local_id = 0
         import json
         with open(filename, 'r') as f:
@@ -445,6 +447,17 @@ class MeshPreprocessor(object):
             if element['type'] == 'tetrahedra':
                 mesh.add_tetrahedra(node_ids=element['nodes'],
                                     node_coords=mesh._coords[element['nodes']])
+            elif element['type'] == 'hexahedra':
+                mesh.add_hexahedra(node_ids=element['nodes'],
+                                   node_coords=mesh._coords[element['nodes']])
+            elif element['type'] == 'wedge':
+                mesh.add_wedge(node_ids=element['nodes'],
+                               node_coords=mesh._coords[element['nodes']])
+            elif element['type'] == 'pyramid':
+                mesh.add_pyramid(node_ids=element['nodes'],
+                                 node_coords=mesh._coords[element['nodes']])
+                
+
 
 
 
