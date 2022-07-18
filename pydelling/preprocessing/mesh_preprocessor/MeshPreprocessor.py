@@ -240,8 +240,9 @@ class MeshPreprocessor(object):
         Returns:
             A list of the nearest mesh elements.
         """
-        if not hasattr(self, 'kd_tree'):
+        if self.kd_tree is None:
             self.create_kd_tree()
+
         ids = self.kd_tree.query_ball_point(point, distance)
         # assert len(ids) != 0, "No elements found"
         return [self.elements[i] for i in ids]
@@ -424,7 +425,7 @@ class MeshPreprocessor(object):
             json.dump(self.get_json(), f)
 
     @classmethod
-    def load_json(self, filename='mesh.json'):
+    def from_json(self, filename='mesh.json'):
         """Load the mesh from a json file."""
         logger.info(f'Loading mesh from {filename}')
         BaseElement.local_id = 0
@@ -439,11 +440,23 @@ class MeshPreprocessor(object):
                 mesh.create_kd_tree()
             return mesh
 
+    @classmethod
+    def from_dict(cls, dict: dict):
+        """Load the mesh from a json file."""
+        BaseElement.local_id = 0
+        mesh = MeshPreprocessor()
+        mesh._coords = np.array(dict['coords'])
+        mesh.has_kd_tree = dict['has_kd_tree']
+        MeshPreprocessor.load_elements(mesh, dict['elements'])
+        if mesh.has_kd_tree:
+            mesh.create_kd_tree()
+        return mesh
+
     @staticmethod
     def load_elements(mesh: MeshPreprocessor, element_dict):
         """Load the elements from a dictionary."""
         elements = []
-        for element in tqdm(element_dict, desc='Loading elements'):
+        for local_id, element in tqdm(enumerate(element_dict), desc='Loading elements'):
             if element['type'] == 'tetrahedra':
                 mesh.add_tetrahedra(node_ids=element['nodes'],
                                     node_coords=mesh._coords[element['nodes']])
@@ -456,7 +469,7 @@ class MeshPreprocessor(object):
             elif element['type'] == 'pyramid':
                 mesh.add_pyramid(node_ids=element['nodes'],
                                  node_coords=mesh._coords[element['nodes']])
-                
+            mesh.elements[local_id].associated_fractures = element_dict[local_id]['associated_fractures']
 
 
 

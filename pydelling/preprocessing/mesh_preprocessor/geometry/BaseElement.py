@@ -180,12 +180,20 @@ class BaseElement(BaseAbstractMeshObject):
 
     def get_json(self):
         """Returns a json representation of the element"""
+        serialized_associated_fractures = {key: {
+            'area': value['area'],
+            'volume': value['volume'],
+            'fracture': value['fracture'].get_json(),
+        } for key, value in self.associated_fractures.items()}
+
+
+
         json_dict = {
             "type": self.type,
             "local_id": self.local_id,
             "n_nodes": self.n_nodes,
             "nodes": self.nodes.tolist(),
-            "associated_fractures": self.associated_fractures,
+            "associated_fractures": serialized_associated_fractures,
             "associated_faults": self.associated_faults,
             "total_fracture_volume": self.total_fracture_volume,
             "area": self.area,

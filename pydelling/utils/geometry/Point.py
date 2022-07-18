@@ -40,3 +40,5 @@ class Point(np.ndarray):
     def z(self):
         return self[2]
 
+    def get_json(self):
+        return [self.x, self.y, self.z]
