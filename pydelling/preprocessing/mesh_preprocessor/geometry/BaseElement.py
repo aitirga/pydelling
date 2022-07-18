@@ -15,7 +15,7 @@ from pydelling.utils.geometry_utils import filter_unique_points
 
 class BaseElement(BaseAbstractMeshObject):
     local_id = 0
-    eps = 1E-6
+    eps = 1E-4
     __slots__ = ['node_ids', 'node_coords']
 
     def __init__(self, node_ids, node_coords, centroid_coords=None):
