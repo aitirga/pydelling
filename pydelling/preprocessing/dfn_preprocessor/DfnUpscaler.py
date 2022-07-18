@@ -21,6 +21,7 @@ class DfnUpscaler:
                  parallel=False,
                  save_intersections=False,
                  load_faults:str or pathlib.Path=None,
+                 loading=False,
                  ):
         self.dfn: DfnPreprocessor = dfn
         self.mesh: MeshPreprocessor = mesh
@@ -28,7 +29,8 @@ class DfnUpscaler:
         self.all_intersected_points = []
         self.save_intersections = save_intersections
         self.load_faults = load_faults
-        self._intersect_dfn_with_mesh(parallel=parallel)
+        if not loading:
+            self._intersect_dfn_with_mesh(parallel=parallel)
 
     def _intersect_dfn_with_mesh(self, parallel=False):
         """Runs the DfnUpscaler"""
@@ -488,12 +490,36 @@ class DfnUpscaler:
         with open(filename, 'w') as f:
             jsonpickle.encode(self, f)
 
+
+    def to_json(self, filename='upscaler.json'):
+        """Save a copy of the class on a serialized json object"""
+        logger.info(f'Saving a copy of the class to {filename}')
+        # Create saving dictionary
+        saving_dict = {}
+        saving_dict['mesh'] = self.mesh.get_json()
+        saving_dict['dfn'] = self.dfn.get_json()
+        intersected_points = []
+        for point_group in self.all_intersected_points:
+            intersected_points.append([])
+            for point in point_group:
+                intersected_points[-1].append(point.get_json())
+        saving_dict['all_intersected_points'] = intersected_points
+        import json
+        with open(filename, 'w') as f:
+            json.dump(saving_dict, f)
+
     @classmethod
-    def load(cls, filename):
+    def from_json(cls, filename):
         """Load a serialized pickle object"""
         logger.info(f'Loading the upscaling class from {filename}')
         import json
         with open(filename, 'rb') as f:
-            return dill.load(f)
+            load_dict = json.load(f)
+            mesh = MeshPreprocessor.from_dict(load_dict['mesh'])
+            dfn = DfnPreprocessor.from_dict(load_dict['dfn'])
+            loaded_class = cls(mesh=mesh, dfn=dfn, loading=True)
+            loaded_class.all_intersected_points = load_dict['all_intersected_points']
+            return loaded_class
+
 
 

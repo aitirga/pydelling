@@ -355,6 +355,17 @@ class DfnPreprocessor(object):
             dfn_object.faults = [Fault(**fault) for fault in dfn_dict['faults']]
             return dfn_object
 
+    @classmethod
+    def from_dict(cls, dict: dict):
+        """Loads a dfn object from a dict."""
+        Fracture.local_id = 0
+        Fault.local_id = 0
+        dfn_object = cls()
+        dfn_object.dfn = [Fracture(**fracture) for fracture in dict['dfn']]
+        dfn_object.faults = [Fault(**fault) for fault in dict['faults']]
+        return dfn_object
+
+
     def __repr__(self):
         return f'DFN with {len(self.dfn)} fractures and {len(self.faults)} faults'
 

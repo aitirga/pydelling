@@ -196,7 +196,7 @@ class Fracture(object):
     @property
     def unit_normal_vector(self):
         """Returns the normal vector of the fracture"""
-        if not hasattr(self, '_unit_normal_vector'):
+        if self._unit_normal_vector is None:
             get_side_points = self.get_side_points()
             v1 = get_side_points[1] - get_side_points[0]
             v2 = get_side_points[2] - get_side_points[0]

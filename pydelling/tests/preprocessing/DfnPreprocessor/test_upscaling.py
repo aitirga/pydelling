@@ -50,17 +50,24 @@ class UpscalingCase(unittest.TestCase):
         # permeability_solution = np.array([[114.70037453,0,0],[0,114.70037453,0],[0,0,0]])
         # nptest.assert_array_almost_equal(permeability[0], permeability_solution)
 
-    def test_save_load_upscaler(self):
+    # def test_save_load_upscaler(self):
+    #     self.dfn_upscaler.save('upscaler.pkl')
+    #     new_upscaler = DfnUpscaler.load('upscaler.pkl')
+    #     self.assertEqual(len(self.dfn_upscaler.mesh.elements), len(new_upscaler.mesh.elements))
+    #     self.assertEqual(len(self.dfn_upscaler.dfn.dfn), len(new_upscaler.dfn.dfn))
+    #     self.assertEqual(len(self.dfn_upscaler.dfn.dfn[0].intersection_dictionary), len(new_upscaler.dfn.dfn[0].intersection_dictionary))
+    #     self.assertEqual(len(self.dfn_upscaler.dfn.faults), len(new_upscaler.dfn.faults))
+    #     self.assertEqual(len(self.dfn_upscaler.upscaled_porosity), len(new_upscaler.upscaled_porosity))
+    #     from pathlib import Path
+    #     Path('upscaler.pkl').unlink()
 
-        self.dfn_upscaler.save('upscaler.pkl')
-        new_upscaler = DfnUpscaler.load('upscaler.pkl')
-        self.assertEqual(len(self.dfn_upscaler.mesh.elements), len(new_upscaler.mesh.elements))
-        self.assertEqual(len(self.dfn_upscaler.dfn.dfn), len(new_upscaler.dfn.dfn))
-        self.assertEqual(len(self.dfn_upscaler.dfn.dfn[0].intersection_dictionary), len(new_upscaler.dfn.dfn[0].intersection_dictionary))
-        self.assertEqual(len(self.dfn_upscaler.dfn.faults), len(new_upscaler.dfn.faults))
-        self.assertEqual(len(self.dfn_upscaler.upscaled_porosity), len(new_upscaler.upscaled_porosity))
-        from pathlib import Path
-        Path('upscaler.pkl').unlink()
+    def test_save_load_json(self):
+        self.dfn_upscaler.to_json('upscaler.json')
+        new_upscaler = DfnUpscaler.from_json('upscaler.json')
+        new_upscaler.upscale_mesh_porosity()
+        self.assertEqual(self.dfn_upscaler.upscaled_porosity[0], new_upscaler.upscaled_porosity[0])
+
+
 
 
 if __name__ == '__main__':
