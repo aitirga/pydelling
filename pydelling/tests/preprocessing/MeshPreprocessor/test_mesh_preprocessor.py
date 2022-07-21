@@ -45,8 +45,7 @@ class TestMeshPreprocessor(unittest.TestCase):
                                                             np.array([0.0, 1.0, -0.5]),
                                                             np.array([0.0, 0.0, 0.5])])
         mesh_preprocessor.to_json(filename='./test.json')
-        mesh_preprocessor_2 = MeshPreprocessor.load_json(filename='./test.json')
-        print(mesh_preprocessor_2)
+        mesh_preprocessor_2 = MeshPreprocessor.from_json(filename='./test.json')
 
 
 if __name__ == '__main__':
