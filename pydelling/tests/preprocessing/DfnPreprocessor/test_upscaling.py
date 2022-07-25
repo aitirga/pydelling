@@ -34,14 +34,17 @@ class UpscalingCase(unittest.TestCase):
             ],
         )
 
+
         self.dfn_upscaler = DfnUpscaler(
             dfn=self.dfn_preprocessor,
             mesh=self.mesh_preprocessor,
             save_intersections=True,
         )
+
         self.dfn_upscaler.upscale_mesh_porosity()
         # Upscale permeability
         self.dfn_upscaler.upscale_mesh_permeability()
+
 
     def test_porosity_and_permeability(self):
         porosity_solution = 0.0125
