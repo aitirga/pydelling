@@ -40,9 +40,6 @@ class Fracture(object):
         # Allow definition of a Fracture object based on a polygon
         if polygon is not None:
             # Assert x, y, z are not provided
-            assert x is None
-            assert y is None
-            assert z is None
             self._side_points = polygon
             centroid = np.mean(polygon, axis=0)
             x = centroid[0]
