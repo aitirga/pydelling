@@ -196,7 +196,9 @@ class DfnUpscaler:
         for local_id in upscaled_porosity:
             vtk_porosity[local_id] = upscaled_porosity[local_id]
 
-        self.mesh.cell_data['upscaled_porosity'] = [vtk_porosity.tolist()]
+        refactored_porosity = self.mesh.refactor_array_by_element_type(vtk_porosity)
+
+        self.mesh.cell_data['upscaled_porosity'] = refactored_porosity
         self.upscaled_porosity = upscaled_porosity
 
         return upscaled_porosity
@@ -419,12 +421,12 @@ class DfnUpscaler:
             vtk_kxz[local_id] = upscaled_hk[local_id][0, 2]
             vtk_kyz[local_id] = upscaled_hk[local_id][1, 2]
 
-        self.mesh.cell_data['Kxx'] = [vtk_kxx.tolist()]
-        self.mesh.cell_data['Kyy'] = [vtk_kyy.tolist()]
-        self.mesh.cell_data['Kzz'] = [vtk_kzz.tolist()]
-        self.mesh.cell_data['Kxy'] = [vtk_kxy.tolist()]
-        self.mesh.cell_data['Kxz'] = [vtk_kxz.tolist()]
-        self.mesh.cell_data['Kyz'] = [vtk_kyz.tolist()]
+        self.mesh.cell_data['Kxx'] = self.mesh.refactor_array_by_element_type(vtk_kxx)
+        self.mesh.cell_data['Kyy'] = self.mesh.refactor_array_by_element_type(vtk_kyy)
+        self.mesh.cell_data['Kzz'] = self.mesh.refactor_array_by_element_type(vtk_kzz)
+        self.mesh.cell_data['Kxy'] = self.mesh.refactor_array_by_element_type(vtk_kxy)
+        self.mesh.cell_data['Kxz'] = self.mesh.refactor_array_by_element_type(vtk_kxz)
+        self.mesh.cell_data['Kyz'] = self.mesh.refactor_array_by_element_type(vtk_kyz)
 
         self.upscaled_permeability = upscaled_hk
 

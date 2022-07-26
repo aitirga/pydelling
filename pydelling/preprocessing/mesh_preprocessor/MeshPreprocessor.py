@@ -469,7 +469,35 @@ class MeshPreprocessor(object):
             elif element['type'] == 'pyramid':
                 mesh.add_pyramid(node_ids=element['nodes'],
                                  node_coords=mesh._coords[element['nodes']])
-            mesh.elements[local_id].associated_fractures = element_dict[local_id]['associated_fractures']
+            associated_fractures_dict = element_dict[local_id]['associated_fractures']
+            temp_associated_fractures = {}
+            for key in associated_fractures_dict:
+                cur_fracture = associated_fractures_dict[key]
+                temp_fracture = {key: value for key, value in cur_fracture.items() if key != 'fracture'}
+                temp_fracture['fracture'] = Fracture(**cur_fracture['fracture'])
+                temp_associated_fractures[key] = temp_fracture
+            mesh.elements[local_id].associated_fractures = temp_associated_fractures
+
+
+
+    def refactor_array_by_element_type(self, array: np.ndarray or list) -> list:
+        """Refactors a given array based on the element type"""
+        if isinstance(array, np.ndarray):
+            array = array.tolist()
+        final_array = []
+        temp_dict = {
+            'wedge': [],
+            'pyramid': [],
+            'tetrahedra': [],
+            'hexahedra': [],
+        }
+        for element in self.elements:
+            temp_dict[element.type].append(array[element.local_id])
+        for key in temp_dict:
+            if len(temp_dict[key]) > 0:
+                final_array.append(temp_dict[key])
+        return final_array
+
 
 
 
