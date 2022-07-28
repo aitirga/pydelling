@@ -501,11 +501,11 @@ class DfnUpscaler:
         saving_dict['mesh'] = self.mesh.get_json()
         saving_dict['dfn'] = self.dfn.get_json()
         intersected_points = []
-        for point_group in self.all_intersected_points:
-            intersected_points.append([])
-            for point in point_group:
-                intersected_points[-1].append(point.get_json())
-        saving_dict['all_intersected_points'] = intersected_points
+        # for point_group in self.all_intersected_points:
+        #     intersected_points.append([])
+        #     for point in point_group:
+        #         intersected_points[-1].append(point.get_json())
+        # saving_dict['all_intersected_points'] = intersected_points
         import json
         with open(filename, 'w') as f:
             json.dump(saving_dict, f)
@@ -520,7 +520,7 @@ class DfnUpscaler:
             mesh = MeshPreprocessor.from_dict(load_dict['mesh'])
             dfn = DfnPreprocessor.from_dict(load_dict['dfn'])
             loaded_class = cls(mesh=mesh, dfn=dfn, loading=True)
-            loaded_class.all_intersected_points = load_dict['all_intersected_points']
+            # loaded_class.all_intersected_points = load_dict['all_intersected_points']
             return loaded_class
 
 
