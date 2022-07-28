@@ -375,7 +375,6 @@ class Fracture(object):
             return 0.0
 
     def get_json(self):
-        print(self.polygon_points)
         cur_dict = {
             'x': self.x_centroid,
             'y': self.y_centroid,
