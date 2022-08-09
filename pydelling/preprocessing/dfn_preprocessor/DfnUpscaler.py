@@ -71,9 +71,9 @@ class DfnUpscaler:
             counter += 1
             absolute_distance = np.abs(fracture.distance_to_point(element.centroid))
             characteristic_length = np.power(element.volume, 1 / 3)
-            if absolute_distance > 1.25 * characteristic_length:
-                elements_filtered += 1
-                continue
+            #if absolute_distance > 1.25 * characteristic_length:
+            #    elements_filtered += 1
+            #    continue
 
             intersection_points = element.intersect_with_fracture(fracture)
             if self.save_intersections:
@@ -198,6 +198,7 @@ class DfnUpscaler:
 
         refactored_porosity = self.mesh.refactor_array_by_element_type(vtk_porosity)
 
+
         self.mesh.cell_data['upscaled_porosity'] = refactored_porosity
         self.upscaled_porosity = upscaled_porosity
 
@@ -281,7 +282,8 @@ class DfnUpscaler:
         #
         # if len(matrix_permeability) != len(self.elements):
         #     print("Incorrect size for matrix permeability. Size of variable doesn't match number of elements in the mesh.")
-        #     break
+        #     breakcd
+        c
         # else:
         #     for elem in tqdm(self.elements, desc="Check size of matrix permeability input"):
         #         if len(matrix_permeability[elem]) == 3:
