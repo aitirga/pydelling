@@ -16,6 +16,7 @@ from pydelling.utils.geometry_utils import filter_unique_points
 class BaseElement(BaseAbstractMeshObject):
     local_id = 0
     eps = 1e-2
+    eps_zero = 1E-4
     _edge_lines = None
     __slots__ = ['node_ids', 'node_coords']
 
@@ -88,7 +89,6 @@ class BaseElement(BaseAbstractMeshObject):
         intersected_lines = []
         intersected_points = []
         final_points = []
-
         # First thing, check if the fracture is inside the element
         for corner in fracture.corners:
             if self.contains(corner):
@@ -99,21 +99,20 @@ class BaseElement(BaseAbstractMeshObject):
             return final_points
 
         for face in self.faces:
-            intersection = self.faces[face].intersect_with_plane(fracture.plane)
+            # intersection = self.faces[face].intersect_with_plane(fracture.plane)
             for corner_line in fracture.corner_lines:
                 line_intersection = corner_line.intersect(self.faces[face].plane)
                 if line_intersection is not None:
                     # if self.contains(line_intersection):
                     intersected_points.append(line_intersection)
-            if intersection:
-                intersected_lines.append(intersection)
+            # if intersection:
+            #     intersected_lines.append(intersection)
         # Intersect the element edges with the fracture plane
         for edge in self.edge_lines:
             intersection = edge.intersect(fracture.plane)
             edge_intersections = []
             if export_all_points:
                 intersection = edge.intersect(fracture.plane)
-                print(intersection)
                 edge_intersections.append(intersection)
                 with open('custom_edge_intersections.txt', 'a') as f:
                     import csv
@@ -125,7 +124,7 @@ class BaseElement(BaseAbstractMeshObject):
                 intersected_points.append(intersection)
 
         # Intersect the lines within themselves
-        intersected_points += list(self._full_line_intersections(intersected_lines=intersected_lines))
+        # intersected_points += list(self._full_line_intersections(intersected_lines=intersected_lines))
         if export_all_points:
             import csv
             with open('intersected_points_all.csv', 'w') as csvfile:
@@ -138,20 +137,32 @@ class BaseElement(BaseAbstractMeshObject):
         for point in intersected_points:
             if self.contains(point):
                 intersected_inside_points.append(point)
+
+            # if self.on_face(point):
+            #     intersected_inside_points.append(point)
         intersected_points = intersected_inside_points.copy()
+        if export_all_points:
+            print(len(intersected_inside_points))
+            with open('intersected_points_inside.csv', 'w') as csvfile:
+                import csv
+                writer = csv.writer(csvfile)
+                writer.writerows(intersected_inside_points)
+
 
         # Test algorithm that checks if a point is contained in the fracture
         for point in intersected_points:
             if fracture.contains(point):
                 final_points.append(point)
-
-
+        if export_all_points:
+            print(len(final_points))
+            print(final_points)
         # Check if any fracture edge is inside the element. If so, add that as intersection point
         # for corner in fracture.corners:
         #     if self.contains(corner):
         #         final_points.append(corner)
 
         # final_points = intersected_points
+
         final_points = filter_unique_points(final_points)
         final_points = [Point(point) for point in final_points]
 
@@ -169,30 +180,27 @@ class BaseElement(BaseAbstractMeshObject):
                 intersected_points.append(intersection)
         return intersected_points
 
-    def contains(self, point: np.ndarray or Point, dilatation_factor=0.01) -> bool:
+    def contains(self, point: np.ndarray or Point) -> bool:
         """Checks if a point is inside the element"""
         for face in self.faces:
             face_centroid = self.faces[face].centroid
-            # if dilatation_factor:
-            #     print('dilating')
-            #     characteristic_distance = abs(face_centroid - self.faces[face].coords[0])
-            #     face_centroid += characteristic_distance * dilatation_factor * self.faces[face].unit_normal_vector
-
             vec = point - face_centroid
             norm_vec = vec / np.linalg.norm(vec)
             dot_plane_point = np.dot(self.faces[face].unit_normal_vector, norm_vec)
-            # if point[2] == -374.0510290551504:
-            #     print('---')
-            #     print(point)
-            #     print(self.faces[face].centroid)
-            #     print(self.faces[face].unit_normal_vector)
-            #     print(dot_plane_point)
-            #     print(self.local_id)
-            #     print('---')
             if dot_plane_point > self.eps:
                 return False
         return True
 
+    def on_face(self, point):
+        """Checks if a point is on a face of the element"""
+        for face in self.faces:
+            face_centroid = self.faces[face].centroid
+            vec = point - face_centroid
+            norm_vec = vec / np.linalg.norm(vec)
+            dot_plane_point = np.abs(np.dot(self.faces[face].unit_normal_vector, norm_vec))
+            if dot_plane_point < self.eps_zero:
+                return True
+        return False
 
     @property
     def n_nodes(self):
