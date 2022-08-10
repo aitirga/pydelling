@@ -47,6 +47,29 @@ class TestMeshPreprocessor(unittest.TestCase):
         mesh_preprocessor.to_json(filename='./test.json')
         mesh_preprocessor_2 = MeshPreprocessor.from_json(filename='./test.json')
 
+    def test_edge_line_generation(self):
+        mesh_preprocessor = MeshPreprocessor()
+        mesh_preprocessor.add_tetrahedra(node_ids=np.array([0, 1, 2, 3]),
+                                            node_coords=[np.array([0.0, 0.0, -0.5]),
+                                                            np.array([1.0, 0.0, -0.5]),
+                                                            np.array([0.0, 1.0, -0.5]),
+                                                            np.array([0.0, 0.0, 0.5])])
+        edge_lines = mesh_preprocessor.elements[0].edge_lines
+        self.assertEqual(len(edge_lines), 6)
+        mesh_preprocessor.clear()
+        mesh_preprocessor.add_hexahedra(node_ids=np.array([0, 1, 2, 3, 4, 5, 6, 7]),
+                                            node_coords=[np.array([0.0, 0.0, -0.5]),
+                                                            np.array([1.0, 0.0, -0.5]),
+                                                            np.array([0.0, 1.0, -0.5]),
+                                                            np.array([0.0, 0.0, 0.5]),
+                                                            np.array([1.0, 0.0, 0.5]),
+                                                            np.array([0.0, 1.0, 0.5]),
+                                                            np.array([1.0, 1.0, 0.5]),
+                                                            np.array([0.0, 1.0, 0.5]),
+                                                         ])
+        edge_lines = mesh_preprocessor.elements[0].edge_lines
+        self.assertEqual(len(edge_lines), 12)
+
 
 if __name__ == '__main__':
     unittest.main()
