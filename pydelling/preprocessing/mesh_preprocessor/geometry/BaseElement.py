@@ -130,7 +130,6 @@ class BaseElement(BaseAbstractMeshObject):
             with open('intersected_points_all.csv', 'w') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerows(intersected_points)
-            print(self.local_id)
             from pydelling.preprocessing import MeshPreprocessor
         # Check if the intersected points are inside the element
         intersected_inside_points = []
@@ -142,7 +141,6 @@ class BaseElement(BaseAbstractMeshObject):
             #     intersected_inside_points.append(point)
         intersected_points = intersected_inside_points.copy()
         if export_all_points:
-            print(len(intersected_inside_points))
             with open('intersected_points_inside.csv', 'w') as csvfile:
                 import csv
                 writer = csv.writer(csvfile)

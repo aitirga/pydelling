@@ -107,10 +107,9 @@ class DfnUpscaler:
             #     with open('issue_element.pkl', 'wb') as f:
             #         pickle.dump(element, f)
 
-            if intersection_area == 0.0:
-                if len(intersection_points) > 0:
-                    print(intersection_area, len(intersection_points), fracture.local_id, element.local_id)
-
+            # if intersection_area == 0.0:
+            #     if len(intersection_points) > 0:
+            #         print(intersection_area, len(intersection_points), fracture.local_id, element.local_id)
             #         print(intersection_points)
                     # import csv
                     # with open('test_intersection.csv', 'w') as f:
@@ -127,21 +126,21 @@ class DfnUpscaler:
                     #     #     self.cur_num += 1
                     #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
                     #     print(fracture.local_id)
-            if element.local_id == 21515:
-                with open(f'test_intersection.csv', 'w') as f:
-                    import csv
-                    writer = csv.writer(f)
-                    writer.writerow(['x', 'y', 'z'])
-                    for point in intersection_points:
-                        writer.writerow([point.x, point.y, point.z])
-                intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
-                import pickle
-                with open(f'issue_element_2.pkl', 'wb') as f:
-                    pickle.dump(element, f)
-                error_mesh = MeshPreprocessor()
-                error_mesh.elements = [element]
-                error_mesh.unordered_nodes = self.mesh.unordered_nodes
-                error_mesh.to_vtk(f'issue_element_debug.vtk')
+            # if element.local_id == 21515:
+            #     with open(f'test_intersection.csv', 'w') as f:
+            #         import csv
+            #         writer = csv.writer(f)
+            #         writer.writerow(['x', 'y', 'z'])
+            #         for point in intersection_points:
+            #             writer.writerow([point.x, point.y, point.z])
+            #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
+            #     import pickle
+            #     with open(f'issue_element_2.pkl', 'wb') as f:
+            #         pickle.dump(element, f)
+            #     error_mesh = MeshPreprocessor()
+            #     error_mesh.elements = [element]
+            #     error_mesh.unordered_nodes = self.mesh.unordered_nodes
+            #     error_mesh.to_vtk(f'issue_element_debug.vtk')
 
             # if intersection_area == None:
             #     if hasattr(self, 'none_written'):
