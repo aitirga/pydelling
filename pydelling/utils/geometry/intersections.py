@@ -17,7 +17,7 @@ def intersect_line_line(line_1: Line, line_2: Line):
             [delta_p[1]],
             [delta_p[2]],
         ])
-        x = np.linalg.lstsq(a, b, rcond=None)
+        x = np.linalg.lstsq(a, b, rcond=-1)
         if x[1] >= line_1.eps:
             return None
         else:

@@ -4,6 +4,7 @@ import numpy as np
 from pydelling.utils.geometry import Line
 from pydelling.preprocessing import DfnPreprocessor, MeshPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import DfnUpscaler
+from pydelling.utils import test_data_path
 
 class IntersectionCase(unittest.TestCase):
     def test_full_intersection(self):
@@ -231,7 +232,42 @@ class IntersectionCase(unittest.TestCase):
 
         nptest.assert_array_almost_equal(intersections, solution)
 
+    def test_problematic_fracture_1(self):
+        import pickle
+        dfn_preprocessor = DfnPreprocessor()
+        mesh = MeshPreprocessor()
+        read_fracture = test_data_path() / "problematic_fractures/issue_fracture_1.pkl"
+        with open(read_fracture, "rb") as f:
+            fracture = pickle.load(f)
+        read_element = test_data_path() / "problematic_fractures/issue_element_1.pkl"
+        with open(read_element, "rb") as f:
+            element = pickle.load(f)
 
+        dfn_preprocessor.dfn.append(fracture)
+        dfn_preprocessor.to_vtk('test_dfn.vtk')
+        element.to_obj('test_element.obj')
+        intersections = element.intersect_with_fracture(dfn_preprocessor[0], export_all_points=True)
+        with open('computed_intersections.csv', 'w') as f:
+            import csv
+            writer = csv.writer(f)
+            writer.writerows(intersections)
+        self.assertEqual(len(intersections), 3)
+
+    def test_problematic_fracture_2(self):
+        import pickle
+        dfn_preprocessor = DfnPreprocessor()
+        mesh = MeshPreprocessor()
+        read_fracture = test_data_path() / "problematic_fractures/issue_fracture_2.pkl"
+        with open(read_fracture, "rb") as f:
+            fracture = pickle.load(f)
+        read_element = test_data_path() / "problematic_fractures/issue_element_2.pkl"
+        with open(read_element, "rb") as f:
+            element = pickle.load(f)
+
+        dfn_preprocessor.dfn.append(fracture)
+        mesh.elements.append(element)
+        intersections = mesh.elements[0].intersect_with_fracture(dfn_preprocessor[0])
+        self.assertEqual(len(intersections), 4)
 
 
 

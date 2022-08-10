@@ -29,15 +29,26 @@ class DfnUpscaler:
         self.all_intersected_points = []
         self.save_intersections = save_intersections
         self.load_faults = load_faults
+
+        self.target_num = 15
+        self.cur_num = 0
+
         if not loading:
             self._intersect_dfn_with_mesh(parallel=parallel)
+
+
 
     def _intersect_dfn_with_mesh(self, parallel=False):
         """Runs the DfnUpscaler"""
         logger.info('Upscaling the DFN to the mesh')
-
+        self.break_for = False
         for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
             self.find_intersection_points_between_fracture_and_mesh(fracture)
+            # if fracture.local_id == 94:
+            #     break
+            # if self.break_for:
+            #     break
+
         if not self.load_faults:
             self.find_fault_cells()
         else:
@@ -79,7 +90,58 @@ class DfnUpscaler:
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
 
-            intersection_area = compute_polygon_area(intersection_points)
+            # intersection_area = compute_polygon_area(intersection_points)
+            intersection_area = np.abs(compute_polygon_area(intersection_points))
+            # if fracture.local_id == 94 and element.local_id == 24544:
+            #     print('here')
+            #     with open('test_intersection.csv', 'w') as f:
+            #         import csv
+            #         writer = csv.writer(f)
+            #         writer.writerow(['x', 'y', 'z'])
+            #         for point in intersection_points:
+            #             writer.writerow([point.x, point.y, point.z])
+            #
+            #     import pickle
+            #     with open('issue_fracture.pkl', 'wb') as f:
+            #         pickle.dump(fracture, f)
+            #     with open('issue_element.pkl', 'wb') as f:
+            #         pickle.dump(element, f)
+
+            if intersection_area == 0.0:
+                if len(intersection_points) > 0:
+                    print(intersection_area, len(intersection_points), fracture.local_id, element.local_id)
+
+            #         print(intersection_points)
+                    # import csv
+                    # with open('test_intersection.csv', 'w') as f:
+                    #     writer = csv.writer(f)
+                    #     writer.writerow(['x', 'y', 'z'])
+                    #     for point in intersection_points:
+                    #         writer.writerow([point.x, point.y, point.z])
+                    #     # if self.cur_num == self.target_num:
+                    #     #     self.break_for = True
+                    #     #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
+                    #     #     print(fracture.local_id)
+                    #     #     break
+                    #     # else:
+                    #     #     self.cur_num += 1
+                    #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
+                    #     print(fracture.local_id)
+            if element.local_id == 21515:
+                with open(f'test_intersection.csv', 'w') as f:
+                    import csv
+                    writer = csv.writer(f)
+                    writer.writerow(['x', 'y', 'z'])
+                    for point in intersection_points:
+                        writer.writerow([point.x, point.y, point.z])
+                intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
+                import pickle
+                with open(f'issue_element_2.pkl', 'wb') as f:
+                    pickle.dump(element, f)
+                error_mesh = MeshPreprocessor()
+                error_mesh.elements = [element]
+                error_mesh.unordered_nodes = self.mesh.unordered_nodes
+                error_mesh.to_vtk(f'issue_element_debug.vtk')
 
             # if intersection_area == None:
             #     if hasattr(self, 'none_written'):
