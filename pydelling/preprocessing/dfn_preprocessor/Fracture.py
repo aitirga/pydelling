@@ -8,7 +8,7 @@ from pydelling.config import config
 
 class Fracture(object):
     local_id = 0
-    eps = 1e-8
+    eps = 1e-3
     _transmissivity = None
     _storativity = None
     _side_points = None
