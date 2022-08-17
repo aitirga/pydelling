@@ -474,7 +474,7 @@ class MeshPreprocessor(object):
             for key in associated_fractures_dict:
                 cur_fracture = associated_fractures_dict[key]
                 temp_fracture = {key: value for key, value in cur_fracture.items() if key != 'fracture'}
-                temp_fracture['fracture'] = Fracture(**cur_fracture['fracture'])
+                temp_fracture['fracture'] = cur_fracture['fracture']
                 temp_associated_fractures[key] = temp_fracture
             mesh.elements[local_id].associated_fractures = temp_associated_fractures
 
