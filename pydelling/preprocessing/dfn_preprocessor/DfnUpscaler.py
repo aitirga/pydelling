@@ -162,7 +162,7 @@ class DfnUpscaler:
                 element.associated_fractures[fracture.local_id] = {
                     'area': intersection_area,
                     'volume': intersection_area * fracture.aperture,
-                    'fracture': fracture,
+                    'fracture': fracture.local_id,
                 }
             n_intersections = len(intersection_points)
             if not n_intersections in self.mesh.find_intersection_stats['intersection_points'].keys():
@@ -273,7 +273,7 @@ class DfnUpscaler:
             for frac_name in elem.associated_fractures:
                 frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
-                upscaled_storativity[elem.local_id] += frac.storativity
+                upscaled_storativity[elem.local_id] += self.dfn[frac].storativity
 
         for fault in self.dfn.faults:
             for element in fault.associated_elements:
@@ -378,27 +378,27 @@ class DfnUpscaler:
                 # n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
                 # n2 = math.cos(frac.dip * (math.pi / 180)) * math.cos(frac.dip_dir * (math.pi / 180))
                 # n3 = -1 * math.sin(frac.dip * (math.pi / 180))
-                n1 = frac.unit_normal_vector[0]
-                n2 = frac.unit_normal_vector[1]
-                n3 = frac.unit_normal_vector[2]
+                n1 = self.dfn[frac].unit_normal_vector[0]
+                n2 = self.dfn[frac].unit_normal_vector[1]
+                n3 = self.dfn[frac].unit_normal_vector[2]
                 # frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
-                frac.hk = frac.transmissivity / frac.aperture
+                self.dfn[frac].hk = self.dfn[frac].transmissivity / self.dfn[frac].aperture
 
                 if 'mode' == 'isotropy':
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                    fracture_hk[elem.local_id][0, 0] += frac.hk * (frac_dict['volume'] / elem.volume)  # Kxx
+                    fracture_hk[elem.local_id][0, 0] += self.dfn[frac].hk * (frac_dict['volume'] / elem.volume)  # Kxx
 
                 else:  # 'anisotropy' in 'mode':
                     perm_tensor = np.zeros([3, 3])
                     # for i in range(1, 4):
                     #    for j in range(1, 4):
                     # Compute tensor
-                    perm_tensor[0, 0] = frac.hk * ((n2 ** 2) + (n3 ** 2))
-                    perm_tensor[0, 1] = frac.hk * (-1) * n1 * n2
-                    perm_tensor[0, 2] = frac.hk * (-1) * n1 * n3
-                    perm_tensor[1, 1] = frac.hk * ((n3 ** 2) + (n1 ** 2))
-                    perm_tensor[1, 2] = frac.hk * (-1) * n2 * n3
-                    perm_tensor[2, 2] = frac.hk * ((n1 ** 2) + (n2 ** 2))
+                    perm_tensor[0, 0] = self.dfn[frac].hk * ((n2 ** 2) + (n3 ** 2))
+                    perm_tensor[0, 1] = self.dfn[frac].hk * (-1) * n1 * n2
+                    perm_tensor[0, 2] = self.dfn[frac].hk * (-1) * n1 * n3
+                    perm_tensor[1, 1] = self.dfn[frac].hk * ((n3 ** 2) + (n1 ** 2))
+                    perm_tensor[1, 2] = self.dfn[frac].hk * (-1) * n2 * n3
+                    perm_tensor[2, 2] = self.dfn[frac].hk * ((n1 ** 2) + (n2 ** 2))
 
                     if 'mode' == 'anisotropy_principals':
                         eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])

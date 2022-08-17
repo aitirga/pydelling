@@ -229,7 +229,7 @@ class BaseElement(BaseAbstractMeshObject):
         serialized_associated_fractures = {key: {
             'area': value['area'],
             'volume': value['volume'],
-            'fracture': value['fracture'].get_json(),
+            'fracture': value['fracture'],
         } for key, value in self.associated_fractures.items()}
 
 
