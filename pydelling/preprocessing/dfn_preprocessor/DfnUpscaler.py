@@ -4,7 +4,7 @@ import pandas as pd
 
 from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
-from pydelling.preprocessing.dfn_preprocessor import Fracture
+from pydelling.preprocessing.dfn_preprocessor import Fracture, Fault
 import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
 from pydelling.utils.geometry_utils import compute_polygon_area, filter_unique_points
 import logging
@@ -177,40 +177,44 @@ class DfnUpscaler:
         """Finds the fault cells in the mesh"""
         logger.info('Finding fault cells')
         fault_cells = {}
-        for fault in self.dfn.faults:
-
-            kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fault.centroid, distance=fault.size)
-
-            if len(kd_tree_filtered_elements) == 0:
-                continue
-
-            logger.info(f'Processing fault {fault}')
-            logger.info(f'Number of elements in the fault: {len(kd_tree_filtered_elements)}')
-
-            kd_tree_centroids = np.array([elem.centroid for elem in kd_tree_filtered_elements])
-            fault_plane = Fracture(normal_vector=fault.normal_vector,
-                                   x=fault.centroid[0],
-                                   y=fault.centroid[1],
-                                   z=fault.centroid[2],
-                                   aperture=fault.aperture
-                                   )
-            distance_vec = []
-            for kd_centroid in kd_tree_centroids:
-                distance_vec.append(fault_plane.distance_to_point(kd_centroid))
-            # Filter distances
-            distance_vec = np.array(distance_vec)
-            distance_vec = np.abs(distance_vec)
-            distance_vec = pd.DataFrame(distance_vec)
-            distance_vec = distance_vec[distance_vec < fault.aperture * 2].dropna()
-            kd_tree_filtered_elements = [kd_tree_filtered_elements[i] for i in distance_vec.index]
-            distances = distance_vec.values
-
-            # distances = fault.distance(kd_tree_centroids)
-            for element, distance in zip(kd_tree_filtered_elements, distances):
+        for fault in tqdm(self.dfn.faults, desc='Finding distances to faults'):
+            fault: Fault
+            # Iterate over each triangle individually and find close mesh elements
+            triangle_centers = fault.trimesh_mesh.triangles_center
+            triangle_areas = fault.trimesh_mesh.area_faces
+            characteristic_distance = fault.aperture
+            logger.info(f'Processing fault {fault.local_id} containing {len(triangle_centers)} triangles')
+            close_triangles = []
+            for triangle_center, triangle_length in zip(triangle_centers, characteristic_distance):
+                kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(triangle_center, distance=triangle_length * 2)
+                if len(kd_tree_filtered_elements) == 0:
+                    continue
+                # fault_plane = Fracture(normal_vector=fault.normal_vector,
+                #                        x=fault.centroid[0],
+                #                        y=fault.centroid[1],
+                #                        z=fault.centroid[2],
+                #                        width=fault.width
+                #                        )
+                # distance_vec = []
+                # for kd_centroid in kd_tree_centroids:
+                #     distance_vec.append(fault_plane.distance_to_point(kd_centroid))
+                # # Filter distances
+                # distance_vec = np.array(distance_vec)
+                # distance_vec = np.abs(distance_vec)
+                # distance_vec = pd.DataFrame(distance_vec)
+                # distance_vec = distance_vec[distance_vec < fault.width * 2].dropna()
+                # kd_tree_filtered_elements = [kd_tree_filtered_elements[i] for i in distance_vec.index]
+                # distances = distance_vec.values
+                close_triangles.append(kd_tree_filtered_elements)
+            close_triangles = [item for sublist in close_triangles for item in sublist]
+            kd_tree_centroids = np.array([elem.centroid for elem in close_triangles])
+            logger.info(f'Found {len(kd_tree_centroids)} close elements, computing distances to mesh.')
+            distances = fault.distance(kd_tree_centroids)
+            for element, distance in zip(close_triangles, distances):
                 distance = np.abs(distance)
                 if distance < fault.aperture / 2:
                     element.associated_faults[fault.local_id] = {
-                        'distance': distance[0],
+                        'distance': distance,
                     }
                     fault.associated_elements.append(element)
 
@@ -584,5 +588,10 @@ class DfnUpscaler:
             # loaded_class.all_intersected_points = load_dict['all_intersected_points']
             return loaded_class
 
+
+
+
+
+        
 
 
