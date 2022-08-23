@@ -31,18 +31,18 @@ class Fault:
         self.porosity = porosity
         self.storativity = storativity
         self.filename = filename
-
+        self.local_id = Fault.local_id
         Fault.local_id += 1
 
     def distance(self, points: np.ndarray, n_max: int = 2500):
         if points.shape[0] == 3:
-            points = points.reshape(1, 3)
+            points = points.reshape(-1, 3)
         # Divide the points into chunks of n_max
         n_chunks = int(points.shape[0] / n_max)
         if n_chunks == 0:
             n_chunks = 1
         distances = []
-        for i in tqdm(range(n_chunks), desc=f"Computing {len(points)} distances"):
+        for i in range(n_chunks):
             distances.append(proximity.signed_distance(self.trimesh_mesh, points[i * n_max:(i + 1) * n_max]))
         return np.concatenate(distances)
 
@@ -105,6 +105,9 @@ class Fault:
             "filename": str(self.filename),
         }
         return save_dict
+
+    def __str__(self):
+        return f"Fault {self.local_id}"
 
 
 
