@@ -1,12 +1,13 @@
-import pandas as pd
-
-from pydelling.webapps.components import BaseComponent
-from pydelling.webapps import WebAppRunner
-from pydelling.config import config
-import streamlit as st
-from pydelling.readers import VTKMeshReader, FemReader, SmeshReader
 from pathlib import Path
+
+import pandas as pd
+import streamlit as st
 from translate import Translator
+
+from pydelling.config import config
+from pydelling.readers import VTKMeshReader, FemReader, SmeshReader
+from pydelling.webapps import WebAppRunner
+from pydelling.webapps.components import BaseComponent
 
 
 class InputComponent(BaseComponent):

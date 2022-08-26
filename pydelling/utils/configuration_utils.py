@@ -1,9 +1,10 @@
 """
 Global variables
 """
+from pathlib import Path
+
 import yaml
 from box import Box
-from pathlib import Path
 
 
 def get_root_path() -> Path:

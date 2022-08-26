@@ -1,7 +1,9 @@
-from pydelling.readers.iGPReader.utils.geometry_utils import *
-from .BaseAbstractMeshObject import BaseAbstractMeshObject
 import sympy as sp
+
+from pydelling.readers.iGPReader.utils.geometry_utils import *
 from pydelling.utils.geometry import Plane
+from .BaseAbstractMeshObject import BaseAbstractMeshObject
+
 
 class BaseFace(BaseAbstractMeshObject):
     __slots__ = ['node_ids', 'node_coords']

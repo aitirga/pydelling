@@ -1,12 +1,9 @@
-import numpy as np
-
-from .Fracture import Fracture
-import meshio
-import trimesh
-from trimesh.exchange.misc import load_meshio
-import trimesh.proximity as proximity
 from pathlib import Path
-from tqdm import tqdm
+
+import meshio
+import numpy as np
+import trimesh
+import trimesh.proximity as proximity
 
 
 class Fault:

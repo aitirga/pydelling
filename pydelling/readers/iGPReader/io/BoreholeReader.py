@@ -1,12 +1,15 @@
-from pydelling.readers.iGPReader.io import BaseReader, iGPReader
-from pydelling.config import config
-import pandas as pd
-from pathlib import Path
 import logging
+from pathlib import Path
 from typing import Dict
+
 import numpy as np
-from pydelling.readers.iGPReader.utils import utils
+import pandas as pd
 from scipy import stats
+
+from pydelling.config import config
+from pydelling.readers.iGPReader.io import BaseReader, iGPReader
+from pydelling.readers.iGPReader.utils import utils
+
 logger = logging.getLogger(__name__)
 import matplotlib.pyplot as plt
 

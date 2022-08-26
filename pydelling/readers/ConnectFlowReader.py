@@ -1,16 +1,19 @@
 """
 Base interface for a reader class
 """
-import numpy as np
 import logging
+
+import numpy as np
+
 from pydelling.readers import BaseReader
+
 logger = logging.getLogger(__name__)
 from pydelling.config import config
 import logging
 from pathlib import Path
 import pandas as pd
 logger = logging.getLogger(__name__)
-from linecache import getline, getlines
+from linecache import getline
 
 
 class ConnectFlowReader(BaseReader):

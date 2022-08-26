@@ -1,12 +1,15 @@
 """
 Centroid file reader
 """
-import numpy as np
-from .BaseReader import BaseReader
-from pydelling.config import config
 import logging
-import pandas as pd
 from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+from pydelling.config import config
+from .BaseReader import BaseReader
+
 logger = logging.getLogger(__name__)
 
 

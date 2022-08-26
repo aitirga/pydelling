@@ -1,10 +1,12 @@
 from __future__ import annotations
+
+from typing import List
+
+import numpy as np
+
 from .BasePrimitive import BasePrimitive
 from .Point import Point
-from .Line import Line
 from .Vector import Vector
-import numpy as np
-from typing import List
 
 
 class Plane(BasePrimitive):

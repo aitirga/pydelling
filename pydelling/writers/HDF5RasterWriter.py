@@ -1,9 +1,10 @@
 import os
+
 import h5py
-import numpy as np
-from .BaseWriter import BaseWriter
-from pydelling.config import config
 import matplotlib.pyplot as plt
+import numpy as np
+
+from .BaseWriter import BaseWriter
 
 
 class HDF5RasterWriter(BaseWriter):

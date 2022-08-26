@@ -1,16 +1,15 @@
+import logging
 import pathlib
 
-import pandas as pd
+import dill
+import numpy as np
+from tqdm import tqdm
 
-from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
+import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
 from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import Fracture, Fault
-import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
-from pydelling.utils.geometry_utils import compute_polygon_area, filter_unique_points
-import logging
-from tqdm import tqdm
-import numpy as np
-import dill
+from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
+from pydelling.utils.geometry_utils import compute_polygon_area
 
 logger = logging.getLogger(__name__)
 

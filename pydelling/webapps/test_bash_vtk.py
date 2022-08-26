@@ -1,11 +1,8 @@
 from WebAppRunner import WebAppRunner
-import streamlit as st
-import dash
 
 
 class TestWebApp(WebAppRunner):
     def construct(self):
-        import streamlit as st
         import streamlit.components.v1 as components
         import pyvista
         from pyvista import examples

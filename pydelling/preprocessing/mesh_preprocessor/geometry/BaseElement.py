@@ -1,16 +1,13 @@
+from itertools import combinations
+from typing import *
+
 import numpy as np
 
-from pydelling.config import config
-from .BaseFace import BaseFace
-import pandas as pd
-from .BaseAbstractMeshObject import BaseAbstractMeshObject
-from typing import *
-from natsort import natsorted
-import sympy as sp
-from pydelling.utils.geometry import Point, Plane, Line
-from itertools import product, combinations
 from pydelling.preprocessing.dfn_preprocessor.Fracture import Fracture
+from pydelling.utils.geometry import Point, Plane, Line
 from pydelling.utils.geometry_utils import filter_unique_points
+from .BaseAbstractMeshObject import BaseAbstractMeshObject
+from .BaseFace import BaseFace
 
 
 class BaseElement(BaseAbstractMeshObject):
@@ -130,7 +127,6 @@ class BaseElement(BaseAbstractMeshObject):
             with open('intersected_points_all.csv', 'w') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerows(intersected_points)
-            from pydelling.preprocessing import MeshPreprocessor
         # Check if the intersected points are inside the element
         intersected_inside_points = []
         for point in intersected_points:

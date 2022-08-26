@@ -1,14 +1,14 @@
-import vtkmodules.vtkCommonDataModel
+import logging
+from pathlib import Path
 
-from pydelling.preprocessing import BasePreprocessing
-from pydelling.config import config
-from pydelling.utils.decorators import set_run
+import numpy as np
 import open3d as o3d
 import pandas as pd
-import numpy as np
-import logging
 import vtk
-from pathlib import Path
+
+from pydelling.config import config
+from pydelling.preprocessing import BasePreprocessing
+from pydelling.utils.decorators import set_run
 
 logger = logging.getLogger(__name__)
 

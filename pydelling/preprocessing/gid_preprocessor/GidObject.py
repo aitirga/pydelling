@@ -1,10 +1,13 @@
 from __future__ import annotations
-from ._AbstractGidObject import _AbstractGidObject
-from .Point import Point
-from .Line import Line
-from .Surface import Surface
-import logging
+
 import functools
+import logging
+
+from .Line import Line
+from .Point import Point
+from .Surface import Surface
+from ._AbstractGidObject import _AbstractGidObject
+
 logger = logging.getLogger(__name__)
 from typing import Union, List
 
