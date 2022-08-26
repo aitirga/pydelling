@@ -1,5 +1,7 @@
-from . import Line, Point, Plane, Segment
 import numpy as np
+
+from . import Line, Point, Plane, Segment
+
 
 def intersect_line_line(line_1: Line, line_2: Line):
     if line_1.is_parallel(line_2):

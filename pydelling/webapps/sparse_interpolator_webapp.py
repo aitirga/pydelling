@@ -1,12 +1,12 @@
+import numpy as np
 import pandas as pd
-
-from pydelling.webapps import WebAppRunner
-from pydelling.webapps.components import InputComponent
 import streamlit as st
+import streamlit.components.v1 as components
+
 from pydelling.config import config
 from pydelling.interpolation import SparseDataInterpolator
-import numpy as np
-import streamlit.components.v1 as components
+from pydelling.webapps import WebAppRunner
+from pydelling.webapps.components import InputComponent
 
 
 class SparseInterpolatorWebapp(WebAppRunner):

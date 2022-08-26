@@ -1,9 +1,15 @@
-import numpy as np
 from ._AbstractGidObject import _AbstractGidObject
 from .Line import Line
 from .Point import Point
 import logging
 from typing import List
+import logging
+from typing import List
+
+from .Line import Line
+from .Point import Point
+from ._AbstractGidObject import _AbstractGidObject
+
 logger = logging.getLogger(__name__)
 
 

@@ -1,9 +1,10 @@
+from typing import List
+
 import numpy as np
 import shapely.geometry as geom
 import sympy as sp
+
 from pydelling.utils.geometry import Plane, Segment, Point, Line
-from typing import List
-from .Fracture import Fracture
 
 
 class PolygonFracture:

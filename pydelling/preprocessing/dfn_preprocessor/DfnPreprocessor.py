@@ -1,15 +1,16 @@
-import numpy as np
-
-from .Fracture import Fracture
-from .Fault import Fault
-from typing import List
-import pandas as pd
 import logging
-from tqdm import tqdm
+from pathlib import Path
+from typing import List
+
+import meshio
+import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 from tabulate import tabulate
-from pathlib import Path
-import meshio
+from tqdm import tqdm
+
+from .Fault import Fault
+from .Fracture import Fracture
 
 logger = logging.getLogger(__name__)
 

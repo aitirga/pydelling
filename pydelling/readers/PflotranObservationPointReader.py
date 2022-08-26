@@ -1,15 +1,16 @@
 """
 Base interface for a reader class
 """
-import numpy as np
 import logging
+
+import numpy as np
+
 from pydelling.readers import BaseReader
+
 logger = logging.getLogger(__name__)
 from pydelling.config import config
 import logging
 from pathlib import Path
-import h5py
-import natsort
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt

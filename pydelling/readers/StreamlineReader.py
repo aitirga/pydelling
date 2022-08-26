@@ -1,17 +1,16 @@
 """
 Centroid file reader
 """
-import numpy as np
-from .BaseReader import BaseReader
-from pydelling.config import config
-from pydelling.utils.utils import aperture_from_a_xy_point
-from pydelling.paraview_processor import ParaviewProcessor
 import logging
-import pandas as pd
 import pickle
+
+import numpy as np
+import pandas as pd
 from pandas.core.groupby import DataFrameGroupBy
 from tqdm import tqdm
-import random
+
+from pydelling.config import config
+from .BaseReader import BaseReader
 
 logger = logging.getLogger(__name__)
 

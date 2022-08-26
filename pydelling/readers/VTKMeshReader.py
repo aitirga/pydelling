@@ -1,10 +1,8 @@
-import os
-import numpy as np
-from ..preprocessing.mesh_preprocessor import MeshPreprocessor
 import logging
-import vtk
+
+from ..preprocessing.mesh_preprocessor import MeshPreprocessor
+
 logger = logging.getLogger(__name__)
-import meshio as msh
 from tqdm import tqdm
 import meshio
 from pathlib import Path

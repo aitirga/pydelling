@@ -1,4 +1,3 @@
-import numpy as np
 from .BaseReader import BaseReader
 try:
     from paraview.simple import *

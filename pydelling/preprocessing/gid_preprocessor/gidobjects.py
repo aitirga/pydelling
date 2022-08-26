@@ -1,7 +1,8 @@
-from .GidObject import GidObject
 from typing import List
-from .Point import Point
+
+from .GidObject import GidObject
 from .Line import Line
+from .Point import Point
 
 
 class Polyline(GidObject):

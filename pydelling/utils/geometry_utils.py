@@ -1,6 +1,5 @@
 import numpy as np
-from scipy.spatial.qhull import ConvexHull
-from shapely.geometry import Polygon
+
 
 # Useful geometrical functions
 def normal_vector(points):

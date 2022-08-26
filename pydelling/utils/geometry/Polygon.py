@@ -1,8 +1,10 @@
-from .BasePrimitive import BasePrimitive
-from . import Point, Segment
-import numpy as np
 from typing import List
+
+import numpy as np
+
 from pydelling.utils.geometry_utils import order_points_clockwise
+from . import Point, Segment
+from .BasePrimitive import BasePrimitive
 
 
 class Polygon(BasePrimitive):

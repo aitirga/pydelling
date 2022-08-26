@@ -1,15 +1,17 @@
 from __future__ import annotations
-from typing import *
-import numpy as np
-import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
-import meshio as msh
-from scipy.spatial import KDTree
-from pydelling.preprocessing.dfn_preprocessor.Fracture import Fracture
-from pydelling.utils.geometry_utils import compute_polygon_area
-from tqdm import tqdm
-import logging
-from pydelling.preprocessing.mesh_preprocessor.geometry import BaseElement
 
+import logging
+from typing import *
+
+import meshio as msh
+import numpy as np
+from scipy.spatial import KDTree
+from tqdm import tqdm
+
+import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
+from pydelling.preprocessing.dfn_preprocessor.Fracture import Fracture
+from pydelling.preprocessing.mesh_preprocessor.geometry import BaseElement
+from pydelling.utils.geometry_utils import compute_polygon_area
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +37,6 @@ class MeshPreprocessor(object):
         self.elements = []
         if 'st_file' in kwargs:
             self.is_streamlit = True
-            import streamlit as st
 
         self.find_intersection_stats = {
             'total_intersections': 0,

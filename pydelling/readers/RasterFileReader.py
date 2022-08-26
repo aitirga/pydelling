@@ -1,6 +1,8 @@
-import numpy as np
-from .BaseReader import BaseReader
 import logging
+
+import numpy as np
+
+from .BaseReader import BaseReader
 
 logger = logging.getLogger(__name__)
 
