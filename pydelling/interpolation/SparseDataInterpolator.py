@@ -1,13 +1,13 @@
 """
 Interpolates a given set of points into a PFLOTRAN mesh
 """
+import logging
+
 import numpy as np
 from scipy.interpolate import griddata
-from .BaseInterpolator import BaseInterpolator
-import logging
+
 from pydelling.utils.decorators import set_run
-
-
+from .BaseInterpolator import BaseInterpolator
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 try:
     from paraview.vtk.numpy_interface import dataset_adapter as dsa
     from paraview.vtk.numpy_interface import algorithms as algs
@@ -8,7 +9,7 @@ try:
 except:
     pass
 from vtk.util.numpy_support import vtk_to_numpy
-from typing import List, Dict
+from typing import List
 import logging
 
 logger = logging.getLogger(__name__)
