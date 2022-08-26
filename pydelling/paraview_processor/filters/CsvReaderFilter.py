@@ -3,8 +3,6 @@ try:
     from paraview.simple import *
 except:
     pass
-import pandas as pd
-from vtk.util.numpy_support import vtk_to_numpy
 from functools import wraps
 
 

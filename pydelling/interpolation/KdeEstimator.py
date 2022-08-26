@@ -1,10 +1,12 @@
+import logging
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from sklearn.neighbors import KernelDensity
-from scipy.stats.kde import gaussian_kde
+
 from pydelling.utils.decorators import set_run
-import numpy as np
-import logging
-import matplotlib.pyplot as plt
+
 logger = logging.getLogger(__name__)
 import seaborn as sns
 
