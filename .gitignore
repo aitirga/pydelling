@@ -10,6 +10,8 @@ __pycache__/
 *.val
 *.zip
 *h5
+*pkl
+**/*_trial_marker
 # Distribution / packaging
 .Python
 #pydelling/templates/*data*
