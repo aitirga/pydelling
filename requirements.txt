@@ -7,7 +7,6 @@ mpmath~=1.2.1
 natsort~=8.1.0
 numpy~=1.21.2
 Ofpp~=0.11
-open3d~=0.15.2
 pandas~=1.4.1
 plotly~=5.1.0
 python_box~=5.4.1
