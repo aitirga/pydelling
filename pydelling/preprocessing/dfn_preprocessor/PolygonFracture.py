@@ -2,7 +2,6 @@ from typing import List
 
 import numpy as np
 import shapely.geometry as geom
-import sympy as sp
 
 from pydelling.utils.geometry import Plane, Segment, Point, Line
 
@@ -193,10 +192,6 @@ class PolygonFracture:
         self._polygon = geom.Polygon(side_points)
         return self._polygon
 
-    @property
-    def sympy_plane(self):
-        """Returns the plane of the fracture"""
-        return sp.Plane(self.centroid, normal_vector=self.unit_normal_vector)
 
     @property
     def plane(self):
