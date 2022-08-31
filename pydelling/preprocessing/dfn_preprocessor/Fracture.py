@@ -1,14 +1,14 @@
+from typing import List
+
 import numpy as np
 import shapely.geometry as geom
-import sympy as sp
+
 from pydelling.utils.geometry import Plane, Segment, Point, Line
-from typing import List
-from pydelling.config import config
 
 
 class Fracture(object):
     local_id = 0
-    eps = 1e-8
+    eps = 1e-3
     _transmissivity = None
     _storativity = None
     _side_points = None
@@ -246,10 +246,6 @@ class Fracture(object):
         self._polygon = geom.Polygon(side_points)
         return self._polygon
 
-    @property
-    def sympy_plane(self):
-        """Returns the plane of the fracture"""
-        return sp.Plane(self.centroid, normal_vector=self.unit_normal_vector)
 
     @property
     def plane(self):

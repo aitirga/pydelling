@@ -1,5 +1,6 @@
-from WebAppRunner import WebAppRunner
 import streamlit as st
+
+from WebAppRunner import WebAppRunner
 
 
 class TestWebApp(WebAppRunner):

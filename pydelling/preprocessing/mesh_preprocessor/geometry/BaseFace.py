@@ -1,7 +1,7 @@
 from pydelling.readers.iGPReader.utils.geometry_utils import *
-from .BaseAbstractMeshObject import BaseAbstractMeshObject
-import sympy as sp
 from pydelling.utils.geometry import Plane
+from .BaseAbstractMeshObject import BaseAbstractMeshObject
+
 
 class BaseFace(BaseAbstractMeshObject):
     __slots__ = ['node_ids', 'node_coords']
@@ -92,10 +92,6 @@ class BaseFace(BaseAbstractMeshObject):
         '''Returns the edge vectors of the face'''
         return NotImplementedError('This method is not implemented yet')
 
-    @property
-    def sympy_plane(self):
-        '''Returns the plane of the face'''
-        return sp.Plane(self.centroid, normal_vector=self.unit_normal_vector)
 
     @property
     def plane(self):

@@ -1,9 +1,11 @@
-import os
-import h5py
-from .BaseWriter import BaseWriter
-import numpy as np
-from pathlib import Path
 import logging
+import os
+from pathlib import Path
+
+import h5py
+import numpy as np
+
+from .BaseWriter import BaseWriter
 
 logger = logging.getLogger(__name__)
 

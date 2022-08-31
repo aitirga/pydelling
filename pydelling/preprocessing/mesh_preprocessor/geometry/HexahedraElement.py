@@ -79,6 +79,21 @@ class HexahedraElement(BaseElement):
                                                                    self.coords[6],
                                                                    self.coords[7]]))
 
+    @property
+    def local_face_nodes(self):
+        """
+        Returns the nodes of the faces of the polyhedra
+        :return: dictionary of nodes of the faces of the polyhedra
+        """
+        return {
+            'q1': [0, 1, 5, 4],
+            'q2': [1, 2, 6, 5],
+            'q3': [2, 3, 7, 6],
+            'q4': [3, 0, 4, 7],
+            'q5': [0, 3, 2, 1],
+            'q6': [4, 5, 6, 7]
+        }
+
     def compute_volume(self):
         """
         Computes volume of a general polyhedron based on the convex hull of a set of points

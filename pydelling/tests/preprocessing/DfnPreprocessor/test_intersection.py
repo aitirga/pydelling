@@ -4,6 +4,7 @@ import numpy as np
 from pydelling.utils.geometry import Line
 from pydelling.preprocessing import DfnPreprocessor, MeshPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import DfnUpscaler
+from pydelling.utils import test_data_path
 
 class IntersectionCase(unittest.TestCase):
     def test_full_intersection(self):
@@ -22,8 +23,8 @@ class IntersectionCase(unittest.TestCase):
             ],
         )
         # Intersect fracture with mesh
-        intersected_points = mesh_preprocessor.elements[0].intersect_faces_with_plane(
-            dfn_preprocessor[0].plane)
+        intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
         solution = [
             np.array([0.5, 0.0, 0.0]),
             np.array([0.0, 0.0, 0.0]),
@@ -47,8 +48,8 @@ class IntersectionCase(unittest.TestCase):
             ],
         )
         # Intersect fracture with mesh
-        intersected_points = mesh_preprocessor.elements[0].intersect_faces_with_plane(
-            dfn_preprocessor[0].plane)
+        intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
         solution = [
             np.array([0.62220399, 0.0, -0.12220399]),
             np.array([0.0, 0.0, 5.12772932e-02]),
@@ -57,7 +58,6 @@ class IntersectionCase(unittest.TestCase):
         nptest.assert_array_almost_equal(intersected_points, solution)
 
     def test_partial_intersection_1(self):
-
         dfn_preprocessor = DfnPreprocessor()
         dfn_preprocessor.add_fracture(
             x=0.1, y=0.1, z=0.5, dip=90, dip_dir=90, size=1.5
@@ -73,16 +73,25 @@ class IntersectionCase(unittest.TestCase):
             ],
         )
         # Intersect fracture with mesh
-        intersected_points = mesh_preprocessor.elements[0].intersect_faces_with_plane(
-            dfn_preprocessor[0].plane)
+        intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
 
         solution = [
-            np.array([0.1, 0.0, 0.4]),
-            np.array([0.1, 0.0, -0.5]),
-            np.array([0.1, 0.9, -0.5]),
+            np.array([0.1,0.,-0.25]),
+            np.array([0.1 ,  0.65 ,-0.25]),
+            np.array([0.1 ,0. , 0.4]),
         ]
-        nptest.assert_array_almost_equal(intersected_points, solution)
+        # dfn_preprocessor.to_vtk('test_dfn.vtk')
+        # mesh_preprocessor.to_vtk('test_element.vtk')
+        # intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+        #     dfn_preprocessor[0], export_all_points=False)
+        # print(intersected_points)
+        # with open('computed_intersections.csv', 'w') as f:
+        #     import csv
+        #     writer = csv.writer(f)
+        #     writer.writerows(intersected_points)
 
+        nptest.assert_array_almost_equal(intersected_points, solution)
 
     def test_partial_intersection_2(self):
 
@@ -101,14 +110,16 @@ class IntersectionCase(unittest.TestCase):
             ],
         )
         # Intersect fracture with mesh
-        intersected_points = mesh_preprocessor.elements[0].intersect_faces_with_plane(
-            dfn_preprocessor[0].plane)
+        intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
 
         solution = [
-            np.array([0.14876171, 0.0, 0.35123829]),
-            np.array([0.37772158, 0.0, -0.5]),
-            np.array([0.31805952, 0.68194048, -0.5]),
+            np.array([0.30360464 , 0.      ,   -0.22444437]),
+            np.array([0.26325587 , 0.4611885 , -0.22444437]),
+            np.array([0.14876171 ,0.   ,      0.35123829]),
         ]
+
+
         nptest.assert_array_almost_equal(intersected_points, solution)
 
 
@@ -128,15 +139,26 @@ class IntersectionCase(unittest.TestCase):
             ],
         )
         # Intersect fracture with mesh
-        intersected_points = mesh_preprocessor.elements[0].intersect_faces_with_plane(
-            dfn_preprocessor[0].plane)
+        intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
 
         solution = [
-            np.array([0.12422918, 0.0, 0.37577082]),
-            np.array([0.38315014, 0.0, -0.5]),
-            np.array([0.0, 5.12725439e-01, -1.27254385e-02]),
-            np.array([0.0, 0.82166813, -0.5]),
+            np.array([0.33225466 , 0.   ,      -0.32785179]),
+            np.array([0.   ,       0.71252241, -0.32785179]),
+            np.array([0.12422918 ,0.   ,      0.37577082]),
+            np.array([0.    ,      0.51272544 ,-0.01272544]),
         ]
+
+        # dfn_preprocessor.to_vtk('test_dfn.vtk')
+        # mesh_preprocessor.to_vtk('test_element.vtk')
+        # intersected_points = mesh_preprocessor.elements[0].intersect_with_fracture(
+        #     dfn_preprocessor[0], export_all_points=False)
+        # print(intersected_points)
+        # with open('computed_intersections.csv', 'w') as f:
+        #     import csv
+        #     writer = csv.writer(f)
+        #     writer.writerows(intersected_points)
+
         nptest.assert_array_almost_equal(intersected_points, solution)
 
 
@@ -231,7 +253,42 @@ class IntersectionCase(unittest.TestCase):
 
         nptest.assert_array_almost_equal(intersections, solution)
 
+    def test_problematic_fracture_1(self):
+        import pickle
+        dfn_preprocessor = DfnPreprocessor()
+        mesh = MeshPreprocessor()
+        read_fracture = test_data_path() / "problematic_fractures/issue_fracture_1.pkl"
+        with open(read_fracture, "rb") as f:
+            fracture = pickle.load(f)
+        read_element = test_data_path() / "problematic_fractures/issue_element_1.pkl"
+        with open(read_element, "rb") as f:
+            element = pickle.load(f)
 
+        dfn_preprocessor.dfn.append(fracture)
+        dfn_preprocessor.to_vtk('test_dfn.vtk')
+        element.to_obj('test_element.obj')
+        intersections = element.intersect_with_fracture(dfn_preprocessor[0], export_all_points=True)
+        with open('computed_intersections.csv', 'w') as f:
+            import csv
+            writer = csv.writer(f)
+            writer.writerows(intersections)
+        self.assertEqual(len(intersections), 3)
+
+    def test_problematic_fracture_2(self):
+        import pickle
+        dfn_preprocessor = DfnPreprocessor()
+        mesh = MeshPreprocessor()
+        read_fracture = test_data_path() / "problematic_fractures/issue_fracture_2.pkl"
+        with open(read_fracture, "rb") as f:
+            fracture = pickle.load(f)
+        read_element = test_data_path() / "problematic_fractures/issue_element_2.pkl"
+        with open(read_element, "rb") as f:
+            element = pickle.load(f)
+
+        dfn_preprocessor.dfn.append(fracture)
+        mesh.elements.append(element)
+        intersections = mesh.elements[0].intersect_with_fracture(dfn_preprocessor[0])
+        self.assertEqual(len(intersections), 4)
 
 
 

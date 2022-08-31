@@ -1,16 +1,15 @@
+import logging
 import pathlib
 
-import pandas as pd
-
-from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
-from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
-from pydelling.preprocessing.dfn_preprocessor import Fracture
-import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
-from pydelling.utils.geometry_utils import compute_polygon_area, filter_unique_points
-import logging
-from tqdm import tqdm
-import numpy as np
 import dill
+import numpy as np
+from tqdm import tqdm
+
+import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
+from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
+from pydelling.preprocessing.dfn_preprocessor import Fracture, Fault
+from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
+from pydelling.utils.geometry_utils import compute_polygon_area
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +28,26 @@ class DfnUpscaler:
         self.all_intersected_points = []
         self.save_intersections = save_intersections
         self.load_faults = load_faults
+
+        self.target_num = 15
+        self.cur_num = 0
+
         if not loading:
             self._intersect_dfn_with_mesh(parallel=parallel)
+
+
 
     def _intersect_dfn_with_mesh(self, parallel=False):
         """Runs the DfnUpscaler"""
         logger.info('Upscaling the DFN to the mesh')
-
+        self.break_for = False
         for fracture in tqdm(self.dfn, desc='Intersecting fractures with mesh', total=len(self.dfn)):
             self.find_intersection_points_between_fracture_and_mesh(fracture)
+            # if fracture.local_id == 94:
+            #     break
+            # if self.break_for:
+            #     break
+
         if not self.load_faults:
             self.find_fault_cells()
         else:
@@ -79,7 +89,57 @@ class DfnUpscaler:
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
 
-            intersection_area = compute_polygon_area(intersection_points)
+            # intersection_area = compute_polygon_area(intersection_points)
+            intersection_area = np.abs(compute_polygon_area(intersection_points))
+            # if fracture.local_id == 94 and element.local_id == 24544:
+            #     print('here')
+            #     with open('test_intersection.csv', 'w') as f:
+            #         import csv
+            #         writer = csv.writer(f)
+            #         writer.writerow(['x', 'y', 'z'])
+            #         for point in intersection_points:
+            #             writer.writerow([point.x, point.y, point.z])
+            #
+            #     import pickle
+            #     with open('issue_fracture.pkl', 'wb') as f:
+            #         pickle.dump(fracture, f)
+            #     with open('issue_element.pkl', 'wb') as f:
+            #         pickle.dump(element, f)
+
+            # if intersection_area == 0.0:
+            #     if len(intersection_points) > 0:
+            #         print(intersection_area, len(intersection_points), fracture.local_id, element.local_id)
+            #         print(intersection_points)
+                    # import csv
+                    # with open('test_intersection.csv', 'w') as f:
+                    #     writer = csv.writer(f)
+                    #     writer.writerow(['x', 'y', 'z'])
+                    #     for point in intersection_points:
+                    #         writer.writerow([point.x, point.y, point.z])
+                    #     # if self.cur_num == self.target_num:
+                    #     #     self.break_for = True
+                    #     #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
+                    #     #     print(fracture.local_id)
+                    #     #     break
+                    #     # else:
+                    #     #     self.cur_num += 1
+                    #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
+                    #     print(fracture.local_id)
+            # if element.local_id == 21515:
+            #     with open(f'test_intersection.csv', 'w') as f:
+            #         import csv
+            #         writer = csv.writer(f)
+            #         writer.writerow(['x', 'y', 'z'])
+            #         for point in intersection_points:
+            #             writer.writerow([point.x, point.y, point.z])
+            #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
+            #     import pickle
+            #     with open(f'issue_element_2.pkl', 'wb') as f:
+            #         pickle.dump(element, f)
+            #     error_mesh = MeshPreprocessor()
+            #     error_mesh.elements = [element]
+            #     error_mesh.unordered_nodes = self.mesh.unordered_nodes
+            #     error_mesh.to_vtk(f'issue_element_debug.vtk')
 
             # if intersection_area == None:
             #     if hasattr(self, 'none_written'):
@@ -101,7 +161,7 @@ class DfnUpscaler:
                 element.associated_fractures[fracture.local_id] = {
                     'area': intersection_area,
                     'volume': intersection_area * fracture.aperture,
-                    'fracture': fracture,
+                    'fracture': fracture.local_id,
                 }
             n_intersections = len(intersection_points)
             if not n_intersections in self.mesh.find_intersection_stats['intersection_points'].keys():
@@ -116,40 +176,44 @@ class DfnUpscaler:
         """Finds the fault cells in the mesh"""
         logger.info('Finding fault cells')
         fault_cells = {}
-        for fault in self.dfn.faults:
-
-            kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(fault.centroid, distance=fault.size)
-
-            if len(kd_tree_filtered_elements) == 0:
-                continue
-
-            logger.info(f'Processing fault {fault}')
-            logger.info(f'Number of elements in the fault: {len(kd_tree_filtered_elements)}')
-
-            kd_tree_centroids = np.array([elem.centroid for elem in kd_tree_filtered_elements])
-            fault_plane = Fracture(normal_vector=fault.normal_vector,
-                                   x=fault.centroid[0],
-                                   y=fault.centroid[1],
-                                   z=fault.centroid[2],
-                                   aperture=fault.aperture
-                                   )
-            distance_vec = []
-            for kd_centroid in kd_tree_centroids:
-                distance_vec.append(fault_plane.distance_to_point(kd_centroid))
-            # Filter distances
-            distance_vec = np.array(distance_vec)
-            distance_vec = np.abs(distance_vec)
-            distance_vec = pd.DataFrame(distance_vec)
-            distance_vec = distance_vec[distance_vec < fault.aperture * 2].dropna()
-            kd_tree_filtered_elements = [kd_tree_filtered_elements[i] for i in distance_vec.index]
-            distances = distance_vec.values
-
-            # distances = fault.distance(kd_tree_centroids)
-            for element, distance in zip(kd_tree_filtered_elements, distances):
+        for fault in tqdm(self.dfn.faults, desc='Finding distances to faults'):
+            fault: Fault
+            # Iterate over each triangle individually and find close mesh elements
+            triangle_centers = fault.trimesh_mesh.triangles_center
+            triangle_areas = fault.trimesh_mesh.area_faces
+            characteristic_distance = fault.aperture
+            logger.info(f'Processing fault {fault.local_id} containing {len(triangle_centers)} triangles')
+            close_triangles = []
+            for triangle_center, triangle_length in zip(triangle_centers, characteristic_distance):
+                kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(triangle_center, distance=triangle_length * 2)
+                if len(kd_tree_filtered_elements) == 0:
+                    continue
+                # fault_plane = Fracture(normal_vector=fault.normal_vector,
+                #                        x=fault.centroid[0],
+                #                        y=fault.centroid[1],
+                #                        z=fault.centroid[2],
+                #                        width=fault.width
+                #                        )
+                # distance_vec = []
+                # for kd_centroid in kd_tree_centroids:
+                #     distance_vec.append(fault_plane.distance_to_point(kd_centroid))
+                # # Filter distances
+                # distance_vec = np.array(distance_vec)
+                # distance_vec = np.abs(distance_vec)
+                # distance_vec = pd.DataFrame(distance_vec)
+                # distance_vec = distance_vec[distance_vec < fault.width * 2].dropna()
+                # kd_tree_filtered_elements = [kd_tree_filtered_elements[i] for i in distance_vec.index]
+                # distances = distance_vec.values
+                close_triangles.append(kd_tree_filtered_elements)
+            close_triangles = [item for sublist in close_triangles for item in sublist]
+            kd_tree_centroids = np.array([elem.centroid for elem in close_triangles])
+            logger.info(f'Found {len(kd_tree_centroids)} close elements, computing distances to mesh.')
+            distances = fault.distance(kd_tree_centroids)
+            for element, distance in zip(close_triangles, distances):
                 distance = np.abs(distance)
                 if distance < fault.aperture / 2:
                     element.associated_faults[fault.local_id] = {
-                        'distance': distance[0],
+                        'distance': distance,
                     }
                     fault.associated_elements.append(element)
 
@@ -213,7 +277,7 @@ class DfnUpscaler:
             for frac_name in elem.associated_fractures:
                 frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
-                upscaled_storativity[elem.local_id] += frac.storativity
+                upscaled_storativity[elem.local_id] += self.dfn[frac].storativity
 
         for fault in self.dfn.faults:
             for element in fault.associated_elements:
@@ -319,27 +383,27 @@ class DfnUpscaler:
                 # n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
                 # n2 = math.cos(frac.dip * (math.pi / 180)) * math.cos(frac.dip_dir * (math.pi / 180))
                 # n3 = -1 * math.sin(frac.dip * (math.pi / 180))
-                n1 = frac.unit_normal_vector[0]
-                n2 = frac.unit_normal_vector[1]
-                n3 = frac.unit_normal_vector[2]
+                n1 = self.dfn[frac].unit_normal_vector[0]
+                n2 = self.dfn[frac].unit_normal_vector[1]
+                n3 = self.dfn[frac].unit_normal_vector[2]
                 # frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
-                frac.hk = frac.transmissivity / frac.aperture
+                self.dfn[frac].hk = self.dfn[frac].transmissivity / self.dfn[frac].aperture
 
                 if 'mode' == 'isotropy':
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                    fracture_hk[elem.local_id][0, 0] += frac.hk * (frac_dict['volume'] / elem.volume)  # Kxx
+                    fracture_hk[elem.local_id][0, 0] += self.dfn[frac].hk * (frac_dict['volume'] / elem.volume)  # Kxx
 
                 else:  # 'anisotropy' in 'mode':
                     perm_tensor = np.zeros([3, 3])
                     # for i in range(1, 4):
                     #    for j in range(1, 4):
                     # Compute tensor
-                    perm_tensor[0, 0] = frac.hk * ((n2 ** 2) + (n3 ** 2))
-                    perm_tensor[0, 1] = frac.hk * (-1) * n1 * n2
-                    perm_tensor[0, 2] = frac.hk * (-1) * n1 * n3
-                    perm_tensor[1, 1] = frac.hk * ((n3 ** 2) + (n1 ** 2))
-                    perm_tensor[1, 2] = frac.hk * (-1) * n2 * n3
-                    perm_tensor[2, 2] = frac.hk * ((n1 ** 2) + (n2 ** 2))
+                    perm_tensor[0, 0] = self.dfn[frac].hk * ((n2 ** 2) + (n3 ** 2))
+                    perm_tensor[0, 1] = self.dfn[frac].hk * (-1) * n1 * n2
+                    perm_tensor[0, 2] = self.dfn[frac].hk * (-1) * n1 * n3
+                    perm_tensor[1, 1] = self.dfn[frac].hk * ((n3 ** 2) + (n1 ** 2))
+                    perm_tensor[1, 2] = self.dfn[frac].hk * (-1) * n2 * n3
+                    perm_tensor[2, 2] = self.dfn[frac].hk * ((n1 ** 2) + (n2 ** 2))
 
                     if 'mode' == 'anisotropy_principals':
                         eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])
@@ -525,5 +589,10 @@ class DfnUpscaler:
             # loaded_class.all_intersected_points = load_dict['all_intersected_points']
             return loaded_class
 
+
+
+
+
+        
 
 

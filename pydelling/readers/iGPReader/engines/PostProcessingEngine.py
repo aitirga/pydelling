@@ -1,15 +1,10 @@
-from pathlib import Path
-import h5py
 import os
 import shutil
-import sys
-import pandas as pd
-from vtk import vtkUnstructuredGridReader
-from vtk.util import numpy_support
-import vtk
-import numpy as np
+from pathlib import Path
 from typing import Dict
-import re
+
+import h5py
+import numpy as np
 
 
 class PostProcessingEngine:

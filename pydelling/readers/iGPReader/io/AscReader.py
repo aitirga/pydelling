@@ -1,10 +1,11 @@
+import logging
+
+import h5py
 import numpy as np
 
+from pydelling.config import config
 from pydelling.readers.iGPReader.io import BaseReader
 from pydelling.readers.iGPReader.utils import get_output_path
-from pydelling.config import config
-import h5py
-import logging
 
 logger = logging.getLogger(__name__)
 

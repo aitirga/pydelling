@@ -1,8 +1,11 @@
 from __future__ import annotations
+
+from typing import List
+
+import numpy as np
+
 from .BasePrimitive import BasePrimitive
 from .Point import Point
-from typing import List
-import numpy as np
 
 
 class Vector(np.ndarray, BasePrimitive):

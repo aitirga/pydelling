@@ -1,15 +1,15 @@
 """
 Base interface for a reader class
 """
-import numpy as np
 import logging
 from pathlib import Path
-import matplotlib.pyplot as plt
+
+import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
 import pydelling.utils.SubFishModule as subfish
-import seaborn as sns
+
 
 class BaseReader:
     data: np.ndarray  # Hint of self.data array

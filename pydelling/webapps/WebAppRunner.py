@@ -1,7 +1,6 @@
-from abc import ABC
-from pathlib import Path
 import inspect
 import subprocess
+from abc import ABC
 
 
 class WebAppRunner(ABC):

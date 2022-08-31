@@ -57,7 +57,18 @@ class PyramidElement(BaseElement):
 
 
 
-
+    @property
+    def local_face_nodes(self):
+        """
+        Returns the nodes of the faces of the polyhedra
+        :return: dictionary of nodes of the faces of the polyhedra
+        """
+        return {
+            'q1': [0, 1, 2, 3],
+            't1': [0, 4, 3],
+            't2': [4, 2, 1],
+            't3': [4, 3, 2]
+        }
 
 
     def compute_volume(self):

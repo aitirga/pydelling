@@ -1,11 +1,12 @@
-import numpy as np
-from typing import Dict
 import logging
+from typing import Dict
+
 import pandas as pd
 
 from pydelling.paraview_processor.filters import VtkFilter, \
     BaseFilter, CalculatorFilter, IntegrateVariablesFilter, PlotOverLineFilter, XDMFFilter, CellDataToPointDataFilter, \
-    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter, TableToPointsFilter, CsvReaderFilter
+    ClipFilter, StreamTracerWithCustomSourceFilter, SaveDataFilter, AppendArcLengthFilter, TableToPointsFilter, \
+    CsvReaderFilter
 
 logger = logging.getLogger(__name__)
 try:

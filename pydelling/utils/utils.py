@@ -1,19 +1,21 @@
 """
 Contains general purpose utility functions
 """
-import yaml
-import pydelling.readers as readers
-import pydelling.interpolation as interpolation
-import numpy as np
-from pathlib import Path
 import os
+from pathlib import Path
+
+import numpy as np
+import yaml
+
+import pydelling.interpolation as interpolation
+import pydelling.readers as readers
+
 try:
     from pydelling.paraview_processor.filters import BaseFilter, PlotOverLineFilter
 except:
     from pydelling.paraview_processor.filters import BaseFilter
 import pandas as pd
 from box import Box
-from scipy.stats import lognorm
 
 
 def interpolate_permeability_anisotropic(perm_filename, mesh_filename=None, mesh=None):

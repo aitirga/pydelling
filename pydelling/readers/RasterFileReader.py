@@ -1,6 +1,8 @@
-import numpy as np
-from .BaseReader import BaseReader
 import logging
+
+import numpy as np
+
+from .BaseReader import BaseReader
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +13,7 @@ class RasterFileReader(BaseReader):
     """
 
     def open_file(self, filename, n_header=6):
-        with open(filename) as opened_file:
+        with open(filename, 'r') as opened_file:
             if self.header:
                 opened_file.readline()  # For now, skips the header if it has
             self.read_file(opened_file, n_header)
@@ -27,6 +29,10 @@ class RasterFileReader(BaseReader):
         for i in range(0, n_header):
             line = opened_file.readline().split()
             self.info["reader"][line[0]] = float(line[1])
+        if 'cellsize' in self.info["reader"].keys():
+            self.info["reader"]["dx"] = self.info["reader"]["cellsize"]
+            self.info["reader"]["dy"] = self.info["reader"]["cellsize"]
+
 
     def read_data(self, opened_file):
         for id, line in enumerate(opened_file.readlines()):
@@ -181,3 +187,15 @@ class RasterFileReader(BaseReader):
         # the floor function
         iy = int(self.reader_info["ncols"] - iy - 1)
         return self.data[iy, ix]
+
+    # def flip_x(self):
+    #     self.data = np.fliplr(self.data)
+    #     self.info["xllcorner"] = self.info["xllcorner"] + self.info["cellsize"] * self.info["ncols"]
+    #     self.info["ncols"] = self.info["ncols"] * -1
+    #     RasterFileReader.rebuild_x_y(self)
+    #
+    # def flip_y(self):
+    #     self.data = np.flipud(self.data)
+    #     self.info["yllcorner"] = self.info["yllcorner"] + self.info["cellsize"] * self.info["nrows"]
+    #     self.info["nrows"] = self.info["nrows"] * -1
+    #     RasterFileReader.rebuild_x_y(self)

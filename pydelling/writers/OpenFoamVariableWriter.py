@@ -1,11 +1,9 @@
-import os
-import h5py
-from .BaseWriter import BaseWriter
-from pathlib import Path
-from pydelling.config import config
 import logging
+
 import numpy as np
-from typing import Dict
+
+from pydelling.config import config
+from .BaseWriter import BaseWriter
 
 logger = logging.getLogger(__name__)
 

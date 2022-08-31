@@ -2,11 +2,13 @@
 Module containing general utility methods
 """
 
-import pandas as pd
-import numpy as np
-from scipy.interpolate import griddata
 import logging
 import os
+
+import numpy as np
+import pandas as pd
+from scipy.interpolate import griddata
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +24,7 @@ def get_output_path():
 
 
 def get_material_id_from_centroids(igp_reader, borehole_coordinates) -> np.array:
-    from pydelling.readers.iGPReader.io import iGPReader, BoreholeReader
+    from pydelling.readers.iGPReader.io import iGPReader
     igp_reader: iGPReader = igp_reader
     borehole_coordinates: pd.DataFrame = borehole_coordinates
     centroid_coordinates: np.array = igp_reader.centroids

@@ -66,6 +66,19 @@ class WedgeElement(BaseElement):
                                         node_coords=np.array([self.coords[3],
                                                               self.coords[4],
                                                               self.coords[5]]))
+    @property
+    def local_face_nodes(self):
+        """
+        Returns the nodes of the faces of the polyhedra
+        :return: dictionary of nodes of the faces of the polyhedra
+        """
+        return {
+            'q1': [0, 1, 4, 3],
+            'q2': [1, 2, 5, 4],
+            'q3': [2, 0, 3, 5],
+            't1': [0, 2, 1],
+            't2': [3, 4, 5]
+        }
 
     def compute_volume(self):
         """

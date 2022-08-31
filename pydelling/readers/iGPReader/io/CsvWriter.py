@@ -1,8 +1,8 @@
 import os
+from pathlib import Path
 
 from pydelling.readers.iGPReader.io import iGPReader
 from pydelling.readers.iGPReader.utils.geometry_utils import *
-from pathlib import Path
 
 
 class CsvWriter(iGPReader):

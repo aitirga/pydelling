@@ -1,8 +1,6 @@
 from __future__ import annotations
+
 import numpy as np
-from . import Scalar
-from .BasePrimitive import BasePrimitive
-from typing import *
 
 
 class Point(np.ndarray):
