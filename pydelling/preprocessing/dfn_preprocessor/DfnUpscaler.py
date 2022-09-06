@@ -184,8 +184,8 @@ class DfnUpscaler:
             characteristic_distance = fault.aperture
             logger.info(f'Processing fault {fault.local_id} containing {len(triangle_centers)} triangles')
             close_triangles = []
-            for triangle_center, triangle_length in zip(triangle_centers, characteristic_distance):
-                kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(triangle_center, distance=triangle_length * 2)
+            for triangle_center in triangle_centers:
+                kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(triangle_center, distance=characteristic_distance)
                 if len(kd_tree_filtered_elements) == 0:
                     continue
                 # fault_plane = Fracture(normal_vector=fault.normal_vector,
