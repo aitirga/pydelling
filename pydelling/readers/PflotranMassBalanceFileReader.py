@@ -28,3 +28,14 @@ class PflotranMassBalanceFileReader(PflotranObservationPointReader):
         logger.info(f"Reading PFLOTRAN mass balance file from {self.filename}")
         super().__init__(filename=self.filename)
         self.results = self.data.copy()
+
+    def generate_mass_balance_plot(self) -> plt.Axes:
+        """
+        Generate a mass balance plot
+
+        Returns
+        -------
+        plt.Axes
+            The mass balance plot
+        """
+
