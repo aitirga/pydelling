@@ -21,6 +21,7 @@ class DfnUpscaler:
                  save_intersections=False,
                  load_faults:str or pathlib.Path=None,
                  loading=False,
+                 nearest=None,
                  ):
         self.dfn: DfnPreprocessor = dfn
         self.mesh: MeshPreprocessor = mesh
@@ -31,6 +32,7 @@ class DfnUpscaler:
 
         self.target_num = 15
         self.cur_num = 0
+        self.nearest = nearest
 
         if not loading:
             self._intersect_dfn_with_mesh(parallel=parallel)
@@ -49,7 +51,7 @@ class DfnUpscaler:
             #     break
 
         if not self.load_faults:
-            self.find_fault_cells()
+            self.find_fault_cells(nearest=self.nearest)
         else:
             logger.info(f'Loading fault assignment information from {self.load_faults}')
             with open(self.load_faults, 'rb') as f:
@@ -172,7 +174,9 @@ class DfnUpscaler:
         self.mesh.is_intersected = True
         return intersection_points
 
-    def find_fault_cells(self, save_fault_cells=True):
+    def find_fault_cells(self, save_fault_cells=True,
+                         nearest=None
+                         ):
         """Finds the fault cells in the mesh"""
         logger.info('Finding fault cells')
         fault_cells = {}
@@ -185,25 +189,14 @@ class DfnUpscaler:
             logger.info(f'Processing fault {fault.local_id} containing {len(triangle_centers)} triangles')
             close_triangles = []
             for triangle_center in triangle_centers:
-                kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(triangle_center, distance=characteristic_distance)
-                if len(kd_tree_filtered_elements) == 0:
-                    continue
-                # fault_plane = Fracture(normal_vector=fault.normal_vector,
-                #                        x=fault.centroid[0],
-                #                        y=fault.centroid[1],
-                #                        z=fault.centroid[2],
-                #                        width=fault.width
-                #                        )
-                # distance_vec = []
-                # for kd_centroid in kd_tree_centroids:
-                #     distance_vec.append(fault_plane.distance_to_point(kd_centroid))
-                # # Filter distances
-                # distance_vec = np.array(distance_vec)
-                # distance_vec = np.abs(distance_vec)
-                # distance_vec = pd.DataFrame(distance_vec)
-                # distance_vec = distance_vec[distance_vec < fault.width * 2].dropna()
-                # kd_tree_filtered_elements = [kd_tree_filtered_elements[i] for i in distance_vec.index]
-                # distances = distance_vec.values
+                if not nearest:
+                    kd_tree_filtered_elements = self.mesh.get_closest_mesh_elements(triangle_center, distance=characteristic_distance)
+                    if len(kd_tree_filtered_elements) == 0:
+                        continue
+                else:
+                    nearest: int
+                    assert type(nearest) == int, 'nearest must be an integer'
+                    kd_tree_filtered_elements = self.mesh.get_closest_n_mesh_elements(triangle_center, n=nearest)
                 close_triangles.append(kd_tree_filtered_elements)
             close_triangles = [item for sublist in close_triangles for item in sublist]
             kd_tree_centroids = np.array([elem.centroid for elem in close_triangles])
@@ -211,7 +204,13 @@ class DfnUpscaler:
             distances = fault.distance(kd_tree_centroids)
             for element, distance in zip(close_triangles, distances):
                 distance = np.abs(distance)
-                if distance < fault.aperture / 2:
+                if not nearest:
+                    if distance < fault.aperture / 2:
+                        element.associated_faults[fault.local_id] = {
+                            'distance': distance,
+                        }
+                        fault.associated_elements.append(element)
+                else:
                     element.associated_faults[fault.local_id] = {
                         'distance': distance,
                     }
