@@ -14,3 +14,4 @@ from .FemReader import FemReader
 from .UnstructuredMeshReader import UnstructuredMeshReader
 from .VTKMeshReader import VTKMeshReader
 from .SmeshReader import SmeshReader
+from .PflotranMassBalanceFileReader import PflotranMassBalanceFileReader

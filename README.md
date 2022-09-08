@@ -8,7 +8,7 @@ Using and IDE like PyCharm is recommended to keep things easy. It may be useful 
 or edit them.
 
 Using PyCharm, you can follow the installation step and then run your scripts in PyFLOTRAN env automatically.
-Otherwise, you can follow the steps below to run PyFLOTRAN manually.
+Otherwise, you can follow the steps below to run PyFLOTRAN manually. 
 
 
 ## Installation
