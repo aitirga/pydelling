@@ -90,12 +90,15 @@ class PflotranObservationPointReader(BaseReader):
         temp_keys = [key for key in self.variables if 'Free' in key]
         return temp_keys
 
-    def plot_variable(self, variable) -> plt.Axes:
+    def plot_variable(self, variable,
+                      delete_previous=True,
+                      label=None ) -> plt.Axes:
         logger.info(f'Creating lineplot of {variable}')
-        plt.clf()
-        lineplot: plt.Axes = sns.lineplot(x=self.time_series,
-                                y=self.results[variable])
-        lineplot.set_label(f'{variable}')
+        if delete_previous:
+            plt.clf()
+        lineplot: plt.Axes = plt.plot(self.time_series,
+                                self.results[variable])[0]
+        lineplot.set_label(f'{variable if label is None else label}')
         return lineplot
 
     def to_csv(self, filename='postprocess/results.csv', variables=None) -> pd.DataFrame:

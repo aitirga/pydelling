@@ -248,6 +248,24 @@ class MeshPreprocessor(object):
         # assert len(ids) != 0, "No elements found"
         return [self.elements[i] for i in ids]
 
+    def get_closest_n_mesh_elements(self,
+                                    point,
+                                    n=1
+                                    ):
+        """
+        Get the nearest mesh elements to a point inside a distance.
+        Args:
+            point: A point in 3D space.
+            distance: The radius of the sphere.
+        Returns:
+            A list of the nearest mesh elements.
+        """
+        if self.kd_tree is None:
+            self.create_kd_tree()
+
+        ids = self.kd_tree.query(point, k=n)[1]
+        return [self.elements[i] for i in ids]
+
     def clear(self):
         """Clears the mesh"""
         self.unordered_nodes = {}
