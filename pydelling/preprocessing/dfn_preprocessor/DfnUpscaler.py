@@ -199,7 +199,13 @@ class DfnUpscaler:
                     kd_tree_filtered_elements = self.mesh.get_closest_n_mesh_elements(triangle_center, n=nearest)
                 close_triangles.append(kd_tree_filtered_elements)
             close_triangles = [item for sublist in close_triangles for item in sublist]
+            # Filter out duplicates
+            temp_dict = {triangle.local_id: triangle for triangle in close_triangles}
+            close_triangles = list(temp_dict.values())
+
             kd_tree_centroids = np.array([elem.centroid for elem in close_triangles])
+
+
             logger.info(f'Found {len(kd_tree_centroids)} close elements, computing distances to mesh.')
             distances = fault.distance(kd_tree_centroids)
             for element, distance in zip(close_triangles, distances):
@@ -290,7 +296,7 @@ class DfnUpscaler:
         for local_id in upscaled_storativity:
             vtk_storativity[local_id] = upscaled_storativity[local_id]
 
-        self.mesh.cell_data['upscaled_storativity'] = [vtk_storativity.tolist()]
+        self.mesh.cell_data['upscaled_storativity'] = self.mesh.refactor_array_by_element_type(vtk_storativity)
         self.upscaled_storativity = upscaled_storativity
 
         return upscaled_storativity
@@ -309,8 +315,7 @@ class DfnUpscaler:
         for local_id in distance:
             vtk_distance[local_id] = distance[local_id]
 
-        self.mesh.cell_data['distance'] = [vtk_distance.tolist()]
-
+        self.mesh.cell_data['distance'] =  self.mesh.refactor_array_by_element_type(vtk_distance)
         self.distance = distance
 
     def export_fracture_property(self, property='area'):
