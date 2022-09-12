@@ -1,5 +1,5 @@
- # PyFLOTRAN
-Set of pre- and post-processing scripts for PFLOTRAN
+ # Pydelling
+Set of pre- and post-processing scripts for modelling
 
 
 ## Recommendations
@@ -7,8 +7,8 @@ Set of pre- and post-processing scripts for PFLOTRAN
 Using and IDE like PyCharm is recommended to keep things easy. It may be useful if you need to debug your scripts,
 or edit them.
 
-Using PyCharm, you can follow the installation step and then run your scripts in PyFLOTRAN env automatically.
-Otherwise, you can follow the steps below to run PyFLOTRAN manually. 
+Using PyCharm, you can follow the installation step and then run your scripts in pydelling env automatically.
+Otherwise, you can follow the steps below to run pydelling manually. 
 
 
 ## Installation
@@ -21,18 +21,18 @@ Regular pip dependencies can be found at `requirements.txt`
 
 ## Templates and Examples
 
-Some examples of usage of PyFLOTRAN may be found inside `templates` folder. Use `config.yaml` to setup data sources and 
+Some examples of usage of pydelling may be found inside `templates` folder. Use `config.yaml` to setup data sources and 
 other variables.
 
 
 ## Running template scripts
 
-In order to execute PyFLOTRAN, `PyFLOTRAN` conda env needs to be loaded.
+In order to execute pydelling, `pydelling` conda env needs to be loaded.
 
 
 ### Loading conda environment
 
-`conda activate PyFLOTRAN`
+`conda activate pydelling`
 
 ### Running script
 
