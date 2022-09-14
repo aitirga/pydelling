@@ -33,24 +33,25 @@ class UpscalingCase(unittest.TestCase):
                 np.array([-0.5, 0.5, 0.5])
             ],
         )
-
+        self.mesh_preprocessor.to_vtk(filename='./test_mesh.vtk')
 
         self.dfn_upscaler = DfnUpscaler(
             dfn=self.dfn_preprocessor,
             mesh=self.mesh_preprocessor,
         )
 
-        # self.dfn_upscaler.upscale_mesh_porosity()
-        # Upscale permeability
-        # self.dfn_upscaler.upscale_mesh_permeability()
+
 
 
     def test_porosity_and_permeability(self):
-        porosity_solution = 0.0125
+        porosity = self.dfn_upscaler.upscale_mesh_porosity()
+        porosity_solution = 0.04977876106194691
+        self.assertAlmostEqual(porosity[0], porosity_solution)
+        # Upscale permeability
+        permeability = self.dfn_upscaler.upscale_mesh_permeability()
         # #self.assertEqual(porosity, porosity_solution)
-        # self.assertAlmostEqual(porosity[0], porosity_solution)
-        # permeability_solution = np.array([[114.70037453,0,0],[0,114.70037453,0],[0,0,0]])
-        # nptest.assert_array_almost_equal(permeability[0], permeability_solution)
+        permeability_solution = np.array([[114.70037453,0,0],[0,114.70037453,0],[0,0,0]])
+        nptest.assert_array_almost_equal(permeability[0], permeability_solution)
 
     # def test_save_load_upscaler(self):
     #     self.dfn_upscaler.save('upscaler.pkl')
@@ -63,13 +64,13 @@ class UpscalingCase(unittest.TestCase):
     #     from pathlib import Path
     #     Path('upscaler.pkl').unlink()
 
-    def test_save_load_json(self):
-        self.dfn_upscaler.to_json('upscaler.json')
-        new_upscaler = DfnUpscaler.from_json('upscaler.json')
-        new_upscaler.upscale_mesh_porosity()
-        # self.dfn_upscaler.upscale_mesh_porosity()
-        # self.assertEqual(self.dfn_upscaler.upscaled_porosity[0], new_upscaler.upscaled_porosity[0])
-    #
+    # def test_save_load_json(self):
+    #     self.dfn_upscaler.to_json('upscaler.json')
+    #     new_upscaler = DfnUpscaler.from_json('upscaler.json')
+    #     new_upscaler.upscale_mesh_porosity()
+    #     # self.dfn_upscaler.upscale_mesh_porosity()
+    #     # self.assertEqual(self.dfn_upscaler.upscaled_porosity[0], new_upscaler.upscaled_porosity[0])
+    # #
 
 
 if __name__ == '__main__':

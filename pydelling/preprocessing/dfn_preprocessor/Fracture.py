@@ -22,6 +22,7 @@ class Fracture(object):
                  dip_dir=None,
                  size=None,
                  aperture=None,
+                 hydraulic_aperture=None,
                  aperture_constant=None,
                  transmissivity_constant=None,
                  storativity_constant=None,
@@ -55,6 +56,7 @@ class Fracture(object):
         self.z_centroid = z
         self.size = size
         self._aperture = aperture
+        self.hydraulic_aperture = hydraulic_aperture
         self.intersection_dictionary = {}
         self.aperture_constant = aperture_constant
         self.transmissivity_constant = transmissivity_constant
@@ -357,7 +359,7 @@ class Fracture(object):
             rho = 1000
             g = 9.8
             mu = 8.9E-4
-            return (np.power(self.aperture, 2) * rho * g) / (12 * mu)
+            return (np.power(self.hydraulic_aperture, 3) * rho * g) / (12 * mu)
 
     @property
     def storativity(self):

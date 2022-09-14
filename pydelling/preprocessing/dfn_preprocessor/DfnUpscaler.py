@@ -83,9 +83,9 @@ class DfnUpscaler:
             counter += 1
             absolute_distance = np.abs(fracture.distance_to_point(element.centroid))
             characteristic_length = np.power(element.volume, 1 / 3)
-            #if absolute_distance > 1.25 * characteristic_length:
-            #    elements_filtered += 1
-            #    continue
+            if absolute_distance > 1.25 * characteristic_length:
+                elements_filtered += 1
+                continue
 
             intersection_points = element.intersect_with_fracture(fracture)
             if self.save_intersections:
@@ -243,11 +243,11 @@ class DfnUpscaler:
 
     def upscale_mesh_porosity(self, matrix_porosity=None):
         # Compute upscaled porosity for each element.
+        matrix_porosity = 0.0
         self._compute_fracture_volume_in_elements()
         upscaled_porosity = {}
         for elem in tqdm(self.mesh.elements, desc="Upscaling porosity"):
-            upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume)  # + (
-            # matrix_porosity[elem] * (1 - (elem.total_fracture_volume / elem.volume)))
+            upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume) + matrix_porosity * (1 - (elem.total_fracture_volume / elem.volume))
             # if elem.total_fracture_volume > 0:
             #     pass
             #     #print(elem.total_fracture_volume, elem.volume, matrix_porosity[elem])
@@ -259,7 +259,7 @@ class DfnUpscaler:
 
         #POROSITY POST-PROCESSING
         for elem in tqdm(self.mesh.elements, desc="Post processing upscaled porosity"):
-            upscaled_porosity[elem.local_id] = upscaled_porosity[elem.local_id] * (1.53) * 1 / 0.3842
+            upscaled_porosity[elem.local_id] = np.abs(upscaled_porosity[elem.local_id]) * (1.53) * 1 / 0.3842
 
         vtk_porosity = np.asarray(self.mesh.elements)
         for local_id in upscaled_porosity:
@@ -291,7 +291,7 @@ class DfnUpscaler:
 
         #STORATIVITY POST-PROCESSING
         for elem in tqdm(self.mesh.elements, desc="Post processing upscaled porosity"):
-            upscaled_storativity[elem.local_id] = upscaled_storativity[elem.local_id] * (1.53) * 0.998 / 0.187
+            upscaled_storativity[elem.local_id] = upscaled_storativity[elem.local_id] #* (1.53) * 0.998 / 0.187
 
         vtk_storativity = np.asarray(self.mesh.elements)
         for local_id in upscaled_storativity:
@@ -350,8 +350,7 @@ class DfnUpscaler:
         #
         # if len(matrix_permeability) != len(self.elements):
         #     print("Incorrect size for matrix permeability. Size of variable doesn't match number of elements in the mesh.")
-        #     breakcd
-        c
+        #     break
         # else:
         #     for elem in tqdm(self.elements, desc="Check size of matrix permeability input"):
         #         if len(matrix_permeability[elem]) == 3:

@@ -68,6 +68,7 @@ class DfnPreprocessor(object):
     def load_fractures_from_polygons_and_apertures(self,
                        polygons,
                        apertures=None,
+                       hydraulic_aperture=None,
                        radii=None,
                        aperture_constant=None,
                        transmissivity_constant=None,
@@ -77,6 +78,7 @@ class DfnPreprocessor(object):
             self.add_fracture(
                 polygon=polygon,
                 aperture=apertures[idx] if apertures is not None else None,
+                hydraulic_aperture=hydraulic_aperture[idx] if hydraulic_aperture is not None else None,
                 size=radii[idx] * 2 if radii is not None else None,
                 aperture_constant=aperture_constant,
                 transmissivity_constant=transmissivity_constant,
@@ -92,6 +94,7 @@ class DfnPreprocessor(object):
                      dip_dir=None,
                      size=None,
                      aperture=None,
+                     hydraulic_aperture=None,
                      aperture_constant=1E-3,
                      transmissivity_constant=None,
                      storativity_constant=None,
@@ -107,6 +110,7 @@ class DfnPreprocessor(object):
             z=z,
             size=size,
             aperture=aperture,
+            hydraulic_aperture=hydraulic_aperture,
             aperture_constant=aperture_constant,
             transmissivity_constant=transmissivity_constant,
             storativity_constant=storativity_constant,
@@ -264,6 +268,14 @@ class DfnPreprocessor(object):
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots()
         plt.hist([fracture.aperture for fracture in self.dfn], bins=100)
+        return fig, ax
+
+    def plot_hydraulic_aperture_histogram(self, filename='aperture_histogram.png'):
+        """Plots the hydraulic aperture histogram."""
+        logger.info(f'Plotting hydraulic aperture histogram to {filename}')
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        plt.hist([fracture.hyd_aperture for fracture in self.dfn], bins=100)
         return fig, ax
 
     def plot_transmissivity_histogram(self, filename='transmissivity_histogram.png'):
