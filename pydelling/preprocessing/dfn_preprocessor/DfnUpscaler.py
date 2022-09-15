@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
+import pydelling.preprocessing.mesh_preprocessor.geometry.BaseElement
 from pydelling.preprocessing.dfn_preprocessor import DfnPreprocessor
 from pydelling.preprocessing.dfn_preprocessor import Fracture, Fault
 from pydelling.preprocessing.mesh_preprocessor import MeshPreprocessor
@@ -22,7 +23,9 @@ class DfnUpscaler:
                  load_faults:str or pathlib.Path=None,
                  loading=False,
                  nearest=None,
+                 check_nodes=False,
                  ):
+        self.eps = 1E-4
         self.dfn: DfnPreprocessor = dfn
         self.mesh: MeshPreprocessor = mesh
         logger.info('The DFN and mesh objects have been set properly')
@@ -32,7 +35,8 @@ class DfnUpscaler:
 
         self.target_num = 15
         self.cur_num = 0
-        self.nearest = nearest
+        self.add_to_class('nearest', nearest, default=None)
+        self.add_to_class('check_nodes', check_nodes, default=False)
 
         if not loading:
             self._intersect_dfn_with_mesh(parallel=parallel)
@@ -51,7 +55,7 @@ class DfnUpscaler:
             #     break
 
         if not self.load_faults:
-            self.find_fault_cells(nearest=self.nearest)
+            self.find_fault_cells(nearest=self.nearest, check_nodes=self.check_nodes)
         else:
             logger.info(f'Loading fault assignment information from {self.load_faults}')
             with open(self.load_faults, 'rb') as f:
@@ -175,7 +179,8 @@ class DfnUpscaler:
         return intersection_points
 
     def find_fault_cells(self, save_fault_cells=True,
-                         nearest=None
+                         nearest=None,
+                         check_nodes=False,
                          ):
         """Finds the fault cells in the mesh"""
         logger.info('Finding fault cells')
@@ -185,7 +190,7 @@ class DfnUpscaler:
             # Iterate over each triangle individually and find close mesh elements
             triangle_centers = fault.trimesh_mesh.triangles_center
             triangle_areas = fault.trimesh_mesh.area_faces
-            characteristic_distance = fault.aperture
+            characteristic_distance = fault.effective_aperture if fault.effective_aperture is not None else fault.aperture
             logger.info(f'Processing fault {fault.local_id} containing {len(triangle_centers)} triangles')
             close_triangles = []
             for triangle_center in triangle_centers:
@@ -204,10 +209,12 @@ class DfnUpscaler:
             close_triangles = list(temp_dict.values())
 
             kd_tree_centroids = np.array([elem.centroid for elem in close_triangles])
+            # Add element nodes
 
 
             logger.info(f'Found {len(kd_tree_centroids)} close elements, computing distances to mesh.')
             distances = fault.distance(kd_tree_centroids)
+
             for element, distance in zip(close_triangles, distances):
                 distance = np.abs(distance)
                 if not nearest:
@@ -216,11 +223,41 @@ class DfnUpscaler:
                             'distance': distance,
                         }
                         fault.associated_elements.append(element)
+
                 else:
                     element.associated_faults[fault.local_id] = {
-                        'distance': distance,
+                        'distance': distance if distance > self.eps else self.eps,
                     }
                     fault.associated_elements.append(element)
+
+            # Check node distances
+            if check_nodes:
+                logger.info('Checking node distances')
+                number_of_nodes = []
+                all_nodes = []
+                for element in close_triangles:
+                    element: pydelling.preprocessing.mesh_preprocessor.geometry.BaseElement
+                    nodes = element.coords
+                    number_of_nodes.append(len(nodes))
+                    all_nodes += [node for node in nodes]
+                # all_nodes = np.array(all_nodes).reshape(-1, 3)
+                distances = fault.distance(np.array(all_nodes))
+                reconstructed_distances = []
+                cum_idx = 0
+                for n_node in number_of_nodes:
+                    reconstructed_distances.append(distances[cum_idx:cum_idx + n_node])
+                    cum_idx += n_node
+
+                for element_id, element in enumerate(close_triangles):
+                    element: pydelling.preprocessing.mesh_preprocessor.geometry.BaseElement
+                    distances = reconstructed_distances[element_id]
+                    for distance in distances:
+                        if distance < fault.aperture / 2:
+                            element.associated_faults[fault.local_id] = {
+                                'distance': distance if distance > self.eps else self.eps,
+                            }
+                            fault.associated_elements.append(element)
+                            break
 
         if save_fault_cells:
             import dill
@@ -255,7 +292,7 @@ class DfnUpscaler:
 
         for fault in self.dfn.faults:
             for element in fault.associated_elements:
-                upscaled_porosity[elem.local_id] = fault.porosity
+                upscaled_porosity[element.local_id] = fault.porosity
 
         #POROSITY POST-PROCESSING
         for elem in tqdm(self.mesh.elements, desc="Post processing upscaled porosity"):
@@ -286,7 +323,7 @@ class DfnUpscaler:
 
         for fault in self.dfn.faults:
             for element in fault.associated_elements:
-                upscaled_storativity[elem.local_id] = fault.storativity
+                upscaled_storativity[element.local_id] = fault.storativity
 
 
         #STORATIVITY POST-PROCESSING
@@ -439,7 +476,8 @@ class DfnUpscaler:
                     n2 = fault.unit_normal_vector[1]
                     n3 = fault.unit_normal_vector[2]
                     # frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
-                    fault.hk = fault.transmissivity / fault.aperture
+                    effective_aperture = fault.effective_aperture if fault.effective_aperture is not None else fault.aperture
+                    fault.hk = fault.transmissivity / effective_aperture
 
                 if 'mode' == 'isotropy':
                     # Add fault permeability. Element porosity equals to 1 when intersected by faults.
@@ -591,6 +629,12 @@ class DfnUpscaler:
             loaded_class = cls(mesh=mesh, dfn=dfn, loading=True)
             # loaded_class.all_intersected_points = load_dict['all_intersected_points']
             return loaded_class
+
+    def add_to_class(self, key, value, default=None):
+        """Add an attribute to the class"""
+        setattr(self, key, value)
+        if value != default:
+            logger.info(f'Added {key} = {value} to the class')
 
 
 

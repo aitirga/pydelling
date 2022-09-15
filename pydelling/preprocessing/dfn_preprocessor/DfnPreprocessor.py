@@ -119,14 +119,24 @@ class DfnPreprocessor(object):
 
     def add_fault(self, filename=None,
                   mesh=None,
-                  aperture=None):
+                  aperture=None,
+                  transmissivity=None,
+                  effective_aperture=None,
+                  porosity=None,
+                  ):
         """Adds a fault to the dfn object."""
         if aperture is None:
             logger.warning(f'No aperture specified for fault {filename}')
         if isinstance(filename, Fault):
             self.faults.append(filename)
         elif isinstance(filename, str) or isinstance(filename, Path):
-            self.faults.append(Fault(filename=filename, mesh=mesh, aperture=aperture))
+            self.faults.append(Fault(filename=filename,
+                                     mesh=mesh,
+                                     aperture=aperture,
+                                     transmissivity=transmissivity,
+                                     effective_aperture=effective_aperture,
+                                     porosity=porosity,
+                                     ))
         else:
             logger.error('Fault filename must be a string or Fault object')
             raise TypeError('Fault filename must be a string or Fault object')
@@ -159,7 +169,7 @@ class DfnPreprocessor(object):
 
     def to_obj(self, filename='dfn.obj', method='v1'):
         '''Exports the dfn object to stl format.'''
-        logger.info(f'Exporting dfn object to {filename}')
+        logger.info(f'Exporting dfn + faults object to {filename}')
         obj_file = open(filename, 'w')
         obj_file.write('# Created by pydelling\n')
         obj_file.write('o dfn\n')
@@ -174,6 +184,7 @@ class DfnPreprocessor(object):
 
     def to_vtk(self, filename='dfn.vtk', method='v1'):
         from pathlib import Path
+        logger.info(f'Exporting dfn + faults object to {filename}')
         self.to_obj('buffer.obj', method=method)
         meshio_mesh: meshio.Mesh = meshio.read('buffer.obj')
         meshio_mesh.cell_data = {'aperture': self.apertures}
@@ -305,7 +316,15 @@ class DfnPreprocessor(object):
 
     @property
     def apertures(self) -> np.ndarray:
-        return np.array([fracture.aperture for fracture in self.dfn])
+        fracture_apertures = [fracture.aperture for fracture in self.dfn]
+        # Get fault apertures for each trimesh element
+        fault_apertures = []
+        for fault in self.faults:
+            trimesh = fault.trimesh_mesh.triangles_center
+            cur_fault_apertures = [fault.aperture for _ in range(len(trimesh))]
+            fault_apertures += cur_fault_apertures
+
+        return np.array(fracture_apertures + fault_apertures)
 
     def __add__(self, other):
         """Adds two dfn objects."""

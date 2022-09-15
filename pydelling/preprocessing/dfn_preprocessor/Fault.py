@@ -15,6 +15,7 @@ class Fault:
                  transmissivity=None,
                  porosity=None,
                  storativity=None,
+                 effective_aperture=None,
                  ):
 
         if filename is not None:
@@ -29,6 +30,7 @@ class Fault:
         self.storativity = storativity
         self.filename = filename
         self.local_id = Fault.local_id
+        self.effective_aperture=effective_aperture
         Fault.local_id += 1
 
     def distance(self, points: np.ndarray, n_max: int = 2500):
