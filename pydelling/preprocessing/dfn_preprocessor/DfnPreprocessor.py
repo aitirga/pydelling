@@ -123,6 +123,7 @@ class DfnPreprocessor(object):
                   transmissivity=None,
                   effective_aperture=None,
                   porosity=None,
+                  storativity=None,
                   ):
         """Adds a fault to the dfn object."""
         if aperture is None:
@@ -136,6 +137,7 @@ class DfnPreprocessor(object):
                                      transmissivity=transmissivity,
                                      effective_aperture=effective_aperture,
                                      porosity=porosity,
+                                     storativity=storativity,
                                      ))
         else:
             logger.error('Fault filename must be a string or Fault object')
