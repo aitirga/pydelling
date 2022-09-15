@@ -372,7 +372,11 @@ class DfnUpscaler:
         self.mesh.cell_data[property] = [vtk_property.tolist()]
         self.property_dict = property_dict
 
-    def upscale_mesh_permeability(self, matrix_permeability=None, rho=1000, g=9.8, mu=8.9e-4,
+    def upscale_mesh_permeability(self,
+                                  matrix_permeability=None,
+                                  rho=1000,
+                                  g=9.8,
+                                  mu=8.9e-4,
                                   mode='full_tensor'):
 
         matrix_permeability = {}
@@ -465,16 +469,14 @@ class DfnUpscaler:
                     1 - (elem.total_fracture_volume / elem.volume))
 
             if len(elem.associated_faults) > 0:
-
                 for fault_name in elem.associated_faults:
-                    fault_dict = elem.associated_faults[fault_name]
-                    fault = fault_dict['fault']
+                    fault = self.dfn.faults[fault_name]
                     # n1 = math.cos(frac.dip * (math.pi / 180)) * math.sin(frac.dip_dir * (math.pi / 180))
                     # n2 = math.cos(frac.dip * (math.pi / 180)) * math.cos(frac.dip_dir * (math.pi / 180))
                     # n3 = -1 * math.sin(frac.dip * (math.pi / 180))
-                    n1 = fault.unit_normal_vector[0]
-                    n2 = fault.unit_normal_vector[1]
-                    n3 = fault.unit_normal_vector[2]
+                    # n1 = fault.unit_normal_vector[0]
+                    # n2 = fault.unit_normal_vector[1]
+                    # n3 = fault.unit_normal_vector[2]
                     # frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
                     effective_aperture = fault.effective_aperture if fault.effective_aperture is not None else fault.aperture
                     fault.hk = fault.transmissivity / effective_aperture
@@ -483,32 +485,33 @@ class DfnUpscaler:
                     # Add fault permeability. Element porosity equals to 1 when intersected by faults.
                     fault_hk[elem.local_id][0, 0] += fault.hk
 
-                else:  # 'anisotropy' in 'mode':
-                    perm_tensor = np.zeros([3, 3])
-                    # for i in range(1, 4):
-                    #    for j in range(1, 4):
-                    # Compute tensor
-                    perm_tensor[0, 0] = fault.hk * ((n2 ** 2) + (n3 ** 2))
-                    perm_tensor[0, 1] = fault.hk * (-1) * n1 * n2
-                    perm_tensor[0, 2] = fault.hk * (-1) * n1 * n3
-                    perm_tensor[1, 1] = fault.hk * ((n3 ** 2) + (n1 ** 2))
-                    perm_tensor[1, 2] = fault.hk * (-1) * n2 * n3
-                    perm_tensor[2, 2] = fault.hk * ((n1 ** 2) + (n2 ** 2))
-
-                    if 'mode' == 'anisotropy_principals':
-                        eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])
-                        perm_tensor = eigen_perm_tensor
-
-                    # Add fault permeability. Element porosity equals to 1 when intersected by faults.
-                    fault_hk[elem.local_id][0, 0] += perm_tensor[0, 0]
-                    fault_hk[elem.local_id][0, 1] += perm_tensor[0, 1]
-                    fault_hk[elem.local_id][0, 2] += perm_tensor[0, 1]
-                    fault_hk[elem.local_id][1, 0] += perm_tensor[0, 1]
-                    fault_hk[elem.local_id][1, 1] += perm_tensor[1, 1]
-                    fault_hk[elem.local_id][1, 2] += perm_tensor[1, 2]
-                    fault_hk[elem.local_id][2, 0] += perm_tensor[0, 1]
-                    fault_hk[elem.local_id][2, 1] += perm_tensor[1, 2]
-                    fault_hk[elem.local_id][2, 2] += perm_tensor[2, 2]
+                #
+                # else:  # 'anisotropy' in 'mode':
+                #     perm_tensor = np.zeros([3, 3])
+                #     # for i in range(1, 4):
+                #     #    for j in range(1, 4):
+                #     # Compute tensor
+                #     perm_tensor[0, 0] = fault.hk * ((n2 ** 2) + (n3 ** 2))
+                #     perm_tensor[0, 1] = fault.hk * (-1) * n1 * n2
+                #     perm_tensor[0, 2] = fault.hk * (-1) * n1 * n3
+                #     perm_tensor[1, 1] = fault.hk * ((n3 ** 2) + (n1 ** 2))
+                #     perm_tensor[1, 2] = fault.hk * (-1) * n2 * n3
+                #     perm_tensor[2, 2] = fault.hk * ((n1 ** 2) + (n2 ** 2))
+                #
+                #     if 'mode' == 'anisotropy_principals':
+                #         eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])
+                #         perm_tensor = eigen_perm_tensor
+                #
+                #     # Add fault permeability. Element porosity equals to 1 when intersected by faults.
+                #     fault_hk[elem.local_id][0, 0] += perm_tensor[0, 0]
+                #     fault_hk[elem.local_id][0, 1] += perm_tensor[0, 1]
+                #     fault_hk[elem.local_id][0, 2] += perm_tensor[0, 1]
+                #     fault_hk[elem.local_id][1, 0] += perm_tensor[0, 1]
+                #     fault_hk[elem.local_id][1, 1] += perm_tensor[1, 1]
+                #     fault_hk[elem.local_id][1, 2] += perm_tensor[1, 2]
+                #     fault_hk[elem.local_id][2, 0] += perm_tensor[0, 1]
+                #     fault_hk[elem.local_id][2, 1] += perm_tensor[1, 2]
+                #     fault_hk[elem.local_id][2, 2] += perm_tensor[2, 2]
 
                 # Sum permeability contribution from faults.
                 upscaled_hk[elem.local_id] = upscaled_hk[elem.local_id] + fault_hk[elem.local_id]

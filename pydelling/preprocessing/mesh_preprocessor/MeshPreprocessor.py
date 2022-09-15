@@ -517,10 +517,12 @@ class MeshPreprocessor(object):
                 final_array.append(temp_dict[key])
         return final_array
 
-
-
-
-
-
     def __repr__(self):
         return f'Mesh with {len(self.elements)} elements and {len(self.coords)} nodes.'
+
+    def add_cell_data(self, name, data):
+        self.cell_data[name] = self.refactor_array_by_element_type(data)
+
+    def add_point_data(self, name, data):
+        self.point_data[name] = data
+
