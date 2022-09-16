@@ -433,7 +433,7 @@ class DfnUpscaler:
                 # frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
                 self.dfn[frac].hk = self.dfn[frac].transmissivity / self.dfn[frac].aperture
 
-                if 'mode' == 'isotropy':
+                if mode == 'isotropy':
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
                     fracture_hk[elem.local_id][0, 0] += self.dfn[frac].hk * (frac_dict['volume'] / elem.volume)  # Kxx
 
@@ -481,9 +481,9 @@ class DfnUpscaler:
                     effective_aperture = fault.effective_aperture if fault.effective_aperture is not None else fault.aperture
                     fault.hk = fault.transmissivity / effective_aperture
 
-                if 'mode' == 'isotropy':
-                    # Add fault permeability. Element porosity equals to 1 when intersected by faults.
-                    fault_hk[elem.local_id][0, 0] += fault.hk
+                    if mode == 'isotropy':
+                        # Add fault permeability.
+                        fault_hk[elem.local_id][0, 0] += fault.hk
 
                 #
                 # else:  # 'anisotropy' in 'mode':
