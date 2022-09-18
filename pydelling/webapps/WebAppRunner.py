@@ -23,14 +23,11 @@ class WebAppRunner(ABC):
             self.initialize()
             self.construct()
 
-    def save_in_session_state(self, value, key: str):
+    def save_in_session_state(self, key, value: object):
         """This method saves the object to a session state"""
-        if key not in st.session_state:
-            st.session_state[key] = value
-        else:
-            st.session_state[key] = value
+        st.session_state[key] = value
 
-    def initialize_in_session_state(self, key: str, value=None):
+    def initialize_in_session_state(self, key: str, value: object=None):
         """This method initializes the session state"""
         if key not in st.session_state:
             st.session_state[key] = value
@@ -43,9 +40,9 @@ class WebAppRunner(ABC):
         """This method initializes the webapp."""
         pass
 
-    def set_to_session_state(self, key: str, value):
+    def set_to_session_state(self, key: str, value: object):
         """This method equals the previous method"""
-        self.save_in_session_state(value, key)
+        self.save_in_session_state(key, value)
 
 
 

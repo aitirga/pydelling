@@ -40,6 +40,7 @@ setup(
         'dill',
         'trimesh',
         'mpmath',
+        'paramiko',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',

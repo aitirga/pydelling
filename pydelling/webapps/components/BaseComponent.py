@@ -38,7 +38,7 @@ class BaseComponent(ABC):
     def value(self):
         """Returns the value of the component"""
         return self._value
-    def save_in_session_state(self, key: str, value):
+    def save_in_session_state(self, key: str, value: object):
         """This method saves the object to a session state"""
         st.session_state[key] = value
 
