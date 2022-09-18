@@ -2,7 +2,6 @@ from pydelling.webapps import WebAppRunner
 from pydelling.webapps.components import RemoteLoginComponent
 import streamlit as st
 import time
-
 class PflotranManagerWebapp(WebAppRunner):
     """This webapp can be used to run and manage PFLOTRAN runs both in local and remote machines."""
     remote_hosts = {
@@ -19,10 +18,21 @@ class PflotranManagerWebapp(WebAppRunner):
         self.initialize_in_session_state('cur_status', None)
         st.sidebar.title('PFLOTRAN Simulation Manager')
         self.sidebar_info = st.sidebar.empty()
+
+
+
         if not self.get_from_session_state('is_login'):
             self.sidebar_info.markdown('Please login to continue')
         else:
             with st.sidebar:
+                # Check if there is an authenticated cookie
+                self.remote = RemoteLoginComponent(
+                    host=self.get_from_session_state('host'),
+                    host_name=self.get_from_session_state('host_name'),
+                    username=self.get_from_session_state('username'),
+                    password=self.get_from_session_state('password'),
+                )
+                self.remote.check_connection()
                 self.sidebar_info.markdown(f' You are logged in to {self.get_from_session_state("host_name")}')
                 st.markdown(f'**Username:** {self.get_from_session_state("username")}')
                 st.text_input('Working directory',
@@ -31,7 +41,6 @@ class PflotranManagerWebapp(WebAppRunner):
                               on_change=self.change_working_directory,
                               )
                 st.button('Logout', on_click=self.logout)
-
 
     def construct(self):
         # First check if the user is logged in
@@ -74,6 +83,11 @@ class PflotranManagerWebapp(WebAppRunner):
 
     def change_working_directory(self):
         self.save_in_session_state('cwd', self.get_from_session_state('cwd-text'))
+
+    def check_login(self):
+        self.remote.check_connection()
+
+
 
 
 if __name__ == '__main__':

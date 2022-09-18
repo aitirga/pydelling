@@ -2,8 +2,9 @@ import inspect
 import subprocess
 from abc import ABC
 import streamlit as st
-
-class WebAppRunner(ABC):
+import extra_streamlit_components as stx
+from .BaseStreamlitUtilityClass import BaseStreamlitUtilityClass
+class WebAppRunner(ABC, BaseStreamlitUtilityClass):
     """This is the base class used to build other webapps."""
     def __init__(self):
         self.source_script_name = None
@@ -23,28 +24,8 @@ class WebAppRunner(ABC):
             self.initialize()
             self.construct()
 
-    def save_in_session_state(self, key, value: object):
-        """This method saves the object to a session state"""
-        st.session_state[key] = value
-
-    def initialize_in_session_state(self, key: str, value: object=None):
-        """This method initializes the session state"""
-        if key not in st.session_state:
-            st.session_state[key] = value
-
-    def get_from_session_state(self, key: str):
-        """This method gets the session state"""
-        return st.session_state[key]
-
     def initialize(self):
         """This method initializes the webapp."""
         pass
-
-    def set_to_session_state(self, key: str, value: object):
-        """This method equals the previous method"""
-        self.save_in_session_state(key, value)
-
-
-
 
 

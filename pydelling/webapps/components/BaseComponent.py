@@ -3,8 +3,10 @@ from abc import ABC, abstractmethod
 from pydelling.webapps import WebAppRunner
 from translate import Translator
 import streamlit as st
+import extra_streamlit_components as stx
+from ..BaseStreamlitUtilityClass import BaseStreamlitUtilityClass
 
-class BaseComponent(ABC):
+class BaseComponent(ABC, BaseStreamlitUtilityClass):
     _value = None
     def __init__(self,
                  webapp: WebAppRunner=None,
@@ -38,15 +40,3 @@ class BaseComponent(ABC):
     def value(self):
         """Returns the value of the component"""
         return self._value
-    def save_in_session_state(self, key: str, value: object):
-        """This method saves the object to a session state"""
-        st.session_state[key] = value
-
-    def initialize_in_session_state(self, key: str, value=None):
-        """This method initializes the session state"""
-        if key not in st.session_state:
-            st.session_state[key] = value
-
-    def get_from_session_state(self, key: str):
-        """This method gets the session state"""
-        return st.session_state[key]
