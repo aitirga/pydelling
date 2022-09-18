@@ -12,18 +12,15 @@ from pydelling.webapps.components import BaseComponent
 
 class InputComponent(BaseComponent):
     """Creates a streamlit block in which the user can drag and drop a file and the resulting object is returned"""
-    def __init__(self, input_type: str, key: str, webapp: WebAppRunner=None, lang=None):
+    def __init__(self, input_type: str, key: str, webapp: WebAppRunner=None, lang=None, *args, **kwargs):
         self.key = key
         if not f'{self.key}_done' in st.session_state:
             st.session_state[f'{self.key}_done'] = False
         self.translate = False
-
         self.input_type = input_type
-        if lang is not None:
-            self.translator = Translator(to_lang=lang)
-            self.translate = True
 
-        super().__init__(webapp)
+
+        super().__init__(webapp=webapp, *args, **kwargs)
 
 
     def run(self):

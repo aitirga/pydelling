@@ -1,7 +1,7 @@
 import inspect
 import subprocess
 from abc import ABC
-
+import streamlit as st
 
 class WebAppRunner(ABC):
     """This is the base class used to build other webapps."""
@@ -20,8 +20,32 @@ class WebAppRunner(ABC):
         if 'threading' not in current_executer[-1][1]:
             subprocess.run(["streamlit", "run", self.source_script_name])
         else:
+            self.initialize()
             self.construct()
 
+    def save_in_session_state(self, value, key: str):
+        """This method saves the object to a session state"""
+        if key not in st.session_state:
+            st.session_state[key] = value
+        else:
+            st.session_state[key] = value
+
+    def initialize_in_session_state(self, key: str, value=None):
+        """This method initializes the session state"""
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+    def get_from_session_state(self, key: str):
+        """This method gets the session state"""
+        return st.session_state[key]
+
+    def initialize(self):
+        """This method initializes the webapp."""
+        pass
+
+    def set_to_session_state(self, key: str, value):
+        """This method equals the previous method"""
+        self.save_in_session_state(value, key)
 
 
 
