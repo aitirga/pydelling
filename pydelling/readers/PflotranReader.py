@@ -19,16 +19,29 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 logger = logging.getLogger(__name__)
 from collections import OrderedDict
+from tqdm import tqdm
 
 
 class PflotranReader(BaseReader):
-    def __init__(self, filename=None):
+    def __init__(self,
+                 filename=None,
+                 variables=None,
+                 ):
         self.filename = Path(filename) if filename else Path(config.pflotran_reader.filename)
         logger.info(f"Reading PFLOTRAN results file from {self.filename}")
         super().__init__(filename=self.filename)
         self.results = {}
-        for time in self.time_keys:
-            self.results[time] = PflotranResults(time=time, data=self.data[self.time_keys[time]])
+        if variables:
+            self.variables = variables
+        else:
+            self.variables = list(self.data[self.time_keys[self.time_values[0]]])
+        if 'Material_ID' not in self.variables:
+            self.variables.append('Material_ID')
+
+        for time in tqdm(self.time_keys, desc='Reading PFLOTRAN results'):
+            data_slice = self.data[self.time_keys[time]]
+            data_slice = {key: data_slice[key] for key in self.variables}
+            self.results[time] = PflotranResults(time=time, data=data_slice)
         self.variables = list(self.results[self.time_values[0]].variable_keys)
 
     def open_file(self, filename):
@@ -46,9 +59,9 @@ class PflotranReader(BaseReader):
     def coordinates(self):
         temp_coordinates = self.data['Coordinates']
         temp_df = {'x[m]': np.array(temp_coordinates['X [m]']),
-                                'y[m]': np.array(temp_coordinates['Y [m]']),
-                                'z[m]': np.array(temp_coordinates['Z [m]']),
-                                }
+                    'y[m]': np.array(temp_coordinates['Y [m]']),
+                    'z[m]': np.array(temp_coordinates['Z [m]']),
+                  }
         return temp_df
 
     def get_data(self) -> np.ndarray:
@@ -232,6 +245,7 @@ class PflotranReader(BaseReader):
             line_plot.set_xlabel ('X [m]')
             line_plot.set_ylabel (f'{mineral} volume fraction variation')
         plt.savefig(postprocess_dir / f'{mineral}.png')
+
 
 class PflotranResults:
     """
