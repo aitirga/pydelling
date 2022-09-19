@@ -17,12 +17,13 @@ import natsort
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-logger = logging.getLogger(__name__)
 from collections import OrderedDict
 from tqdm import tqdm
+from pydelling.readers import PflotranProcessingUtils
 
+logger = logging.getLogger(__name__)
 
-class PflotranReader(BaseReader):
+class PflotranReader(BaseReader, PflotranProcessingUtils):
     def __init__(self,
                  filename=None,
                  variables=None,
