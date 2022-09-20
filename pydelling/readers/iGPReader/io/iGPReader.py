@@ -733,6 +733,12 @@ class iGPReader(BaseReader):
     def get_region(self, region_name):
         return self.centroids[self.region_dict[region_name]['centroid_id'] - 1]
 
+    def get_region_nodes(self, region_name):
+        cur_array = self.region_dict[region_name]['elements']
+        cur_array = cur_array.flatten()
+        cur_array = np.unique(cur_array)
+        return self.nodes[cur_array]
+
     @property
     def min_x(self):
         '''Returns the minimum x coordinate of the centroids of the mesh'''

@@ -159,3 +159,8 @@ class PflotranObservationPointReader(BaseReader):
     @property
     def time_series(self):
         return self.results.iloc[:, 0]
+
+    @property
+    def columns(self):
+        return self.results.columns
+
