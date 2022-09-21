@@ -5,6 +5,7 @@ Base interface for a reader class
 import logging
 
 import numpy as np
+import pandas
 
 from pydelling.readers import BaseReader
 
@@ -20,6 +21,10 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 from tqdm import tqdm
 from pydelling.readers import PflotranProcessingUtils
+import colorsys
+import seaborn as sns
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +109,7 @@ class PflotranReader(BaseReader, PflotranProcessingUtils):
     def species_names(self):
         temp_keys = [key.split('_')[1] for key in self.variables if 'Total' in key]
         return temp_keys
+
 
     def get_variable_by_time_index(self, variable: str, time_index: int) -> np.ndarray:
         """
@@ -280,6 +286,119 @@ class PflotranReader(BaseReader, PflotranProcessingUtils):
             line_plot.set_xlabel ('X [m]')
             line_plot.set_ylabel (f'{mineral} volume fraction variation')
         plt.savefig(postprocess_dir / f'{mineral}.png')
+
+    def plot_1D_slice_of_variable(self, variable,
+                                  times=None,
+                                  axis='x',
+                                  coordinate=0,
+                                  postprocess_dir='./postprocess',
+                                  color='b',
+                                  ) -> plt.Axes:
+        """This method plots the variation of a variable along a given axis and coordinate"""
+        fig, ax = plt.subplots()
+        ax: plt.Axes
+        ax_color = ax._get_lines.get_next_color()
+        if times is None:
+            times = [self.time_values[0]]
+        elif times == 'all':
+            times = self.time_values
+        else:
+            times = times
+
+        for time_id, time in enumerate(times):
+            data = self.get_variable_by_time(variable, time)
+            data_slice = self.get_slice_from_coordinates(data=data,
+                                                         axis=axis,
+                                                         coordinate=coordinate
+                                                         )
+            dims = self.get_shape_dimensions(data_slice)
+            n_times = len(times)
+            # Convert hex to rgb
+            next_color = tuple(int(ax_color.lstrip('#')[i:i + 2], 16) / 255 for i in (0, 2, 4))
+            original_color = colorsys.rgb_to_hls(*next_color)
+            darker_color = colorsys.hls_to_rgb(original_color[0], 0.25 + 0.5 * time_id / n_times, original_color[2])
+            data_slice = data_slice.flatten()
+            x_data = self.axis_centroids(dims)
+            ax.plot(x_data, data_slice, label=f'{time} years', color=darker_color)
+            ax.set_xlabel(self.axis_translator[dims])
+        ax.set_ylabel(variable)
+        ax.grid()
+        return ax
+
+    def plot_1D_rigge_variable(self,
+                               variable,
+                                 times=None,
+                                 axis='x',
+                                 coordinate=0,
+                                 postprocess_dir='./postprocess',
+                                 color='b',
+                                 ) -> plt.Axes:
+
+        if times is None:
+            times = [self.time_values[0]]
+        elif times is 'all':
+            times = self.time_values
+        else:
+            times = times
+
+        df = pd.DataFrame()
+
+        for time_id, time in enumerate(times):
+            data = self.get_variable_by_time(variable, time)
+            data_slice = self.get_slice_from_coordinates(data=data,
+                                                         axis=axis,
+                                                         coordinate=coordinate
+                                                         )
+            dims = self.get_shape_dimensions(data_slice)
+            n_times = len(times)
+            # Convert hex to rgb
+            label_name = self.get_shape_dimensions(data_slice)
+            data_slice = data_slice.flatten()
+            x_data = self.axis_centroids(dims)
+            times_var = [time] * len(x_data)
+            df = pd.concat([df, pd.DataFrame({'x': x_data, 'y': data_slice, 'times': times_var})])
+
+
+        a = 2
+        sns.set_theme(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
+
+        # Initialize the FacetGrid object
+        pal = sns.cubehelix_palette(len(times), rot=-.25, light=.7)
+        g = sns.FacetGrid(df, row="times", hue="times", aspect=15, height=.5, palette=pal)
+
+        g.map(sns.lineplot, "x", 'y',
+              clip_on=False,
+            alpha=1, linewidth=1.5)
+        # Fill the space between the line and the curve
+        g.map(plt.fill_between, "x", "y", alpha=.2, clip_on=False)
+
+        # Add a horizontal line to show the maximum value
+        max_value = df['y'].max()
+        # g.map(plt.axhline, y=max_value, lw=0.5, clip_on=True, color='k')
+        def label(x, color, label):
+            ax = plt.gca()
+            ax.text(-.04, .2, label, fontweight="bold", color=color,
+                    ha="left", va="center", transform=ax.transAxes)
+
+
+        g.map(label, 'x')
+        # Set the subplots to overlap
+        g.figure.subplots_adjust(hspace=0.5)
+        # Change the x axis labels
+
+        # Remove axes details that don't play well with overlap
+        g.set_titles("")
+        g.set(yticks=[], ylabel="")
+        g.despine(bottom=True, left=True)
+        g.set_xlabels('x [m]')
+        # Set y label in the middle
+        g.fig.text(0.01, 0.5, variable, va='center', rotation='vertical')
+        # Shrink the plot to fit the legend
+        g.fig.subplots_adjust(left=0.1, bottom=0.15)
+
+
+
+
 
 
 
