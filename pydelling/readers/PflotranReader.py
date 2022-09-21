@@ -105,17 +105,51 @@ class PflotranReader(BaseReader, PflotranProcessingUtils):
         temp_keys = [key.split('_')[1] for key in self.variables if 'Total' in key]
         return temp_keys
 
-    @property
-    def x_centroid(self):
-        return pd.DataFrame(np.diff(self.coordinates['x[m]']) + self.coordinates['x[m]'][0:-1], columns=['x[m]'])
+    def get_variable_by_time_index(self, variable: str, time_index: int) -> np.ndarray:
+        """
+        Returns the results of a given variable at a given time index
+        Args:
+            variable: variable name
+            time_index: time index
 
-    @property
-    def y_centroid(self):
-        return np.diff(self.coordinates['y[m]']) + self.coordinates['y[m]'][0:-1]
+        Returns:
+            results of the variable at the given time index
+        """
+        return self.results[self.time_values[time_index]].results[variable]
 
-    @property
-    def z_centroid(self):
-        return np.diff(self.coordinates['z[m]']) + self.coordinates['z[m]'][0:-1]
+    def get_variable_by_time(self, variable: str, time: float) -> np.ndarray:
+        """
+        Returns the results of a given variable at a given time
+        Args:
+            variable: variable name
+            time: time
+
+        Returns:
+            results of the variable at the given time
+        """
+        return self.results[time].results[variable]
+
+    def get_results_by_time(self, time: float) -> dict:
+        """
+        Returns the results of a given time
+        Args:
+            time: time
+
+        Returns:
+            results of the given time
+        """
+        return self.results[time].results
+
+    def get_results_by_time_index(self, time_index: int) -> dict:
+        """
+        Returns the results of a given time index
+        Args:
+            time_index: time index
+
+        Returns:
+            results of the given time index
+        """
+        return self.results[self.time_values[time_index]].results
 
 
     def get_mineral_vf_key(self, mineral):
@@ -246,6 +280,8 @@ class PflotranReader(BaseReader, PflotranProcessingUtils):
             line_plot.set_xlabel ('X [m]')
             line_plot.set_ylabel (f'{mineral} volume fraction variation')
         plt.savefig(postprocess_dir / f'{mineral}.png')
+
+
 
 
 class PflotranResults:
