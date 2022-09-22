@@ -548,52 +548,26 @@ class DfnUpscaler:
                 #     fault_hk[elem.local_id][2, 1] += perm_tensor[1, 2]
                 #     fault_hk[elem.local_id][2, 2] += perm_tensor[2, 2]
 
-                # Sum permeability contribution from faults.
-                upscaled_hk[elem.local_id] = upscaled_hk[elem.local_id] + fault_hk[elem.local_id]
+            # Sum permeability contribution from faults.
+            upscaled_hk[elem.local_id] = upscaled_hk[elem.local_id] + fault_hk[elem.local_id]
 
         #Post-processing: Truncate values in each direction.
 
-        resulting_hkxx = [upscaled_hk[local_id][0,0] for local_id in upscaled_hk]
-        minimum_hk = np.percentile(np.array(resulting_hkxx)[~np.isnan(resulting_hkxx)], truncate_to_min_percentile)
-        maximum_hk = np.percentile(np.array(resulting_hkxx)[~np.isnan(resulting_hkxx)], truncate_to_max_percentile)
+        for i in range(0,3):
+            for j in range(0,3):
+                resulting_hk = [upscaled_hk[local_id][0,0] for local_id in upscaled_hk]
+                minimum_hk = np.percentile(np.array(resulting_hk)[~np.isnan(resulting_hk)], truncate_to_min_percentile)
+                maximum_hk = np.percentile(np.array(resulting_hk)[~np.isnan(resulting_hk)], truncate_to_max_percentile)
 
-        for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
-            if upscaled_hk[elem.local_id][0,0] == math.isnan:
-                upscaled_hk[elem.local_id][0, 0] = minimum_hk
-            elif upscaled_hk[elem.local_id][0, 0] > maximum_hk:
-                upscaled_hk[elem.local_id][0, 0] = maximum_hk
-            elif upscaled_hk[elem.local_id][0, 0] <= minimum_hk:
-                upscaled_hk[elem.local_id][0, 0] = minimum_hk
-            else:
-                continue
-
-        resulting_hkyy = [upscaled_hk[local_id][1, 1] for local_id in upscaled_hk]
-        minimum_hk = np.percentile(np.array(resulting_hkyy)[~np.isnan(resulting_hkyy)], truncate_to_min_percentile)
-        maximum_hk = np.percentile(np.array(resulting_hkyy)[~np.isnan(resulting_hkyy)], truncate_to_max_percentile)
-
-        for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
-            if upscaled_hk[elem.local_id][1, 1] == math.isnan:
-                upscaled_hk[elem.local_id][1, 1] = minimum_hk
-            elif upscaled_hk[elem.local_id][1, 1] > maximum_hk:
-                upscaled_hk[elem.local_id][1, 1] = maximum_hk
-            elif upscaled_hk[elem.local_id][1, 1] <= minimum_hk:
-                upscaled_hk[elem.local_id][1, 1] = minimum_hk
-            else:
-                continue
-
-        resulting_hkz = [upscaled_hk[local_id][2, 2] for local_id in upscaled_hk]
-        minimum_hk = np.percentile(np.array(resulting_hkz)[~np.isnan(resulting_hkz)], truncate_to_min_percentile)
-        maximum_hk = np.percentile(np.array(resulting_hkz)[~np.isnan(resulting_hkz)], truncate_to_max_percentile)
-
-        for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
-            if upscaled_hk[elem.local_id][2, 2] == math.isnan:
-                upscaled_hk[elem.local_id][2, 2] = minimum_hk
-            elif upscaled_hk[elem.local_id][2, 2] > maximum_hk:
-                upscaled_hk[elem.local_id][2, 2] = maximum_hk
-            elif upscaled_hk[elem.local_id][2, 2] <= minimum_hk:
-                upscaled_hk[elem.local_id][2, 2] = minimum_hk
-            else:
-                continue
+                for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
+                    if upscaled_hk[elem.local_id][i,j] == math.isnan:
+                        upscaled_hk[elem.local_id][i,j] = minimum_hk
+                    elif upscaled_hk[elem.local_id][i,j] > maximum_hk:
+                        upscaled_hk[elem.local_id][i,j] = maximum_hk
+                    elif upscaled_hk[elem.local_id][i,j] <= minimum_hk:
+                        upscaled_hk[elem.local_id][i,j] = minimum_hk
+                    else:
+                        continue
 
         # Export values to VTK
         vtk_kxx = np.asarray(self.mesh.elements)
