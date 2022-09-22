@@ -23,6 +23,7 @@ class Fracture(object):
                  size=None,
                  aperture=None,
                  hydraulic_aperture=None,
+                 rock_type=None,
                  aperture_constant=None,
                  transmissivity_constant=None,
                  storativity_constant=None,
@@ -57,10 +58,17 @@ class Fracture(object):
         self.size = size
         self._aperture = aperture
         self.hydraulic_aperture = hydraulic_aperture
+        self.rock_type = rock_type,
         self.intersection_dictionary = {}
         self.aperture_constant = aperture_constant
-        self.transmissivity_constant = transmissivity_constant
-        self.storativity_constant = storativity_constant
+        if transmissivity_constant is not None:
+            self.transmissivity_constant = transmissivity_constant[int(rock_type)]
+        else:
+            self.transmissivity_constant = None
+        if storativity_constant is not None:
+            self.storativity_constant = storativity_constant[int(rock_type)]
+        else:
+            self.storativity_constant = None
         self.aperture = self.compute_aperture()
         self.local_id = Fracture.local_id
         self.side_points = self.get_side_points()
@@ -382,6 +390,7 @@ class Fracture(object):
             'dip': self.dip,
             'dip_dir': self.dip_dir,
             'aperture_constant': self.aperture_constant,
+            'rock_type': self.rock_type,
             'transmissivity_constant': self.transmissivity_constant,
             'storativity_constant': self.storativity_constant,
             'normal_vector': self._unit_normal_vector.tolist() if self._unit_normal_vector is not None else None,

@@ -3,6 +3,7 @@ import pathlib
 
 import dill
 import numpy as np
+import math
 from tqdm import tqdm
 
 import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
@@ -278,25 +279,35 @@ class DfnUpscaler:
                 # Attribute of the element: portion of element occupied by fractures.
                 elem.total_fracture_volume += fracture_dict['volume']
 
-    def upscale_mesh_porosity(self, matrix_porosity=None):
+    def upscale_mesh_porosity(self, matrix_porosity=None, intensity_correction_factor=None, existing_fractures_fraction=None, truncate_to_min_percentile=5,
+                              truncate_to_max_percentile=95):
         # Compute upscaled porosity for each element.
         matrix_porosity = 0.0
         self._compute_fracture_volume_in_elements()
         upscaled_porosity = {}
         for elem in tqdm(self.mesh.elements, desc="Upscaling porosity"):
-            upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / elem.volume) + matrix_porosity * (1 - (elem.total_fracture_volume / elem.volume))
-            # if elem.total_fracture_volume > 0:
-            #     pass
-            #     #print(elem.total_fracture_volume, elem.volume, matrix_porosity[elem])
-
+            element_volume = elem.volume
+            upscaled_porosity[elem.local_id] = (elem.total_fracture_volume / element_volume) + matrix_porosity * (1 - (elem.total_fracture_volume / element_volume))
+            upscaled_porosity[elem.local_id] = np.abs(upscaled_porosity[elem.local_id]) * intensity_correction_factor * (1 / existing_fractures_fraction)
 
         for fault in self.dfn.faults:
             for element in fault.associated_elements:
                 upscaled_porosity[element.local_id] = fault.porosity
 
-        #POROSITY POST-PROCESSING
-        for elem in tqdm(self.mesh.elements, desc="Post processing upscaled porosity"):
-            upscaled_porosity[elem.local_id] = np.abs(upscaled_porosity[elem.local_id]) * (1.53) * 1 / 0.3842
+        #Post-processing: Truncate values to P5 and P95.
+        resulting_porosity = [upscaled_porosity[local_id] for local_id in upscaled_porosity]
+        minimum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)], truncate_to_min_percentile)
+        maximum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)], truncate_to_max_percentile)
+
+        for elem in tqdm(self.mesh.elements, desc="Truncating porosity values to P1 and P99"):
+            if upscaled_porosity[elem.local_id] == math.isnan :
+                upscaled_porosity[elem.local_id] = minimum_porosity
+            elif upscaled_porosity[elem.local_id] > maximum_porosity :
+                upscaled_porosity[elem.local_id] = maximum_porosity
+            elif upscaled_porosity[elem.local_id] <= minimum_porosity:
+                upscaled_porosity[elem.local_id] = minimum_porosity
+            else:
+                continue
 
         vtk_porosity = np.asarray(self.mesh.elements)
         for local_id in upscaled_porosity:
@@ -310,25 +321,42 @@ class DfnUpscaler:
 
         return upscaled_porosity
 
-    def upscale_mesh_storativity(self, matrix_storativity=None):
+    def upscale_mesh_storativity(self, matrix_storativity=None, truncate_to_min_percentile=5,truncate_to_max_percentile=95):
 
         upscaled_storativity = {}
 
         for elem in tqdm(self.mesh.elements, desc="Upscaling fractures storativity"):
             upscaled_storativity[elem.local_id] = 0.0
+            element_volume = elem.volume
+            sum_weights = 0.0
+            sum_weigted_storativity = 0.0
             for frac_name in elem.associated_fractures:
                 frac_dict = elem.associated_fractures[frac_name]
                 frac = frac_dict['fracture']
-                upscaled_storativity[elem.local_id] += self.dfn[frac].storativity
+                frac_volume_in_element = frac_dict['volume'] / element_volume
+                sum_weights += frac_volume_in_element
+                sum_weigted_storativity += self.dfn[frac].storativity * frac_volume_in_element
+                upscaled_storativity[elem.local_id] = sum_weigted_storativity/sum_weights
 
         for fault in self.dfn.faults:
             for element in fault.associated_elements:
                 upscaled_storativity[element.local_id] = fault.storativity
 
 
-        #STORATIVITY POST-PROCESSING
-        for elem in tqdm(self.mesh.elements, desc="Post processing upscaled porosity"):
-            upscaled_storativity[elem.local_id] = upscaled_storativity[elem.local_id] #* (1.53) * 0.998 / 0.187
+        #Post-processing: Truncate values to P5 and P95.
+        resulting_storativity = [upscaled_storativity[local_id] for local_id in upscaled_storativity]
+        minimum_storativity = np.percentile(np.array(resulting_storativity)[~np.isnan(resulting_storativity)], truncate_to_min_percentile)
+        maximum_storativity = np.percentile(np.array(resulting_storativity)[~np.isnan(resulting_storativity)], truncate_to_max_percentile)
+
+        for elem in tqdm(self.mesh.elements, desc="Truncating porosity values to P1 and P99"):
+            if upscaled_storativity[elem.local_id] == math.isnan:
+              upscaled_storativity[elem.local_id] = minimum_storativity
+            elif upscaled_storativity[elem.local_id] > maximum_storativity:
+                upscaled_storativity[elem.local_id] = maximum_storativity
+            elif upscaled_storativity[elem.local_id] <= minimum_storativity:
+                upscaled_storativity[elem.local_id] = minimum_storativity
+            else:
+                continue
 
         vtk_storativity = np.asarray(self.mesh.elements)
         for local_id in upscaled_storativity:
@@ -377,7 +405,9 @@ class DfnUpscaler:
                                   rho=1000,
                                   g=9.8,
                                   mu=8.9e-4,
-                                  mode='full_tensor'):
+                                  mode='full_tensor',
+                                  truncate_to_min_percentile=5,
+                                  truncate_to_max_percentile=95):
 
         matrix_permeability = {}
 
@@ -417,6 +447,8 @@ class DfnUpscaler:
         # For each fracture, compute permeability tensor,
         # and add it to the elements intersected by the fracture.
         for elem in tqdm(self.mesh.elements, desc="Upscaling fractures permeability"):
+            element_volume = elem.volume
+            element_porosity = elem.total_fracture_volume / elem.volume
             fracture_hk[elem.local_id] = np.zeros([3, 3])
             upscaled_hk[elem.local_id] = np.zeros([3, 3])
             fault_hk[elem.local_id] = np.zeros([3, 3])
@@ -430,12 +462,13 @@ class DfnUpscaler:
                 n1 = self.dfn[frac].unit_normal_vector[0]
                 n2 = self.dfn[frac].unit_normal_vector[1]
                 n3 = self.dfn[frac].unit_normal_vector[2]
-                # frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
+                #frac.hk = ((frac.aperture ** 2) * rho * g) / (12 * mu)
                 self.dfn[frac].hk = self.dfn[frac].transmissivity / self.dfn[frac].aperture
+                #self.dfn[frac].hk = (5.932E-8 * (np.log10(self.dfn[frac].size / 2.0)) ** 2) / self.dfn[frac].aperture
 
                 if mode == 'isotropy':
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                    fracture_hk[elem.local_id][0, 0] += self.dfn[frac].hk * (frac_dict['volume'] / elem.volume)  # Kxx
+                    fracture_hk[elem.local_id][0, 0] += self.dfn[frac].hk * (frac_dict['volume'] / element_volume)  # Kxx
 
                 else:  # 'anisotropy' in 'mode':
                     perm_tensor = np.zeros([3, 3])
@@ -453,20 +486,22 @@ class DfnUpscaler:
                         eigen_perm_tensor = np.diag(np.linalg.eig(perm_tensor)[0])
                         perm_tensor = eigen_perm_tensor
 
+                    frac_volume_in_element = frac_dict['volume'] / element_volume
                     # Add fracture permeability, weighted by the area that the fracture occupies in the element.
-                    fracture_hk[elem.local_id][0, 0] += (perm_tensor[0, 0] * frac_dict['volume'] / elem.volume)
-                    fracture_hk[elem.local_id][0, 1] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_hk[elem.local_id][0, 2] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_hk[elem.local_id][1, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_hk[elem.local_id][1, 1] += (perm_tensor[1, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_hk[elem.local_id][1, 2] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
-                    fracture_hk[elem.local_id][2, 0] += (perm_tensor[0, 1] * frac_dict['volume'] / elem.volume)
-                    fracture_hk[elem.local_id][2, 1] += (perm_tensor[1, 2] * frac_dict['volume'] / elem.volume)
-                    fracture_hk[elem.local_id][2, 2] += (perm_tensor[2, 2] * frac_dict['volume'] / elem.volume)
+                    fracture_hk[elem.local_id][0, 0] += (perm_tensor[0, 0] * frac_volume_in_element)
+                    fracture_hk[elem.local_id][0, 1] += (perm_tensor[0, 1] * frac_volume_in_element)
+                    fracture_hk[elem.local_id][0, 2] += (perm_tensor[0, 1] * frac_volume_in_element)
+                    fracture_hk[elem.local_id][1, 0] += (perm_tensor[0, 1] * frac_volume_in_element)
+                    fracture_hk[elem.local_id][1, 1] += (perm_tensor[1, 1] * frac_volume_in_element)
+                    fracture_hk[elem.local_id][1, 2] += (perm_tensor[1, 2] * frac_volume_in_element)
+                    fracture_hk[elem.local_id][2, 0] += (perm_tensor[0, 1] * frac_volume_in_element)
+                    fracture_hk[elem.local_id][2, 1] += (perm_tensor[1, 2] * frac_volume_in_element)
+                    fracture_hk[elem.local_id][2, 2] += (perm_tensor[2, 2] * frac_volume_in_element)
 
             # Sum permeability contribution from fractures and from matrix.
+
             upscaled_hk[elem.local_id] = fracture_hk[elem.local_id] + matrix_permeability_tensor[elem.local_id] * (
-                    1 - (elem.total_fracture_volume / elem.volume))
+                    1 - element_porosity)
 
             if len(elem.associated_faults) > 0:
                 for fault_name in elem.associated_faults:
@@ -515,6 +550,50 @@ class DfnUpscaler:
 
                 # Sum permeability contribution from faults.
                 upscaled_hk[elem.local_id] = upscaled_hk[elem.local_id] + fault_hk[elem.local_id]
+
+        #Post-processing: Truncate values in each direction.
+
+        resulting_hkxx = [upscaled_hk[local_id][0,0] for local_id in upscaled_hk]
+        minimum_hk = np.percentile(np.array(resulting_hkxx)[~np.isnan(resulting_hkxx)], truncate_to_min_percentile)
+        maximum_hk = np.percentile(np.array(resulting_hkxx)[~np.isnan(resulting_hkxx)], truncate_to_max_percentile)
+
+        for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
+            if upscaled_hk[elem.local_id][0,0] == math.isnan:
+                upscaled_hk[elem.local_id][0, 0] = minimum_hk
+            elif upscaled_hk[elem.local_id][0, 0] > maximum_hk:
+                upscaled_hk[elem.local_id][0, 0] = maximum_hk
+            elif upscaled_hk[elem.local_id][0, 0] <= minimum_hk:
+                upscaled_hk[elem.local_id][0, 0] = minimum_hk
+            else:
+                continue
+
+        resulting_hkyy = [upscaled_hk[local_id][1, 1] for local_id in upscaled_hk]
+        minimum_hk = np.percentile(np.array(resulting_hkyy)[~np.isnan(resulting_hkyy)], truncate_to_min_percentile)
+        maximum_hk = np.percentile(np.array(resulting_hkyy)[~np.isnan(resulting_hkyy)], truncate_to_max_percentile)
+
+        for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
+            if upscaled_hk[elem.local_id][1, 1] == math.isnan:
+                upscaled_hk[elem.local_id][1, 1] = minimum_hk
+            elif upscaled_hk[elem.local_id][1, 1] > maximum_hk:
+                upscaled_hk[elem.local_id][1, 1] = maximum_hk
+            elif upscaled_hk[elem.local_id][1, 1] <= minimum_hk:
+                upscaled_hk[elem.local_id][1, 1] = minimum_hk
+            else:
+                continue
+
+        resulting_hkz = [upscaled_hk[local_id][2, 2] for local_id in upscaled_hk]
+        minimum_hk = np.percentile(np.array(resulting_hkz)[~np.isnan(resulting_hkz)], truncate_to_min_percentile)
+        maximum_hk = np.percentile(np.array(resulting_hkz)[~np.isnan(resulting_hkz)], truncate_to_max_percentile)
+
+        for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
+            if upscaled_hk[elem.local_id][2, 2] == math.isnan:
+                upscaled_hk[elem.local_id][2, 2] = minimum_hk
+            elif upscaled_hk[elem.local_id][2, 2] > maximum_hk:
+                upscaled_hk[elem.local_id][2, 2] = maximum_hk
+            elif upscaled_hk[elem.local_id][2, 2] <= minimum_hk:
+                upscaled_hk[elem.local_id][2, 2] = minimum_hk
+            else:
+                continue
 
         # Export values to VTK
         vtk_kxx = np.asarray(self.mesh.elements)

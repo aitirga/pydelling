@@ -40,6 +40,7 @@ class DfnPreprocessor(object):
                        size='size',
                        aperture=None,
                        aperture_constant=None,
+                       rock_type=None,
                        transmissivity_constant=None,
                        storativity_constant=None
                        ):
@@ -61,6 +62,7 @@ class DfnPreprocessor(object):
                 size=row[size],
                 aperture_constant=aperture_constant,
                 aperture=aperture,
+                rock_type=rock_type,
                 transmissivity_constant=transmissivity_constant,
                 storativity_constant=storativity_constant
             )
@@ -71,6 +73,7 @@ class DfnPreprocessor(object):
                        hydraulic_aperture=None,
                        radii=None,
                        aperture_constant=None,
+                       rock_type=None,
                        transmissivity_constant=None,
                        storativity_constant=None):
         logger.info('Loading fractures from polygons and apertures')
@@ -81,6 +84,7 @@ class DfnPreprocessor(object):
                 hydraulic_aperture=hydraulic_aperture[idx] if hydraulic_aperture is not None else None,
                 size=radii[idx] * 2 if radii is not None else None,
                 aperture_constant=aperture_constant,
+                rock_type=rock_type[idx],
                 transmissivity_constant=transmissivity_constant,
                 storativity_constant=storativity_constant,
             )
@@ -96,6 +100,7 @@ class DfnPreprocessor(object):
                      aperture=None,
                      hydraulic_aperture=None,
                      aperture_constant=1E-3,
+                     rock_type=None,
                      transmissivity_constant=None,
                      storativity_constant=None,
                      polygon=None,
@@ -112,6 +117,7 @@ class DfnPreprocessor(object):
             aperture=aperture,
             hydraulic_aperture=hydraulic_aperture,
             aperture_constant=aperture_constant,
+            rock_type=rock_type,
             transmissivity_constant=transmissivity_constant,
             storativity_constant=storativity_constant,
             polygon=polygon,

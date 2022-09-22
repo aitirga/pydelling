@@ -18,6 +18,9 @@ class UpscalingCase(unittest.TestCase):
         self.dfn_preprocessor[0].aperture = 0.01
         self.dfn_preprocessor[1].aperture = 0.01
 
+        self.dfn_preprocessor[0].hydraulic_aperture = 0.01
+        self.dfn_preprocessor[1].hydraulic_aperture = 0.01
+
         self.dfn_preprocessor.to_obj('fracture.obj')
         self.mesh_preprocessor = MeshPreprocessor()
         self.mesh_preprocessor.add_hexahedra(
@@ -41,13 +44,18 @@ class UpscalingCase(unittest.TestCase):
         )
 
     def test_porosity_and_permeability(self):
-        porosity = self.dfn_upscaler.upscale_mesh_porosity()
-        porosity_solution = 0.04977876106194691
+        porosity = self.dfn_upscaler.upscale_mesh_porosity(intensity_correction_factor=1.53,
+                                                           existing_fractures_fraction=0.385,
+                                                           truncate_to_min_percentile=0,
+                                                           truncate_to_max_percentile=100)
+
+        porosity_solution = 0.049675324675324685
         self.assertAlmostEqual(porosity[0], porosity_solution)
         # Upscale permeability
-        permeability = self.dfn_upscaler.upscale_mesh_permeability()
+        permeability = self.dfn_upscaler.upscale_mesh_permeability(truncate_to_min_percentile=0,
+                                                                   truncate_to_max_percentile=100)
         # #self.assertEqual(porosity, porosity_solution)
-        permeability_solution = np.array([[114.70037453,0,0],[0,114.70037453,0],[0,0,0]])
+        permeability_solution = np.array([[1.1470037453,0,0],[0,1.1470037453,0],[0,0,0]])
         nptest.assert_array_almost_equal(permeability[0], permeability_solution)
 
     # def test_save_load_upscaler(self):
