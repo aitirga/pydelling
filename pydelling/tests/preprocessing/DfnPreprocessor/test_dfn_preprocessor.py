@@ -1,6 +1,7 @@
 import unittest
 from pydelling.preprocessing import DfnPreprocessor
 from pydelling.utils import test_data_path
+from pydelling.config import config
 
 
 class DfnPreprocessorCase(unittest.TestCase):
@@ -20,6 +21,18 @@ class DfnPreprocessorCase(unittest.TestCase):
         dfn_one = DfnPreprocessor()
         dfn_one.add_fracture(
             x=0, y=0, z=0, dip=0, dip_dir=0, aperture=0.1, size=1.2
+        )
+        dfn_one.to_json('test.json')
+        dfn_one_loaded = DfnPreprocessor.from_json('test.json')
+        self.assertEqual(len(dfn_one_loaded.dfn), 1)
+        self.assertEqual(dfn_one_loaded.dfn[0].x_centroid, 0)
+        self.assertEqual(dfn_one_loaded.dfn[0].aperture, 0.1)
+        self.assertEqual(dfn_one_loaded.dfn[0].size, 1.2)
+
+    def test_dfn_save_load_with_storativity(self):
+        dfn_one = DfnPreprocessor()
+        dfn_one.add_fracture(
+            x=0, y=0, z=0, dip=0, dip_dir=0, aperture=0.1, size=1.2, rock_type=0, transmissivity_constant=config.upscaling.transmissivity_constant,
         )
         dfn_one.to_json('test.json')
         dfn_one_loaded = DfnPreprocessor.from_json('test.json')

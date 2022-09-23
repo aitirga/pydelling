@@ -1,0 +1,4 @@
+upscaling:
+  transmissivity_constant:
+    0: 1E-5
+    1: 1E-6

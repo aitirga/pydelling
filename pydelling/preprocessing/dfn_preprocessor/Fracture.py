@@ -58,7 +58,7 @@ class Fracture(object):
         self.size = size
         self._aperture = aperture
         self.hydraulic_aperture = hydraulic_aperture
-        self.rock_type = rock_type,
+        self.rock_type = rock_type
         self.intersection_dictionary = {}
         self.aperture_constant = aperture_constant
         if transmissivity_constant is not None:
@@ -388,6 +388,8 @@ class Fracture(object):
             return 0.0
 
     def get_json(self):
+        print(self.rock_type)
+        print(type(self.rock_type))
         cur_dict = {
             'x': self.x_centroid,
             'y': self.y_centroid,
