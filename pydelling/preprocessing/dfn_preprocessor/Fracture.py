@@ -63,14 +63,20 @@ class Fracture(object):
         self.aperture_constant = aperture_constant
         if transmissivity_constant is not None:
             if rock_type is not None:
-                self.transmissivity_constant = transmissivity_constant[int(rock_type)]
+                if isinstance(transmissivity_constant, dict):
+                    self.transmissivity_constant = transmissivity_constant[int(rock_type)]
+                else:
+                    self.transmissivity_constant = transmissivity_constant
             else:
                 self.transmissivity_constant = transmissivity_constant
         else:
             self.transmissivity_constant = None
         if storativity_constant is not None:
             if rock_type is not None:
-                self.storativity_constant = storativity_constant[int(rock_type)]
+                if isinstance(storativity_constant, dict):
+                    self.storativity_constant = storativity_constant[int(rock_type)]
+                else:
+                    self.storativity_constant = storativity_constant
             else:
                 self.storativity_constant = storativity_constant
         else:
