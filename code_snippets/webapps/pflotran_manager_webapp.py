@@ -89,10 +89,8 @@ class PflotranManagerWebapp(WebAppRunner):
         st.success('You have been logged out, please login again')
         # Delete the cookie
         self.get_manager().delete(self.get_from_session_state('cur_cookie'))
-        self.save_in_session_state('is_login', False)
         self.save_in_session_state('hard_logout', True)
-
-
+        self.save_in_session_state('is_login', False)
 
     def main(self):
         st.title('PFLOTRAN Simulation Manager')

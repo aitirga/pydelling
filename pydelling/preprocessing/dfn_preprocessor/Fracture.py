@@ -66,11 +66,15 @@ class Fracture(object):
                 self.transmissivity_constant = transmissivity_constant[int(rock_type)]
             else:
                 self.transmissivity_constant = transmissivity_constant
+        else:
+            self.transmissivity_constant = None
         if storativity_constant is not None:
             if rock_type is not None:
                 self.storativity_constant = storativity_constant[int(rock_type)]
             else:
                 self.storativity_constant = storativity_constant
+        else:
+            self.storativity_constant = None
 
         self.aperture = self.compute_aperture()
         self.local_id = Fracture.local_id
@@ -399,6 +403,7 @@ class Fracture(object):
             'normal_vector': self._unit_normal_vector.tolist() if self._unit_normal_vector is not None else None,
             'polygon': [point.tolist() for point in self.polygon_points] if self.polygon_points is not None else None,
         }
+
         return cur_dict
 
 
