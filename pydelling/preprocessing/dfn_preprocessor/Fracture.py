@@ -62,13 +62,16 @@ class Fracture(object):
         self.intersection_dictionary = {}
         self.aperture_constant = aperture_constant
         if transmissivity_constant is not None:
-            self.transmissivity_constant = transmissivity_constant[int(rock_type)]
-        else:
-            self.transmissivity_constant = None
+            if rock_type is not None:
+                self.transmissivity_constant = transmissivity_constant[int(rock_type)]
+            else:
+                self.transmissivity_constant = transmissivity_constant
         if storativity_constant is not None:
-            self.storativity_constant = storativity_constant[int(rock_type)]
-        else:
-            self.storativity_constant = None
+            if rock_type is not None:
+                self.storativity_constant = storativity_constant[int(rock_type)]
+            else:
+                self.storativity_constant = storativity_constant
+
         self.aperture = self.compute_aperture()
         self.local_id = Fracture.local_id
         self.side_points = self.get_side_points()
