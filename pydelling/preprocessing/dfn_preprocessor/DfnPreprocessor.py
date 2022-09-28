@@ -39,6 +39,7 @@ class DfnPreprocessor(object):
                        z='position-z',
                        size='size',
                        aperture=None,
+                       hydraulic_aperture=None,
                        aperture_constant=None,
                        rock_type=None,
                        transmissivity_constant=None,
@@ -62,6 +63,7 @@ class DfnPreprocessor(object):
                 size=row[size],
                 aperture_constant=aperture_constant,
                 aperture=aperture,
+                hydraulic_aperture=hydraulic_aperture,
                 rock_type=rock_type,
                 transmissivity_constant=transmissivity_constant,
                 storativity_constant=storativity_constant
@@ -84,7 +86,7 @@ class DfnPreprocessor(object):
                 hydraulic_aperture=hydraulic_aperture[idx] if hydraulic_aperture is not None else None,
                 size=radii[idx] * 2 if radii is not None else None,
                 aperture_constant=aperture_constant,
-                rock_type=rock_type[idx],
+                rock_type=rock_type[idx] if rock_type is not None else None,
                 transmissivity_constant=transmissivity_constant,
                 storativity_constant=storativity_constant,
             )
