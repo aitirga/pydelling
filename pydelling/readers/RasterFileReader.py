@@ -206,48 +206,37 @@ class RasterFileReader(BaseReader):
     #     self.info["nrows"] = self.info["nrows"] * -1
     #     RasterFileReader.rebuild_x_y(self)
 
-    def get_plot_image(self, ax=None, **kwargs):
+    def get_plot_image(self, ax=None,
+                       fig=None,
+                       colorbar=True,
+                       colorbar_label=None,
+                       **kwargs):
         import matplotlib.pyplot as plt
         if ax is None:
             fig, ax = plt.subplots()
         ax.imshow(self.data, **kwargs)
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        return ax
-
-    def plot(self, colorbar = True):
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
-        self.get_plot_image(ax=ax)
-        # Add the colorbar
         if colorbar:
-            fig.colorbar(ax.get_images()[0])
-
-        plt.show()
-
-    def save_plot(self, output_file, **kwargs):
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
-        self.get_plot_image(ax=ax)
-        plt.savefig(output_file, **kwargs)
-
-    def get_plot_contour(self, ax=None, **kwargs):
-        import matplotlib.pyplot as plt
-        if ax is None:
-            fig, ax = plt.subplots()
-        ax.contour(self.data, **kwargs)
-        ax.set_xlabel("x")
-        ax.set_ylabel("y")
+            fig.colorbar(ax.get_images()[0], label=colorbar_label)
         return ax
 
-    def plot_contour(self):
+    def plot(self, colorbar=True, colorbar_label=None, **kwargs):
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots()
-        self.get_plot_contour(ax=ax)
+        self.get_plot_image(ax=ax,
+                            fig=fig,
+                            colorbar=colorbar,
+                            colorbar_label=colorbar_label,
+                            **kwargs)
         plt.show()
 
-    def save_plot_contour(self, output_file, **kwargs):
+    def save_plot(self, output_file, colorbar=None, colorbar_label=None,**kwargs):
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots()
-        self.get_plot_contour(ax=ax)
-        plt.savefig(output_file, **kwargs)
+        self.get_plot_image(ax=ax,
+                            fig=fig,
+                            colorbar=colorbar,
+                            colorbar_label=colorbar_label,
+                            **kwargs)
+        plt.savefig(output_file)

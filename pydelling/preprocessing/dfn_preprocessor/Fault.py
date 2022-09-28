@@ -105,6 +105,10 @@ class Fault:
         }
         return save_dict
 
+    @property
+    def area(self):
+        return self.trimesh_mesh.area
+
     def __str__(self):
         return f"Fault {self.local_id}"
 
