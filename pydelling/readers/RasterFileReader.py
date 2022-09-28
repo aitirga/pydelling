@@ -26,8 +26,14 @@ class RasterFileReader(BaseReader):
         logger.info(f"Reading ASC raster file from {opened_file}")
 
     def read_header(self, opened_file, n_header=6):
-        for i in range(0, n_header):
+        flag_stop = False
+        while not flag_stop:
+            current_position = opened_file.tell()
             line = opened_file.readline().split()
+            if len(line) != 2:
+                opened_file.seek(current_position)
+                flag_stop = True
+
             self.info["reader"][line[0]] = float(line[1])
         if 'cellsize' in self.info["reader"].keys():
             self.info["reader"]["dx"] = self.info["reader"]["cellsize"]
@@ -199,3 +205,49 @@ class RasterFileReader(BaseReader):
     #     self.info["yllcorner"] = self.info["yllcorner"] + self.info["cellsize"] * self.info["nrows"]
     #     self.info["nrows"] = self.info["nrows"] * -1
     #     RasterFileReader.rebuild_x_y(self)
+
+    def get_plot_image(self, ax=None, **kwargs):
+        import matplotlib.pyplot as plt
+        if ax is None:
+            fig, ax = plt.subplots()
+        ax.imshow(self.data, **kwargs)
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        return ax
+
+    def plot(self, colorbar = True):
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        self.get_plot_image(ax=ax)
+        # Add the colorbar
+        if colorbar:
+            fig.colorbar(ax.get_images()[0])
+
+        plt.show()
+
+    def save_plot(self, output_file, **kwargs):
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        self.get_plot_image(ax=ax)
+        plt.savefig(output_file, **kwargs)
+
+    def get_plot_contour(self, ax=None, **kwargs):
+        import matplotlib.pyplot as plt
+        if ax is None:
+            fig, ax = plt.subplots()
+        ax.contour(self.data, **kwargs)
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        return ax
+
+    def plot_contour(self):
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        self.get_plot_contour(ax=ax)
+        plt.show()
+
+    def save_plot_contour(self, output_file, **kwargs):
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        self.get_plot_contour(ax=ax)
+        plt.savefig(output_file, **kwargs)
