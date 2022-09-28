@@ -240,3 +240,13 @@ class RasterFileReader(BaseReader):
                             colorbar_label=colorbar_label,
                             **kwargs)
         plt.savefig(output_file)
+
+    # Add difference of two raster files
+    def __sub__(self, other):
+        if isinstance(other, RasterFileReader):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster.data = self.data - other.data
+            new_raster.info = self.info
+            return new_raster
+        else:
+            raise ValueError("The other object is not a RasterFileReader")

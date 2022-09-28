@@ -15,13 +15,18 @@ class BaseReader:
     data: np.ndarray  # Hint of self.data array
     info: dict
 
-    def __init__(self, filename=None, header=False, **kwargs):
+    def __init__(self, filename=None,
+                 header=False,
+                 read_data=True,
+                 **kwargs,
+                 ):
         self.filename = Path(filename)
         self.info = {"reader": {}}
         self.data = None
         self.header = header
         self.__dict__.update(kwargs)
-        self.open_file(filename, **kwargs)
+        if read_data:
+            self.open_file(filename, **kwargs)
 
     def read_file(self, opened_file):
         """
@@ -102,3 +107,7 @@ class BaseReader:
                                     }
                                    )
         return tang_sol_pd
+
+    @property
+    def values(self):
+        return self.get_data()
