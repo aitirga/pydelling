@@ -11,6 +11,11 @@ class RasterFileReader(BaseReader):
     """
     Class that contains functions to read a rasterized file in .asc format
     """
+    def __init__(self, filename=None,
+                 header=False,
+                 read_data=True,
+                 **kwargs,):
+        super().__init__(filename=filename, header=header, read_data=read_data, **kwargs)
 
     def open_file(self, filename, n_header=6):
         with open(filename, 'r') as opened_file:
@@ -73,7 +78,7 @@ class RasterFileReader(BaseReader):
         self.z_coord = z_coord
 
     def get_data(self) -> np.ndarray:
-        self.rebuild_x_y()
+        # self.rebuild_x_y()
         if hasattr(self, "z_coord"):
             return self.get_xyz_data()
         else:
@@ -243,12 +248,20 @@ class RasterFileReader(BaseReader):
         plt.savefig(output_file)
 
     @property
-    def nx(self):
-        return self.info['reader']["ncols"]
+    def nx(self) -> int:
+        return int(self.info['reader']["ncols"])
 
     @property
-    def ny(self):
-        return self.info['reader']["nrows"]
+    def ny(self) -> int:
+        return int(self.info['reader']["nrows"])
+
+    @property
+    def nrows(self) -> int:
+        return int(self.info['reader']["nrows"])
+
+    @property
+    def ncols(self) -> int:
+        return int(self.info['reader']["ncols"])
 
     @property
     def dx(self):
@@ -268,13 +281,16 @@ class RasterFileReader(BaseReader):
     def __sub__(self, other):
         if isinstance(other, RasterFileReader):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data - other.data
-            new_raster.info = self.info
             return new_raster
         elif isinstance(other, (int, float)):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data - other
-            new_raster.info = self.info
+
             return new_raster
         else:
             raise ValueError("The other object is not a RasterFileReader or a number")
@@ -283,13 +299,17 @@ class RasterFileReader(BaseReader):
     def __add__(self, other):
         if isinstance(other, RasterFileReader):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data + other.data
-            new_raster.info = self.info
+
             return new_raster
         elif isinstance(other, (int, float)):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data + other
-            new_raster.info = self.info
+
             return new_raster
         else:
             raise ValueError("The other object is not a RasterFileReader or a number")
@@ -297,14 +317,17 @@ class RasterFileReader(BaseReader):
     def __mul__(self, other):
         if isinstance(other, (int, float)):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data * other
-            new_raster.info = self.info
             return new_raster
 
         elif isinstance(other, RasterFileReader):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data * other.data
-            new_raster.info = self.info
+
             return new_raster
 
         else:
@@ -313,14 +336,17 @@ class RasterFileReader(BaseReader):
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data / other
-            new_raster.info = self.info
             return new_raster
 
         elif isinstance(other, RasterFileReader):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data / other.data
-            new_raster.info = self.info
+
             return new_raster
 
         else:
@@ -329,14 +355,18 @@ class RasterFileReader(BaseReader):
     def __pow__(self, other):
         if isinstance(other, (int, float)):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
             new_raster.data = self.data ** other
-            new_raster.info = self.info
             return new_raster
 
         elif isinstance(other, RasterFileReader):
             new_raster = RasterFileReader(filename=self.filename, read_data=False)
-            new_raster.data = self.data ** other.data
             new_raster.info = self.info
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data ** other.data
+
             return new_raster
 
         else:
