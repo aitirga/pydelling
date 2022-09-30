@@ -11,6 +11,11 @@ class RasterFileReader(BaseReader):
     """
     Class that contains functions to read a rasterized file in .asc format
     """
+    def __init__(self, filename=None,
+                 header=False,
+                 read_data=True,
+                 **kwargs,):
+        super().__init__(filename=filename, header=header, read_data=read_data, **kwargs)
 
     def open_file(self, filename, n_header=6):
         with open(filename, 'r') as opened_file:
@@ -26,8 +31,14 @@ class RasterFileReader(BaseReader):
         logger.info(f"Reading ASC raster file from {opened_file}")
 
     def read_header(self, opened_file, n_header=6):
-        for i in range(0, n_header):
+        flag_stop = False
+        while not flag_stop:
+            current_position = opened_file.tell()
             line = opened_file.readline().split()
+            if len(line) != 2:
+                opened_file.seek(current_position)
+                flag_stop = True
+
             self.info["reader"][line[0]] = float(line[1])
         if 'cellsize' in self.info["reader"].keys():
             self.info["reader"]["dx"] = self.info["reader"]["cellsize"]
@@ -67,16 +78,17 @@ class RasterFileReader(BaseReader):
         self.z_coord = z_coord
 
     def get_data(self) -> np.ndarray:
+        # self.rebuild_x_y()
         if hasattr(self, "z_coord"):
             return self.get_xyz_data()
         else:
             return self.get_xy_data()
 
     def rebuild_x_y(self):
-        x_range = np.arange(self.info["reader"]["xllcorner"], self.info["reader"]["nrows"] * self.info["reader"]["cellsize"],
-                            self.info["reader"]["cellsize"])
-        y_range = np.arange(self.info["reader"]["yllcorner"], self.info["reader"]["ncols"] * self.info["reader"]["cellsize"],
-                            self.info["reader"]["cellsize"])
+        x_range = np.arange(self.info["reader"]["xllcorner"], self.info["reader"]["nrows"] * self.info["reader"]["dx"],
+                            self.info["reader"]["dx"])
+        y_range = np.arange(self.info["reader"]["yllcorner"], self.info["reader"]["ncols"] * self.info["reader"]["dy"],
+                            self.info["reader"]["dy"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
 
     def get_xy_data(self) -> np.ndarray:
@@ -199,3 +211,170 @@ class RasterFileReader(BaseReader):
     #     self.info["yllcorner"] = self.info["yllcorner"] + self.info["cellsize"] * self.info["nrows"]
     #     self.info["nrows"] = self.info["nrows"] * -1
     #     RasterFileReader.rebuild_x_y(self)
+
+    def get_plot_image(self, ax=None,
+                       fig=None,
+                       colorbar=True,
+                       colorbar_label=None,
+                       **kwargs):
+        import matplotlib.pyplot as plt
+        if ax is None:
+            fig, ax = plt.subplots()
+        ax.imshow(self.data, **kwargs)
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        if colorbar:
+            fig.colorbar(ax.get_images()[0], label=colorbar_label)
+        return ax
+
+    def plot(self, colorbar=True, colorbar_label=None, **kwargs):
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        self.get_plot_image(ax=ax,
+                            fig=fig,
+                            colorbar=colorbar,
+                            colorbar_label=colorbar_label,
+                            **kwargs)
+        plt.show()
+
+    def save_plot(self, output_file, colorbar=None, colorbar_label=None,**kwargs):
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        self.get_plot_image(ax=ax,
+                            fig=fig,
+                            colorbar=colorbar,
+                            colorbar_label=colorbar_label,
+                            **kwargs)
+        plt.savefig(output_file)
+
+    @property
+    def nx(self) -> int:
+        return int(self.info['reader']["ncols"])
+
+    @property
+    def ny(self) -> int:
+        return int(self.info['reader']["nrows"])
+
+    @property
+    def nrows(self) -> int:
+        return int(self.info['reader']["nrows"])
+
+    @property
+    def ncols(self) -> int:
+        return int(self.info['reader']["ncols"])
+
+    @property
+    def dx(self):
+        if 'dx' in self.info:
+            return self.info['reader']['dx']
+        else:
+            return self.info['reader']["cellsize"]
+
+    @property
+    def dy(self):
+        if 'dy' in self.info:
+            return self.info['reader']['dy']
+        else:
+            return self.info['reader']["cellsize"]
+
+    # Add difference of two raster files
+    def __sub__(self, other):
+        if isinstance(other, RasterFileReader):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data - other.data
+            return new_raster
+        elif isinstance(other, (int, float)):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data - other
+
+            return new_raster
+        else:
+            raise ValueError("The other object is not a RasterFileReader or a number")
+
+    # Add sum of two raster files
+    def __add__(self, other):
+        if isinstance(other, RasterFileReader):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data + other.data
+
+            return new_raster
+        elif isinstance(other, (int, float)):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data + other
+
+            return new_raster
+        else:
+            raise ValueError("The other object is not a RasterFileReader or a number")
+
+    def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data * other
+            return new_raster
+
+        elif isinstance(other, RasterFileReader):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data * other.data
+
+            return new_raster
+
+        else:
+            raise ValueError("The other object is not a RasterFileReader or a number")
+
+    def __truediv__(self, other):
+        if isinstance(other, (int, float)):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data / other
+            return new_raster
+
+        elif isinstance(other, RasterFileReader):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data / other.data
+
+            return new_raster
+
+        else:
+            raise ValueError("The other object is not a RasterFileReader or a number")
+
+    def __pow__(self, other):
+        if isinstance(other, (int, float)):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data ** other
+            return new_raster
+
+        elif isinstance(other, RasterFileReader):
+            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster.info = self.info
+            for key in self.__dict__.keys():
+                new_raster.__dict__[key] = self.__dict__[key]
+            new_raster.data = self.data ** other.data
+
+            return new_raster
+
+        else:
+            raise ValueError("The other object is not a RasterFileReader or a number")
+
+
+
+
+
+
+
