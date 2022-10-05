@@ -23,7 +23,7 @@ class iGPReader(BaseReader):
     """
     element_dict = {"4": "T", "5": "P", "6": "W", "8": "H"}
 
-    def __init__(self, path, project_name, build_mesh=False, output_folder=None, write_materials=True):
+    def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder=None, write_materials=True):
         logger.info("Initializing iGP Reader module")
         from pydelling.readers.iGPReader.io import AscReader, BoreholeReader, CsvWriter, PflotranExplicitWriter, PflotranImplicitWriter
         self.ExplicitWriter = PflotranExplicitWriter
