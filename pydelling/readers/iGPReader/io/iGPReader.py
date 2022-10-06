@@ -799,6 +799,20 @@ class iGPReader(BaseReader):
         '''Returns the maximum z coordinate of the nodes of the mesh'''
         return max(self.nodes[:, 2])
 
+    def __repr__(self):
+        import rich
+        from rich.markdown import Markdown
+        text = Markdown(f"""
+         iGP mesh with {self.n_mesh_elements} elements and {self.n_mesh_nodes} nodes.
+         Boundary names: {list(self.region_dict.keys())}
+         Material names: {list(self.material_dict.keys())}
+         """)
+        rich.print(text)
+        return ''
+
+    def __str__(self):
+        return self.__repr__()
+
 
 def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_size, centroids):
     amount_read = 0.0
