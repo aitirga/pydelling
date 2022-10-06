@@ -52,6 +52,7 @@ loggers = [handler for handler in logging.root.handlers if isinstance(handler, l
 strange_logger = loggers[-1]
 strange_logger.setLevel(logging.ERROR)
 
+# Capture warnings
 logging.captureWarnings(True)
 logging.getLogger("py.warnings").setLevel(logging.ERROR)
 
