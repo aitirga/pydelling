@@ -6,6 +6,8 @@ from pathlib import Path
 import yaml
 from box import Box
 
+import logging
+
 
 def get_root_path() -> Path:
     """Returns path to the root of the project"""
@@ -55,3 +57,8 @@ def create_output_folder():
     output_folder = Path('./output')
     output_folder.mkdir(parents=True, exist_ok=True)
     return output_folder
+
+def delete_last_logger():
+    loggers = [handler for handler in logging.root.handlers if isinstance(handler, logging.StreamHandler)]
+    strange_logger = loggers[-1]
+    strange_logger.setLevel(logging.ERROR)
