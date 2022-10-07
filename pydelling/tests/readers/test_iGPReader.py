@@ -80,5 +80,10 @@ class iGPReaderCase(unittest.TestCase):
         region_nodes = self.igp_reader.get_region_nodes('Pwall')
         self.assertEqual(region_nodes.shape, (82, 3))
 
+    def test_region_elements(self):
+        self.igp_reader.build_mesh_data()
+        top_elements = self.igp_reader.elements
+        print(top_elements[0])
+
 if __name__ == '__main__':
     unittest.main()

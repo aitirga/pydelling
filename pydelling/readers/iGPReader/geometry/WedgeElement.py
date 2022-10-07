@@ -10,6 +10,7 @@ class WedgeElement(BaseElement):
         self.define_faces()  # Define faces of the element
         # self.centroid = self.compute_centroid()
         # self.centroid_coords = self.centroid
+        self.type = 'Wedge'
 
         if centroid_coords is None:
             self.centroid = self.compute_centroid()

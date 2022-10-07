@@ -621,7 +621,7 @@ class iGPReader(BaseReader):
                 #     amount = id_local / int(self.mesh_info["n_elements"])
                 #     logger.info(f"Building internal mesh {amount * 100:3.0f} %")
                 #     amount_read += 0.01
-
+            print(temp)
             self.elements = temp
             self.is_mesh_built = True
         else:
@@ -741,6 +741,13 @@ class iGPReader(BaseReader):
         cur_array = cur_array.flatten()
         cur_array = np.unique(cur_array)
         return self.nodes[cur_array]
+
+    def get_region_elements(self, region_name):
+        assert self.is_mesh_built, "Mesh has to be built before calling this method"
+        return self.elements[self.region_dict[region_name]['elements'] - 1]
+
+    def get_material_elements(self, material_name):
+        return self.material_dict[material_name]
 
     def get_material_centroids(self, material_name):
         return self.centroids[self.material_dict[material_name] - 1]
