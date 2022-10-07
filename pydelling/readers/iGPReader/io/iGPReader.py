@@ -24,7 +24,7 @@ class iGPReader(BaseReader):
     """
     element_dict = {"4": "T", "5": "P", "6": "W", "8": "H"}
 
-    def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder=None, write_materials=True):
+    def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder='./results', write_materials=True):
         logger.info("Initializing iGP Reader module")
         from pydelling.readers.iGPReader.io import AscReader, BoreholeReader, CsvWriter, PflotranExplicitWriter, PflotranImplicitWriter
         self.ExplicitWriter = PflotranExplicitWriter
@@ -99,9 +99,9 @@ class iGPReader(BaseReader):
         logger.info(f"Mesh data has been read from {self.path / 'data.mesh'}")
 
     def initialize_info_dicts(self):
-        self.material_names = {}
+        self._material_names = {}
         for material_id, material in enumerate(self.material_dict):
-            self.material_names[material_id] = material
+            self._material_names[material_id] = material
         self.material_info = {}
         for material in self.material_dict:
             self.material_info[material] = {}
@@ -185,6 +185,7 @@ class iGPReader(BaseReader):
         logger.info("Converting PFLOTRAN implicit mesh to explicit format")
         self.find_connectivities()  # Find the connections of the mesh
         # Write mesh file
+        logger.info(f'Writing mesh file to {self.output_folder}')
         exp_mesh_filename = f"{self.project_name}.mesh"
         if self.output_folder is None:
             output_file = open(exp_mesh_filename, "w")
@@ -732,7 +733,7 @@ class iGPReader(BaseReader):
                 print(f"{step * '  '}{property} = {self.material_info[material][property]}")
 
 
-    def get_region(self, region_name):
+    def get_region_centroids(self, region_name):
         return self.centroids[self.region_dict[region_name]['centroid_id'] - 1]
 
     def get_region_nodes(self, region_name):
@@ -740,6 +741,9 @@ class iGPReader(BaseReader):
         cur_array = cur_array.flatten()
         cur_array = np.unique(cur_array)
         return self.nodes[cur_array]
+
+    def get_material_centroids(self, material_name):
+        return self.centroids[self.material_dict[material_name] - 1]
 
     @property
     def min_x(self):
@@ -801,6 +805,17 @@ class iGPReader(BaseReader):
         '''Returns the maximum z coordinate of the nodes of the mesh'''
         return max(self.nodes[:, 2])
 
+    @property
+    def region_names(self):
+        '''Returns the names of the regions'''
+        return list(self.region_dict.keys())
+
+    @property
+    def material_names(self):
+        '''Returns the names of the materials'''
+        return list(self.material_dict.keys())
+
+
     def __repr__(self):
         import rich
         from rich.markdown import Markdown
@@ -849,6 +864,8 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
             amount = id_local / int(len(elements))
             logger.info(f"Process {chunk_index} completed amount: {amount * 100:3.0f} %")
             amount_read += 0.1
+
+
 
 
 
