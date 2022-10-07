@@ -12,6 +12,7 @@ from pydelling.config import config
 from pydelling.readers.iGPReader.geometry import *
 from pydelling.readers.iGPReader.io import BaseReader
 from pydelling.readers.iGPReader.utils import get_output_path
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -179,7 +180,8 @@ class iGPReader(BaseReader):
         Function that transforms an implicit mesh into an explicit mesh
         :param dump_mesh_info: set it True in order to write the primal mesh into the same unstructured explicit mesh
         """
-        assert self.is_mesh_built, "Mesh is read but not built"
+        if not self.is_mesh_built:
+            self.build_mesh_data()
         logger.info("Converting PFLOTRAN implicit mesh to explicit format")
         self.find_connectivities()  # Find the connections of the mesh
         # Write mesh file
@@ -588,7 +590,7 @@ class iGPReader(BaseReader):
             logger.info("Building implicit mesh structure")
             temp = []
             amount_read = 0.0
-            for id_local, element in enumerate(self.elements):
+            for id_local, element in tqdm(enumerate(self.elements), total=len(self.elements), desc='Building mesh'):
                 n_type = len(element)
                 if n_type == 4:  # This is a Wedge object
                     temp.append(TetrahedraElement(node_ids=element,
@@ -614,10 +616,10 @@ class iGPReader(BaseReader):
                                                  centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                                  # centroid_coords=self.centroids[id_local]
                                                  ))
-                if id_local / int(self.mesh_info["n_elements"]) >= amount_read:
-                    amount = id_local / int(self.mesh_info["n_elements"])
-                    logger.info(f"Building internal mesh {amount * 100:3.0f} %")
-                    amount_read += 0.01
+                # if id_local / int(self.mesh_info["n_elements"]) >= amount_read:
+                #     amount = id_local / int(self.mesh_info["n_elements"])
+                #     logger.info(f"Building internal mesh {amount * 100:3.0f} %")
+                #     amount_read += 0.01
 
             self.elements = temp
             self.is_mesh_built = True
