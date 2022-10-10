@@ -57,12 +57,12 @@ logging.captureWarnings(True)
 logging.getLogger("py.warnings").setLevel(logging.ERROR)
 
 # Add welcome message, get the version from the setup.py file
-with open(Path(__file__).parent.parent.parent / "setup.py", "r") as setup_file:
-    setup_file = setup_file.read()
-    version = setup_file.split("version=")[1].split(",")[0].strip().strip("'")
-    logging.info(f"-----------------------------------")
-    logging.info(f"Welcome to Pydelling v{version}")
-    logging.info(f"-----------------------------------")
+# with open(Path(__file__).parent.parent.parent / "setup.py", "r") as setup_file:
+#     setup_file = setup_file.read()
+#     version = setup_file.split("version=")[1].split(",")[0].strip().strip("'")
+logging.info(f"-----------------------------------")
+logging.info(f"Welcome to Pydelling")
+logging.info(f"-----------------------------------")
 
 
 
