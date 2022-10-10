@@ -26,3 +26,4 @@ vtk~=9.1.0
 paramiko
 extra-streamlit-components
 numpy-stl
+rich

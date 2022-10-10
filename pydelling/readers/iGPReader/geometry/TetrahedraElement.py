@@ -8,6 +8,7 @@ class TetrahedraElement(BaseElement):
     def __init__(self, node_ids, node_coords, element_type_n, local_id, centroid_coords=None):
         super().__init__(node_ids, node_coords, element_type_n, local_id, centroid_coords)
         self.define_faces()  # Define faces of the element
+        self.type = 'Tetrahedra'
         # self.centroid = self.compute_centroid()
         # self.centroid_coords = self.centroid
 

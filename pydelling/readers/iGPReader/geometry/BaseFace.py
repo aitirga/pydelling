@@ -8,6 +8,7 @@ class BaseFace:
         self.n_coords = len(coords)
         self.area = self.compute_area()
         self.centroid = self.compute_centroid()
+        self.type = "BaseFace"
         # print(f"old centroid: {self.compute_centroid_mean()}, new centroid: {self.centroid}")
         # print(f"Area: {self.area}")
         # if len(self.node_ids) == 3:

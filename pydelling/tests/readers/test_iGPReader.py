@@ -67,6 +67,23 @@ class iGPReaderCase(unittest.TestCase):
         self.assertEqual(max_z, explicit_max_z)
         self.assertEqual(max_nodes_z, explicit_max_z_nodes)
 
+    def test_properties(self):
+        region_names = self.igp_reader.region_names
+        self.assertEqual(region_names, ['Pwall'])
+        material_names = self.igp_reader.material_names
+        self.assertEqual(material_names, [])
+
+        # Get Pwall region centroids
+        region_centroids = self.igp_reader.get_region_centroids('Pwall')
+        self.assertEqual(region_centroids.shape, (130, 3))
+        # Get Pwall region nodes
+        region_nodes = self.igp_reader.get_region_nodes('Pwall')
+        self.assertEqual(region_nodes.shape, (82, 3))
+
+    def test_region_elements(self):
+        self.igp_reader.build_mesh_data()
+        top_elements = self.igp_reader.elements
+        print(top_elements[0])
 
 if __name__ == '__main__':
     unittest.main()

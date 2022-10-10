@@ -12,6 +12,7 @@ from pydelling.config import config
 from pydelling.readers.iGPReader.geometry import *
 from pydelling.readers.iGPReader.io import BaseReader
 from pydelling.readers.iGPReader.utils import get_output_path
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class iGPReader(BaseReader):
     """
     element_dict = {"4": "T", "5": "P", "6": "W", "8": "H"}
 
-    def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder=None, write_materials=True):
+    def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder='./results', write_materials=True):
         logger.info("Initializing iGP Reader module")
         from pydelling.readers.iGPReader.io import AscReader, BoreholeReader, CsvWriter, PflotranExplicitWriter, PflotranImplicitWriter
         self.ExplicitWriter = PflotranExplicitWriter
@@ -98,9 +99,9 @@ class iGPReader(BaseReader):
         logger.info(f"Mesh data has been read from {self.path / 'data.mesh'}")
 
     def initialize_info_dicts(self):
-        self.material_names = {}
+        self._material_names = {}
         for material_id, material in enumerate(self.material_dict):
-            self.material_names[material_id] = material
+            self._material_names[material_id] = material
         self.material_info = {}
         for material in self.material_dict:
             self.material_info[material] = {}
@@ -179,10 +180,12 @@ class iGPReader(BaseReader):
         Function that transforms an implicit mesh into an explicit mesh
         :param dump_mesh_info: set it True in order to write the primal mesh into the same unstructured explicit mesh
         """
-        assert self.is_mesh_built, "Mesh is read but not built"
+        if not self.is_mesh_built:
+            self.build_mesh_data()
         logger.info("Converting PFLOTRAN implicit mesh to explicit format")
         self.find_connectivities()  # Find the connections of the mesh
         # Write mesh file
+        logger.info(f'Writing mesh file to {self.output_folder}')
         exp_mesh_filename = f"{self.project_name}.mesh"
         if self.output_folder is None:
             output_file = open(exp_mesh_filename, "w")
@@ -588,7 +591,7 @@ class iGPReader(BaseReader):
             logger.info("Building implicit mesh structure")
             temp = []
             amount_read = 0.0
-            for id_local, element in enumerate(self.elements):
+            for id_local, element in tqdm(enumerate(self.elements), total=len(self.elements), desc='Building mesh'):
                 n_type = len(element)
                 if n_type == 4:  # This is a Wedge object
                     temp.append(TetrahedraElement(node_ids=element,
@@ -614,11 +617,11 @@ class iGPReader(BaseReader):
                                                  centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                                  # centroid_coords=self.centroids[id_local]
                                                  ))
-                if id_local / int(self.mesh_info["n_elements"]) >= amount_read:
-                    amount = id_local / int(self.mesh_info["n_elements"])
-                    logger.info(f"Building internal mesh {amount * 100:3.0f} %")
-                    amount_read += 0.01
-
+                # if id_local / int(self.mesh_info["n_elements"]) >= amount_read:
+                #     amount = id_local / int(self.mesh_info["n_elements"])
+                #     logger.info(f"Building internal mesh {amount * 100:3.0f} %")
+                #     amount_read += 0.01
+            print(temp)
             self.elements = temp
             self.is_mesh_built = True
         else:
@@ -730,7 +733,7 @@ class iGPReader(BaseReader):
                 print(f"{step * '  '}{property} = {self.material_info[material][property]}")
 
 
-    def get_region(self, region_name):
+    def get_region_centroids(self, region_name):
         return self.centroids[self.region_dict[region_name]['centroid_id'] - 1]
 
     def get_region_nodes(self, region_name):
@@ -738,6 +741,16 @@ class iGPReader(BaseReader):
         cur_array = cur_array.flatten()
         cur_array = np.unique(cur_array)
         return self.nodes[cur_array]
+
+    def get_region_elements(self, region_name):
+        assert self.is_mesh_built, "Mesh has to be built before calling this method"
+        return self.elements[self.region_dict[region_name]['elements'] - 1]
+
+    def get_material_elements(self, material_name):
+        return self.material_dict[material_name]
+
+    def get_material_centroids(self, material_name):
+        return self.centroids[self.material_dict[material_name] - 1]
 
     @property
     def min_x(self):
@@ -799,6 +812,31 @@ class iGPReader(BaseReader):
         '''Returns the maximum z coordinate of the nodes of the mesh'''
         return max(self.nodes[:, 2])
 
+    @property
+    def region_names(self):
+        '''Returns the names of the regions'''
+        return list(self.region_dict.keys())
+
+    @property
+    def material_names(self):
+        '''Returns the names of the materials'''
+        return list(self.material_dict.keys())
+
+
+    def __repr__(self):
+        import rich
+        from rich.markdown import Markdown
+        text = Markdown(f"""
+         iGP mesh with {self.n_mesh_elements} elements and {self.n_mesh_nodes} nodes.
+         Boundary names: {list(self.region_dict.keys())}
+         Material names: {list(self.material_dict.keys())}
+         """)
+        rich.print(text)
+        return ''
+
+    def __str__(self):
+        return self.__repr__()
+
 
 def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_size, centroids):
     amount_read = 0.0
@@ -833,6 +871,8 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
             amount = id_local / int(len(elements))
             logger.info(f"Process {chunk_index} completed amount: {amount * 100:3.0f} %")
             amount_read += 0.1
+
+
 
 
 
