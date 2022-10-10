@@ -47,7 +47,8 @@ setup(
         'pyyaml',
         'pandas',
         'seaborn',
-        'h5py'
+        'h5py',
+        'mpmath'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
