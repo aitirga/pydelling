@@ -290,6 +290,36 @@ class IntersectionCase(unittest.TestCase):
         intersections = mesh.elements[0].intersect_with_fracture(dfn_preprocessor[0])
         self.assertEqual(len(intersections), 4)
 
+    def test_prism_intersection(self):
+        dfn_preprocessor = DfnPreprocessor()
+        dfn_preprocessor.add_fracture(
+            x=0.0, y=0.0, z=0.0, dip=1, dip_dir=0, size=2.0
+        )
+        mesh_preprocessor = MeshPreprocessor()
+        mesh_preprocessor.add_wedge(
+            node_ids=np.array([0, 1, 2, 3, 4, 5]),
+            node_coords=[
+                np.array([-0.5, -0.5, -0.5]),
+                np.array([0.5, -0.5, -0.5]),
+                np.array([0.5, 0.5, -0.5]),
+                np.array([-0.5, -0.5, 0.5]),
+                np.array([0.5, -0.5, 0.5]),
+                np.array([0.5, 0.5, 0.5]),
+            ],
+        )
+
+        intersections = mesh_preprocessor.elements[0].intersect_with_fracture(
+            dfn_preprocessor[0])
+        solution = np.array([
+            np.array([-0.5, -0.5, 0.00872753]),
+            np.array([0.5, -0.5, 0.00872753]),
+            np.array([0.5, 0.5, -0.00872753]),
+        ])
+        # Sort intersections to make them comparable
+        intersections = np.sort(intersections, axis=0)
+        solution = np.sort(solution, axis=0)
+
+        nptest.assert_array_almost_equal(intersections, solution)
 
 
 
