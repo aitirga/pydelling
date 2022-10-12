@@ -597,7 +597,6 @@ class iGPReader(BaseReader):
                 if n_type == 4:  # This is a Wedge object
                     temp.append(TetrahedraElement(node_ids=element,
                                                   node_coords=self.nodes[element],
-                                                  element_type_n=n_type,
                                                   local_id=id_local,
                                                   centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                                   # centroid_coords=self.centroids[id_local]
@@ -605,7 +604,6 @@ class iGPReader(BaseReader):
                 if n_type == 6:  # This is a Wedge object
                     temp.append(WedgeElement(node_ids=element,
                                              node_coords=self.nodes[element],
-                                             element_type_n=n_type,
                                              local_id=id_local,
                                              centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                              # centroid_coords=self.centroids[id_local]
@@ -613,12 +611,10 @@ class iGPReader(BaseReader):
                 if n_type == 8:  # This is a Hexahedra object
                     temp.append(HexahedraElement(node_ids=element,
                                                  node_coords=self.nodes[element],
-                                                 element_type_n=n_type,
                                                  local_id=id_local,
                                                  centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                                  # centroid_coords=self.centroids[id_local]
                                                  ))
-            print(temp)
             self.elements = temp
             self.is_mesh_built = True
         else:
@@ -845,7 +841,6 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
         if n_type == 4:  # This is a Tetrahedra object
             shared_list.append(TetrahedraElement(node_ids=element,
                                                  node_coords=nodes[element],
-                                                 element_type_n=n_type,
                                                  local_id=id_local_chunk,
                                                  centroid_coords=centroids[id_local_chunk] if config.general.constant_centroids else None,
                                                  # centroid_coords=self.centroids[id_local]
@@ -853,7 +848,6 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
         if n_type == 6:  # This is a Wedge object
             shared_list.append(WedgeElement(node_ids=element,
                                             node_coords=nodes[element],
-                                            element_type_n=n_type,
                                             local_id=id_local_chunk,
                                             centroid_coords=centroids[id_local_chunk] if config.general.constant_centroids else None,
                                             # centroid_coords=self.centroids[id_local]
@@ -861,7 +855,6 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
         if n_type == 8:  # This is a Hexahedra object
             shared_list.append(HexahedraElement(node_ids=element,
                                                 node_coords=nodes[element],
-                                                element_type_n=n_type,
                                                 local_id=id_local_chunk,
                                                 centroid_coords=centroids[id_local_chunk] if config.general.constant_centroids else None,
                                                 # centroid_coords=self.centroids[id_local]
