@@ -9,7 +9,8 @@ import numpy as np
 import pandas as pd
 
 from pydelling.config import config
-from pydelling.readers.iGPReader.geometry import *
+# from pydelling.readers.iGPReader.geometry import *
+from pydelling.preprocessing.mesh_preprocessor.geometry import *
 from pydelling.readers.iGPReader.io import BaseReader
 from pydelling.readers.iGPReader.utils import get_output_path
 from tqdm import tqdm
@@ -580,14 +581,14 @@ class iGPReader(BaseReader):
     def chunks(l, n):
         return [l[i:i + n] for i in range(0, len(l), n)]
 
-    def build_mesh_data(self):
+    def build_mesh_data(self, processes=1):
         """
         Creates an internal representation of the mesh based on a given unstructured implicit grid.
         :return:
         """
         if config.general.constant_centroids:
             logger.info('The location of the centroids will not be changed after refining the boundaries')
-        if not config.general.multiprocessing:
+        if processes == 1:
             logger.info("Building implicit mesh structure")
             temp = []
             amount_read = 0.0
@@ -617,31 +618,27 @@ class iGPReader(BaseReader):
                                                  centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                                  # centroid_coords=self.centroids[id_local]
                                                  ))
-                # if id_local / int(self.mesh_info["n_elements"]) >= amount_read:
-                #     amount = id_local / int(self.mesh_info["n_elements"])
-                #     logger.info(f"Building internal mesh {amount * 100:3.0f} %")
-                #     amount_read += 0.01
             print(temp)
             self.elements = temp
             self.is_mesh_built = True
         else:
-            logger.info("Building internal mesh using multiprocessing")
+            logger.info(f"Building internal mesh using multiprocessing with {processes} processes")
             from multiprocessing import Process, Manager
             import multiprocessing as mp
             with Manager() as manager:
                 shared_list = manager.list()
-                processes = []
+                processes_list = []
                 total_number_of_elements = len(self.elements)
-                number_of_processes = config.general.num_of_processes if config.general.num_of_processes else mp.cpu_count() - 1
+                number_of_processes = processes if processes is not None else mp.cpu_count() - 1
                 chunk_size = int(total_number_of_elements / number_of_processes)
                 chunks = self.chunks(self.elements, chunk_size)
                 for i, chunk in enumerate(chunks):
                     p = Process(target=parallel_build_mesh_data, args=(chunk, self.nodes, shared_list, i, chunk_size, self.centroids))
-                    processes.append(p)
-                for id, process in enumerate(processes):
+                    processes_list.append(p)
+                for id, process in enumerate(processes_list):
                     process.start()
                     logger.info(f"Process {id} has been started")
-                for id, process in enumerate(processes):
+                for id, process in enumerate(processes_list):
                     process.join()
                     logger.info(f"Process {id} has finished")
                 self.elements = list(shared_list)
@@ -744,13 +741,15 @@ class iGPReader(BaseReader):
 
     def get_region_elements(self, region_name):
         assert self.is_mesh_built, "Mesh has to be built before calling this method"
-        return self.elements[self.region_dict[region_name]['elements'] - 1]
+        print(self.region_dict[region_name]['elements'])
+        print(self.region_dict[region_name]['centroid_id'])
+        return self.elements[self.region_dict[region_name]['elements']]
 
     def get_material_elements(self, material_name):
         return self.material_dict[material_name]
 
     def get_material_centroids(self, material_name):
-        return self.centroids[self.material_dict[material_name] - 1]
+        return self.centroids[self.material_dict[material_name]]
 
     @property
     def min_x(self):
