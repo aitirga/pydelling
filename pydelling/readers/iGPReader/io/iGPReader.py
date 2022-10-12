@@ -26,6 +26,9 @@ class iGPReader(BaseReader):
     element_dict = {"4": "T", "5": "P", "6": "W", "8": "H"}
 
     def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder='./results', write_materials=True):
+        self.elements = None
+        self.regions = {}
+        self.element_nodes = None
         logger.info("Initializing iGP Reader module")
         from pydelling.readers.iGPReader.io import AscReader, BoreholeReader, CsvWriter, PflotranExplicitWriter, PflotranImplicitWriter
         self.ExplicitWriter = PflotranExplicitWriter
@@ -86,8 +89,8 @@ class iGPReader(BaseReader):
             mesh_line = self.mesh_data.readline().split()
             _elements.append([int(element) - 1 for element in mesh_line[1:]])
         # self.elements = np.array(_elements, dtype=np.int32) - 1  # To local ordering
-        self.elements = _elements
-        assert len(self.elements) == self.mesh_info["n_elements"], "Element number is incorrect"
+        self.element_nodes = _elements
+        assert len(self.element_nodes) == self.mesh_info["n_elements"], "Element number is incorrect"
         # Read node data
         _nodes = []
         for line in range(self.mesh_info["n_nodes"]):
@@ -108,7 +111,7 @@ class iGPReader(BaseReader):
             self.material_info[material] = {}
 
     def read_centroid_data(self):
-        self.centroids = np.zeros(shape=(len(self.elements), 3))
+        self.centroids = np.zeros(shape=(len(self.element_nodes), 3))
         for _ in range(self.mesh_info["n_elements"]):
             mesh_line = self.centroid_data.readline().split()
             self.centroids[int(mesh_line[-1]) - 1] = np.array(mesh_line[0:3], dtype=np.float32)
@@ -335,7 +338,7 @@ class iGPReader(BaseReader):
             else:
                 file = open(os.path.join(self.output_folder, filename), "w")
             file.write(f"{self.mesh_info['n_elements']} {self.mesh_info['n_nodes']}\n")
-            for element in self.elements:  # Element data
+            for element in self.element_nodes:  # Element data
                 file.write(f"{config.globals.element_dict[len(element)]} {' '.join(map(str, element + 1))}\n")
             for id, node in enumerate(self.nodes_output):  # Node coordinates data
                 file.write(f"{node[0]} {node[1]} {self.nodes[id][2]:5.5f}\n")
@@ -592,7 +595,7 @@ class iGPReader(BaseReader):
             logger.info("Building implicit mesh structure")
             temp = []
             amount_read = 0.0
-            for id_local, element in tqdm(enumerate(self.elements), total=len(self.elements), desc='Building mesh'):
+            for id_local, element in tqdm(enumerate(self.element_nodes), total=len(self.element_nodes), desc='Building mesh'):
                 n_type = len(element)
                 if n_type == 4:  # This is a Wedge object
                     temp.append(TetrahedraElement(node_ids=element,
@@ -616,6 +619,7 @@ class iGPReader(BaseReader):
                                                  # centroid_coords=self.centroids[id_local]
                                                  ))
             self.elements = temp
+
             self.is_mesh_built = True
         else:
             logger.info(f"Building internal mesh using multiprocessing with {processes} processes")
@@ -624,10 +628,10 @@ class iGPReader(BaseReader):
             with Manager() as manager:
                 shared_list = manager.list()
                 processes_list = []
-                total_number_of_elements = len(self.elements)
+                total_number_of_elements = len(self.element_nodes)
                 number_of_processes = processes if processes is not None else mp.cpu_count() - 1
                 chunk_size = int(total_number_of_elements / number_of_processes)
-                chunks = self.chunks(self.elements, chunk_size)
+                chunks = self.chunks(self.element_nodes, chunk_size)
                 for i, chunk in enumerate(chunks):
                     p = Process(target=parallel_build_mesh_data, args=(chunk, self.nodes, shared_list, i, chunk_size, self.centroids))
                     processes_list.append(p)
