@@ -27,7 +27,7 @@ class iGPReader(BaseReader):
 
     def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder='./results', write_materials=True):
         self.elements = None
-        self.regions = {}
+        self.boundaries = {}
         self.element_nodes = None
         logger.info("Initializing iGP Reader module")
         from pydelling.readers.iGPReader.io import AscReader, BoreholeReader, CsvWriter, PflotranExplicitWriter, PflotranImplicitWriter
@@ -584,7 +584,9 @@ class iGPReader(BaseReader):
     def chunks(l, n):
         return [l[i:i + n] for i in range(0, len(l), n)]
 
-    def build_mesh_data(self, processes=1):
+    def build_mesh_data(self, processes=1,
+                        generate_boundaries=True,
+                        ):
         """
         Creates an internal representation of the mesh based on a given unstructured implicit grid.
         :return:
@@ -619,7 +621,25 @@ class iGPReader(BaseReader):
                                                  # centroid_coords=self.centroids[id_local]
                                                  ))
             self.elements = temp
-
+            # Generate boundary information
+            if generate_boundaries:
+                for boundary in tqdm(self.region_dict, desc='Generating boundary mesh'):
+                    temp_boundary = []
+                    for element in self.region_dict[boundary]['elements']:
+                        n_type = len(element)
+                        if n_type == 4:
+                            temp_boundary.append(QuadrilateralFace(
+                                node_ids=element,
+                                node_coords=self.nodes[element],
+                            )
+                            )
+                        if n_type == 3:
+                            temp_boundary.append(TriangleFace(
+                                node_ids=element,
+                                node_coords=self.nodes[element],
+                            )
+                            )
+                    self.boundaries[boundary] = temp_boundary
             self.is_mesh_built = True
         else:
             logger.info(f"Building internal mesh using multiprocessing with {processes} processes")
