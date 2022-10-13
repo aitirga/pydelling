@@ -205,6 +205,7 @@ class iGPReader(BaseReader):
         self.ExplicitWriter.write_condition_data(self)
         if self.is_write_materials:
             self.ExplicitWriter.write_materials(self)
+        self.write_hdf5_domain()
 
     def write_explicit_mesh_in_csv(self):
         """
@@ -879,6 +880,7 @@ class iGPReader(BaseReader):
         name_below = name_below if name_below != 'below' else f"{region_name}_below"
         name_above = name_above if name_above != 'above' else f"{region_name}_above"
 
+
         new_boundaries = {name_below: [],
                           name_above: []}
 
@@ -897,7 +899,7 @@ class iGPReader(BaseReader):
         get_old_region = self.region_dict[region_name]
         # Divide the region elements based on the found idx
         self.region_dict[name_below] = {'elements': get_old_region['elements'][new_boundaries[name_below]],
-                                        'centroid_id': get_old_region['centroid_id'][new_boundaries[name_below]],
+                                        'centroid_id': get_old_region['centroid_id'][new_boundaries[name_below] ],
                                         'length': len(new_boundaries[name_below])}
         self.region_dict[name_above] = {'elements': get_old_region['elements'][new_boundaries[name_above]],
                                         'centroid_id': get_old_region['centroid_id'][new_boundaries[name_above]],

@@ -12,7 +12,7 @@ def main():
     # First, build a mathematical structure of the mesh
     read_iGP.build_mesh_data()
     read_iGP.implicit_to_explicit()
-    read_iGP.write_hdf5_domain()
+    # read_iGP.write_hdf5_domain()
 
 
 if __name__ == "__main__":
