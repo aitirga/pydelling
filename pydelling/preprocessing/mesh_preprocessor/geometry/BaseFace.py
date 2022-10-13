@@ -4,11 +4,15 @@ from .BaseAbstractMeshObject import BaseAbstractMeshObject
 
 
 class BaseFace(BaseAbstractMeshObject):
+    local_id = 0
     __slots__ = ['node_ids', 'node_coords']
     def __init__(self, node_ids, node_coords):
         self.nodes = np.array(node_ids)
         self.coords = np.array(node_coords)
         self.n_coords = len(node_coords)
+        self.type = 'BaseFace'
+        # self.local_id = BaseFace.local_id
+        # BaseFace.local_id += 1
 
     @property
     def area(self):
@@ -97,3 +101,6 @@ class BaseFace(BaseAbstractMeshObject):
     def plane(self):
         '''Returns the plane of the face'''
         return Plane(self.centroid, normal=self.unit_normal_vector)
+
+    def __repr__(self):
+        return f"{self.type}"
