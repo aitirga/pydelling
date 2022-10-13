@@ -6,4 +6,3 @@ from .CsvWriter import CsvWriter
 from .BoreholeReader import BoreholeReader
 from .PflotranExplicitWriter import PflotranExplicitWriter
 from .PflotranImplicitWriter import PflotranImplicitWriter
-
