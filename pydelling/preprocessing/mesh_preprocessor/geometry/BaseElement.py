@@ -81,7 +81,7 @@ class BaseElement(BaseAbstractMeshObject):
         return intersected_points
 
 
-    def intersect_with_fracture(self, fracture: Fracture, export_all_points=False):
+    def intersect_with_fracture(self, fracture: Fracture, export_all_points=True):
         """Intersects an element with a fracture"""
         intersected_lines = []
         intersected_points = []
@@ -127,6 +127,7 @@ class BaseElement(BaseAbstractMeshObject):
             with open('intersected_points_all.csv', 'w') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerows(intersected_points)
+            self.to_obj('element.obj')
         # Check if the intersected points are inside the element
         intersected_inside_points = []
         for point in intersected_points:
