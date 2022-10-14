@@ -183,12 +183,14 @@ class BaseElement(BaseAbstractMeshObject):
 
     def contains(self, point: np.ndarray or Point, sign=1.0) -> bool:
         """Checks if a point is inside the element"""
+        # self.plot_normal_vectors()
         for face in self.faces:
             face_centroid = self.faces[face].centroid
             vec = point - face_centroid
             norm_vec = vec / np.linalg.norm(vec)
             dot_plane_point = np.dot(self.faces[face].unit_normal_vector, norm_vec)
             if dot_plane_point > self.eps * sign:
+                self.plot_normal_vectors(point=point, value=dot_plane_point, error_face=face_centroid)
                 return False
         return True
 
@@ -298,3 +300,32 @@ class BaseElement(BaseAbstractMeshObject):
         :return: centroid of the polyhedron
         """
         return np.mean(self.coords, axis=0)
+
+    def plot_normal_vectors(self, point: Point=None, value=None, error_face=None):
+        """Plots the normal vectors of the faces"""
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        for face in self.faces:
+            face_centroid = self.faces[face].centroid
+            ax.quiver(face_centroid[0], face_centroid[1], face_centroid[2], self.faces[face].unit_normal_vector[0],
+                      self.faces[face].unit_normal_vector[1], self.faces[face].unit_normal_vector[2], length=0.1,
+                      normalize=True)
+        # Add transparent faces
+        for face in self.faces:
+            face_coords = self.faces[face].coords
+            face_coords = np.array(face_coords)
+            ax.add_collection3d(
+                Poly3DCollection([face_coords], facecolors='b', alpha=0.1, linewidths=1, edgecolors='k'))
+
+
+        if point is not None:
+            ax.scatter(point[0], point[1], point[2], color='r')
+
+        if value is not None:
+            ax.text(point[0], point[1], point[2], value)
+
+        if error_face is not None:
+            ax.scatter(error_face[0], error_face[1], error_face[2], color='g')
+        plt.show()
