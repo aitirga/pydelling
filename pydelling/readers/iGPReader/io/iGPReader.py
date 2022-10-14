@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 from collections import OrderedDict
@@ -9,15 +11,16 @@ import numpy as np
 import pandas as pd
 
 from pydelling.config import config
-from pydelling.readers.iGPReader.geometry import *
+# from pydelling.readers.iGPReader.geometry import *
+from pydelling.preprocessing.mesh_preprocessor.geometry import *
 from pydelling.readers.iGPReader.io import BaseReader
-from pydelling.readers.iGPReader.utils import get_output_path
+from pydelling.readers.iGPReader.utils import get_output_path, RegionOperations
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
 
-class iGPReader(BaseReader):
+class iGPReader(BaseReader, RegionOperations):
     """
     This class reads the mesh and region information of an iGP project folder. It also builds an internal representation
     of the mesh, and controls all the pre-processing functions related to the mesh.
@@ -25,6 +28,9 @@ class iGPReader(BaseReader):
     element_dict = {"4": "T", "5": "P", "6": "W", "8": "H"}
 
     def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder='./results', write_materials=True):
+        self.elements = None
+        self.boundaries = {}
+        self.element_nodes = None
         logger.info("Initializing iGP Reader module")
         from pydelling.readers.iGPReader.io import AscReader, BoreholeReader, CsvWriter, PflotranExplicitWriter, PflotranImplicitWriter
         self.ExplicitWriter = PflotranExplicitWriter
@@ -85,8 +91,8 @@ class iGPReader(BaseReader):
             mesh_line = self.mesh_data.readline().split()
             _elements.append([int(element) - 1 for element in mesh_line[1:]])
         # self.elements = np.array(_elements, dtype=np.int32) - 1  # To local ordering
-        self.elements = _elements
-        assert len(self.elements) == self.mesh_info["n_elements"], "Element number is incorrect"
+        self.element_nodes = _elements
+        assert len(self.element_nodes) == self.mesh_info["n_elements"], "Element number is incorrect"
         # Read node data
         _nodes = []
         for line in range(self.mesh_info["n_nodes"]):
@@ -107,7 +113,7 @@ class iGPReader(BaseReader):
             self.material_info[material] = {}
 
     def read_centroid_data(self):
-        self.centroids = np.zeros(shape=(len(self.elements), 3))
+        self.centroids = np.zeros(shape=(len(self.element_nodes), 3))
         for _ in range(self.mesh_info["n_elements"]):
             mesh_line = self.centroid_data.readline().split()
             self.centroids[int(mesh_line[-1]) - 1] = np.array(mesh_line[0:3], dtype=np.float32)
@@ -201,6 +207,7 @@ class iGPReader(BaseReader):
         self.ExplicitWriter.write_condition_data(self)
         if self.is_write_materials:
             self.ExplicitWriter.write_materials(self)
+        self.write_hdf5_domain()
 
     def write_explicit_mesh_in_csv(self):
         """
@@ -334,7 +341,7 @@ class iGPReader(BaseReader):
             else:
                 file = open(os.path.join(self.output_folder, filename), "w")
             file.write(f"{self.mesh_info['n_elements']} {self.mesh_info['n_nodes']}\n")
-            for element in self.elements:  # Element data
+            for element in self.element_nodes:  # Element data
                 file.write(f"{config.globals.element_dict[len(element)]} {' '.join(map(str, element + 1))}\n")
             for id, node in enumerate(self.nodes_output):  # Node coordinates data
                 file.write(f"{node[0]} {node[1]} {self.nodes[id][2]:5.5f}\n")
@@ -580,23 +587,24 @@ class iGPReader(BaseReader):
     def chunks(l, n):
         return [l[i:i + n] for i in range(0, len(l), n)]
 
-    def build_mesh_data(self):
+    def build_mesh_data(self, processes=1,
+                        generate_boundaries=True,
+                        ):
         """
         Creates an internal representation of the mesh based on a given unstructured implicit grid.
         :return:
         """
         if config.general.constant_centroids:
             logger.info('The location of the centroids will not be changed after refining the boundaries')
-        if not config.general.multiprocessing:
+        if processes == 1:
             logger.info("Building implicit mesh structure")
             temp = []
             amount_read = 0.0
-            for id_local, element in tqdm(enumerate(self.elements), total=len(self.elements), desc='Building mesh'):
+            for id_local, element in tqdm(enumerate(self.element_nodes), total=len(self.element_nodes), desc='Building mesh'):
                 n_type = len(element)
                 if n_type == 4:  # This is a Wedge object
                     temp.append(TetrahedraElement(node_ids=element,
                                                   node_coords=self.nodes[element],
-                                                  element_type_n=n_type,
                                                   local_id=id_local,
                                                   centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                                   # centroid_coords=self.centroids[id_local]
@@ -604,7 +612,6 @@ class iGPReader(BaseReader):
                 if n_type == 6:  # This is a Wedge object
                     temp.append(WedgeElement(node_ids=element,
                                              node_coords=self.nodes[element],
-                                             element_type_n=n_type,
                                              local_id=id_local,
                                              centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                              # centroid_coords=self.centroids[id_local]
@@ -612,36 +619,49 @@ class iGPReader(BaseReader):
                 if n_type == 8:  # This is a Hexahedra object
                     temp.append(HexahedraElement(node_ids=element,
                                                  node_coords=self.nodes[element],
-                                                 element_type_n=n_type,
                                                  local_id=id_local,
                                                  centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                                  # centroid_coords=self.centroids[id_local]
                                                  ))
-                # if id_local / int(self.mesh_info["n_elements"]) >= amount_read:
-                #     amount = id_local / int(self.mesh_info["n_elements"])
-                #     logger.info(f"Building internal mesh {amount * 100:3.0f} %")
-                #     amount_read += 0.01
-            print(temp)
             self.elements = temp
+            # Generate boundary information
+            if generate_boundaries:
+                for boundary in tqdm(self.region_dict, desc='Generating boundary mesh'):
+                    temp_boundary = []
+                    for element in self.region_dict[boundary]['elements']:
+                        n_type = len(element)
+                        if n_type == 4:
+                            temp_boundary.append(QuadrilateralFace(
+                                node_ids=element,
+                                node_coords=self.nodes[element],
+                            )
+                            )
+                        if n_type == 3:
+                            temp_boundary.append(TriangleFace(
+                                node_ids=element,
+                                node_coords=self.nodes[element],
+                            )
+                            )
+                    self.boundaries[boundary] = temp_boundary
             self.is_mesh_built = True
         else:
-            logger.info("Building internal mesh using multiprocessing")
+            logger.info(f"Building internal mesh using multiprocessing with {processes} processes")
             from multiprocessing import Process, Manager
             import multiprocessing as mp
             with Manager() as manager:
                 shared_list = manager.list()
-                processes = []
-                total_number_of_elements = len(self.elements)
-                number_of_processes = config.general.num_of_processes if config.general.num_of_processes else mp.cpu_count() - 1
+                processes_list = []
+                total_number_of_elements = len(self.element_nodes)
+                number_of_processes = processes if processes is not None else mp.cpu_count() - 1
                 chunk_size = int(total_number_of_elements / number_of_processes)
-                chunks = self.chunks(self.elements, chunk_size)
+                chunks = self.chunks(self.element_nodes, chunk_size)
                 for i, chunk in enumerate(chunks):
                     p = Process(target=parallel_build_mesh_data, args=(chunk, self.nodes, shared_list, i, chunk_size, self.centroids))
-                    processes.append(p)
-                for id, process in enumerate(processes):
+                    processes_list.append(p)
+                for id, process in enumerate(processes_list):
                     process.start()
                     logger.info(f"Process {id} has been started")
-                for id, process in enumerate(processes):
+                for id, process in enumerate(processes_list):
                     process.join()
                     logger.info(f"Process {id} has finished")
                 self.elements = list(shared_list)
@@ -732,7 +752,6 @@ class iGPReader(BaseReader):
                 step = 1
                 print(f"{step * '  '}{property} = {self.material_info[material][property]}")
 
-
     def get_region_centroids(self, region_name):
         return self.centroids[self.region_dict[region_name]['centroid_id'] - 1]
 
@@ -742,15 +761,16 @@ class iGPReader(BaseReader):
         cur_array = np.unique(cur_array)
         return self.nodes[cur_array]
 
-    def get_region_elements(self, region_name):
+    def get_boundary_faces(self, region_name) -> List[BaseFace]:
         assert self.is_mesh_built, "Mesh has to be built before calling this method"
-        return self.elements[self.region_dict[region_name]['elements'] - 1]
+        return self.boundaries[region_name]
 
-    def get_material_elements(self, material_name):
+    def get_material_elements(self, material_name) -> List[BaseElement]:
+        assert self.is_mesh_built, "Mesh has to be built before calling this method"
         return self.material_dict[material_name]
 
     def get_material_centroids(self, material_name):
-        return self.centroids[self.material_dict[material_name] - 1]
+        return self.centroids[self.material_dict[material_name]]
 
     @property
     def min_x(self):
@@ -818,9 +838,15 @@ class iGPReader(BaseReader):
         return list(self.region_dict.keys())
 
     @property
+    def boundary_names(self):
+        '''Returns the names of the boundaries'''
+        return list(self.region_dict.keys())
+
+    @property
     def material_names(self):
         '''Returns the names of the materials'''
         return list(self.material_dict.keys())
+
 
 
     def __repr__(self):
@@ -846,7 +872,6 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
         if n_type == 4:  # This is a Tetrahedra object
             shared_list.append(TetrahedraElement(node_ids=element,
                                                  node_coords=nodes[element],
-                                                 element_type_n=n_type,
                                                  local_id=id_local_chunk,
                                                  centroid_coords=centroids[id_local_chunk] if config.general.constant_centroids else None,
                                                  # centroid_coords=self.centroids[id_local]
@@ -854,7 +879,6 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
         if n_type == 6:  # This is a Wedge object
             shared_list.append(WedgeElement(node_ids=element,
                                             node_coords=nodes[element],
-                                            element_type_n=n_type,
                                             local_id=id_local_chunk,
                                             centroid_coords=centroids[id_local_chunk] if config.general.constant_centroids else None,
                                             # centroid_coords=self.centroids[id_local]
@@ -862,7 +886,6 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
         if n_type == 8:  # This is a Hexahedra object
             shared_list.append(HexahedraElement(node_ids=element,
                                                 node_coords=nodes[element],
-                                                element_type_n=n_type,
                                                 local_id=id_local_chunk,
                                                 centroid_coords=centroids[id_local_chunk] if config.general.constant_centroids else None,
                                                 # centroid_coords=self.centroids[id_local]
@@ -871,6 +894,7 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
             amount = id_local / int(len(elements))
             logger.info(f"Process {chunk_index} completed amount: {amount * 100:3.0f} %")
             amount_read += 0.1
+
 
 
 

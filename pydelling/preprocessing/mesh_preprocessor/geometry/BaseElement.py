@@ -17,12 +17,18 @@ class BaseElement(BaseAbstractMeshObject):
     _edge_lines = None
     __slots__ = ['node_ids', 'node_coords']
 
-    def __init__(self, node_ids, node_coords, centroid_coords=None):
+    def __init__(self, node_ids, node_coords, centroid_coords=None, local_id=None):
         self.nodes: np.ndarray = np.array(node_ids)  # Node id set
         self.coords: np.ndarray = np.array(node_coords)  # Coordinates of each node
-        self.centroid_coords = centroid_coords
-        self.local_id = BaseElement.local_id # Element id
-        BaseElement.local_id += 1
+        if centroid_coords is None:
+            self.centroid = self.compute_centroid()
+            self.centroid_coords = self.centroid
+        else:
+            self.centroid = np.array(centroid_coords)
+            self.centroid_coords = self.centroid
+        self.local_id = local_id if local_id is not None else BaseElement.local_id
+        if local_id is not None:
+            BaseElement.local_id += 1
         self.faces: Dict[str, BaseFace] = {}  # Faces of an element
         self.type = None
         self.meshio_type = None
@@ -284,3 +290,11 @@ class BaseElement(BaseAbstractMeshObject):
                 for local_id in local_ids:
                     f.write(f'{local_id + 1} ')
                 f.write('\n')
+
+
+    def compute_centroid(self):
+        """
+        Computes the centroid of a general polyhedra
+        :return: centroid of the polyhedron
+        """
+        return np.mean(self.coords, axis=0)

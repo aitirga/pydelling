@@ -13,9 +13,10 @@ class iGPReaderCase(unittest.TestCase):
         self.igp_reader = iGPReader(test_data_path() / "test_implicit_to_explicit.gid",
                                             project_name="test-implicit_to_explicit"
                                             )
+        self.igp_reader.build_mesh_data()
+
 
     def test_implicit_to_explicit(self):
-        self.igp_reader.build_mesh_data()
         self.igp_reader.implicit_to_explicit()
 
     def test_limits(self):
@@ -79,6 +80,12 @@ class iGPReaderCase(unittest.TestCase):
         # Get Pwall region nodes
         region_nodes = self.igp_reader.get_region_nodes('Pwall')
         self.assertEqual(region_nodes.shape, (82, 3))
+
+    def test_boundary_faces(self):
+        boundary_faces = self.igp_reader.boundary_names
+        self.assertEqual(boundary_faces, ['Pwall'])
+        boundary_elements = self.igp_reader.get_boundary_faces('Pwall')
+        self.assertEqual(len(boundary_elements), 130)
 
     def test_region_elements(self):
         self.igp_reader.build_mesh_data()

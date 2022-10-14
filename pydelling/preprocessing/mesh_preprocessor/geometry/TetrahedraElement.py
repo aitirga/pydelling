@@ -5,8 +5,8 @@ from pydelling.preprocessing.mesh_preprocessor.geometry import TriangleFace, Bas
 
 
 class TetrahedraElement(BaseElement):
-    def __init__(self, node_ids, node_coords, centroid_coords=None):
-        super().__init__(node_ids=node_ids, node_coords=node_coords, centroid_coords=centroid_coords)
+    def __init__(self, node_ids, node_coords, centroid_coords=None, local_id=None):
+        super().__init__(node_ids=node_ids, node_coords=node_coords, centroid_coords=centroid_coords, local_id=local_id)
         self.type = "tetrahedra"
         self.meshio_type = "tetra"
         self.define_faces()  # Define faces of the element
