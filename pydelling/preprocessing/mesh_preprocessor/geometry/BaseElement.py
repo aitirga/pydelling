@@ -181,14 +181,14 @@ class BaseElement(BaseAbstractMeshObject):
                 intersected_points.append(intersection)
         return intersected_points
 
-    def contains(self, point: np.ndarray or Point) -> bool:
+    def contains(self, point: np.ndarray or Point, sign=1.0) -> bool:
         """Checks if a point is inside the element"""
         for face in self.faces:
             face_centroid = self.faces[face].centroid
             vec = point - face_centroid
             norm_vec = vec / np.linalg.norm(vec)
             dot_plane_point = np.dot(self.faces[face].unit_normal_vector, norm_vec)
-            if dot_plane_point > self.eps:
+            if dot_plane_point > self.eps * sign:
                 return False
         return True
 
