@@ -91,8 +91,8 @@ class DfnUpscaler:
             if absolute_distance > 1.25 * characteristic_length:
                 elements_filtered += 1
                 continue
-            if absolute_distance < 0.1 * characteristic_length:
-                intersection_points = element.intersect_with_fracture(fracture)
+
+            intersection_points = element.intersect_with_fracture(fracture)
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
 

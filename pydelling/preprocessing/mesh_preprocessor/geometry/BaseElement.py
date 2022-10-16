@@ -8,6 +8,7 @@ from pydelling.utils.geometry import Point, Plane, Line
 from pydelling.utils.geometry_utils import filter_unique_points
 from .BaseAbstractMeshObject import BaseAbstractMeshObject
 from .BaseFace import BaseFace
+from scipy.spatial import Delaunay
 
 
 class BaseElement(BaseAbstractMeshObject):
@@ -184,13 +185,16 @@ class BaseElement(BaseAbstractMeshObject):
     def contains(self, point: np.ndarray or Point, sign=1.0) -> bool:
         """Checks if a point is inside the element"""
         # self.plot_normal_vectors()
+        # contains = Delaunay(self.coords).find_simplex(point) >= 0
+        # return contains
+
         for face in self.faces:
             face_centroid = self.faces[face].centroid
             vec = point - face_centroid
             norm_vec = vec / np.linalg.norm(vec)
             dot_plane_point = np.dot(self.faces[face].unit_normal_vector, norm_vec)
             if dot_plane_point > self.eps * sign:
-                self.plot_normal_vectors(point=point, value=dot_plane_point, error_face=face_centroid)
+                # self.plot_normal_vectors(point=point, value=dot_plane_point, error_face=face_centroid)
                 return False
         return True
 
