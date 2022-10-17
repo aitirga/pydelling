@@ -76,7 +76,7 @@ class DfnUpscaler:
                         writer.writerow([point.x, point.y, point.z, local_id])
                     local_id += 1
 
-    def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture, export_stats=False):
+    def find_intersection_points_between_fracture_and_mesh(self, fracture: Fracture, export_stats=True):
         """Finds the intersection points between a fracture and the mesh"""
 
         intersection_points = []
@@ -93,76 +93,13 @@ class DfnUpscaler:
                 continue
 
             intersection_points = element.intersect_with_fracture(fracture)
+            if len(intersection_points) > 0:
+                a = 1
             if self.save_intersections:
                 self.all_intersected_points.append(intersection_points)
 
             # intersection_area = compute_polygon_area(intersection_points)
             intersection_area = np.abs(compute_polygon_area(intersection_points))
-            # if fracture.local_id == 94 and element.local_id == 24544:
-            #     print('here')
-            #     with open('test_intersection.csv', 'w') as f:
-            #         import csv
-            #         writer = csv.writer(f)
-            #         writer.writerow(['x', 'y', 'z'])
-            #         for point in intersection_points:
-            #             writer.writerow([point.x, point.y, point.z])
-            #
-            #     import pickle
-            #     with open('issue_fracture.pkl', 'wb') as f:
-            #         pickle.dump(fracture, f)
-            #     with open('issue_element.pkl', 'wb') as f:
-            #         pickle.dump(element, f)
-
-            # if intersection_area == 0.0:
-            #     if len(intersection_points) > 0:
-            #         print(intersection_area, len(intersection_points), fracture.local_id, element.local_id)
-            #         print(intersection_points)
-                    # import csv
-                    # with open('test_intersection.csv', 'w') as f:
-                    #     writer = csv.writer(f)
-                    #     writer.writerow(['x', 'y', 'z'])
-                    #     for point in intersection_points:
-                    #         writer.writerow([point.x, point.y, point.z])
-                    #     # if self.cur_num == self.target_num:
-                    #     #     self.break_for = True
-                    #     #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
-                    #     #     print(fracture.local_id)
-                    #     #     break
-                    #     # else:
-                    #     #     self.cur_num += 1
-                    #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
-                    #     print(fracture.local_id)
-            # if element.local_id == 21515:
-            #     with open(f'test_intersection.csv', 'w') as f:
-            #         import csv
-            #         writer = csv.writer(f)
-            #         writer.writerow(['x', 'y', 'z'])
-            #         for point in intersection_points:
-            #             writer.writerow([point.x, point.y, point.z])
-            #     intersection_points = element.intersect_with_fracture(fracture, export_all_points=True)
-            #     import pickle
-            #     with open(f'issue_element_2.pkl', 'wb') as f:
-            #         pickle.dump(element, f)
-            #     error_mesh = MeshPreprocessor()
-            #     error_mesh.elements = [element]
-            #     error_mesh.unordered_nodes = self.mesh.unordered_nodes
-            #     error_mesh.to_vtk(f'issue_element_debug.vtk')
-
-            # if intersection_area == None:
-            #     if hasattr(self, 'none_written'):
-            #         continue
-            #     with open('none_intersections.txt', 'a') as f:
-            #         for intersection_point in intersection_points:
-            #             f.write(f'{intersection_point[0]},{intersection_point[1]},{intersection_point[2]}\n')
-            #     self.none_written = True
-            # elif intersection_area < 0:
-            #     if hasattr(self, 'negative_written'):
-            #         continue
-            #     with open('negative_intersections.txt', 'a') as f:
-            #         for intersection_point in intersection_points:
-            #             f.write(f'{intersection_point[0]},{intersection_point[1]},{intersection_point[2]}\n')
-            #     self.negative_written = True
-
             fracture.intersection_dictionary[element.local_id] = intersection_area
             if len(intersection_points) > 0:
                 element.associated_fractures[fracture.local_id] = {
@@ -279,8 +216,13 @@ class DfnUpscaler:
                 # Attribute of the element: portion of element occupied by fractures.
                 elem.total_fracture_volume += fracture_dict['volume']
 
-    def upscale_mesh_porosity(self, matrix_porosity=None, intensity_correction_factor=None, existing_fractures_fraction=None, truncate_to_min_percentile=5,
-                              truncate_to_max_percentile=95):
+    def upscale_mesh_porosity(self,
+                              matrix_porosity=None,
+                              intensity_correction_factor=1.0,
+                              existing_fractures_fraction=1.0,
+                              truncate_to_min_percentile=5,
+                              truncate_to_max_percentile=95,
+                              ):
         # Compute upscaled porosity for each element.
         matrix_porosity = 0.0
         self._compute_fracture_volume_in_elements()
@@ -302,7 +244,6 @@ class DfnUpscaler:
             minimum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)],
                                              min_percentile)
             min_percentile = min_percentile + 1
-            print(min_percentile)
         print("Porosity will be truncated to Percentile = " + str(min_percentile))
 
         maximum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)], truncate_to_max_percentile)
@@ -310,7 +251,7 @@ class DfnUpscaler:
         for elem in tqdm(self.mesh.elements, desc="Truncating porosity values to P1 and P99"):
             if math.isnan(upscaled_porosity[elem.local_id]):
                 upscaled_porosity[elem.local_id] = minimum_porosity
-            elif upscaled_porosity[elem.local_id] > maximum_porosity :
+            elif upscaled_porosity[elem.local_id] > maximum_porosity:
                 upscaled_porosity[elem.local_id] = maximum_porosity
             elif upscaled_porosity[elem.local_id] <= 0.0:
                 upscaled_porosity[elem.local_id] = minimum_porosity
@@ -322,7 +263,6 @@ class DfnUpscaler:
             vtk_porosity[local_id] = upscaled_porosity[local_id]
 
         refactored_porosity = self.mesh.refactor_array_by_element_type(vtk_porosity)
-
 
         self.mesh.cell_data['upscaled_porosity'] = refactored_porosity
         self.upscaled_porosity = upscaled_porosity

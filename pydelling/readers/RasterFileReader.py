@@ -118,7 +118,7 @@ class RasterFileReader(BaseReader):
         :param output_file:
         :return:
         """
-        print(f"Starting dump into {output_file}")
+
         if not self.xydata_computed:
             xydata = self.get_xy_data()
         else:
@@ -134,7 +134,7 @@ class RasterFileReader(BaseReader):
             else:
                 f.write(f"{data[0]},{data[1]},{data[2]}\n")
         f.close()
-        print(f"The data has been properly exported to the {output_file} file")
+        logger.info(f"The raster file points have been exported to the CSV file {output_file}")
 
     def to_wsv(self, output_file):
         print(f"Starting dump into {output_file}")

@@ -431,8 +431,8 @@ class MeshPreprocessor(object):
         """Export the mesh to a json file."""
         logger.info('Exporting mesh to json')
         save_dictionary = {}
-        self.elements = [element.get_json() for element in self.elements]
-        save_dictionary['elements'] = self.elements
+        _elements = [element.get_json() for element in self.elements]
+        save_dictionary['elements'] = _elements
         save_dictionary['coords'] = self.coords.tolist()
         save_dictionary['has_kd_tree'] = self.has_kd_tree
         return save_dictionary

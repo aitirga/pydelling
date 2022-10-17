@@ -28,7 +28,7 @@ class BaseElement(BaseAbstractMeshObject):
             self.centroid = np.array(centroid_coords)
             self.centroid_coords = self.centroid
         self.local_id = local_id if local_id is not None else BaseElement.local_id
-        if local_id is not None:
+        if local_id is None:
             BaseElement.local_id += 1
         self.faces: Dict[str, BaseFace] = {}  # Faces of an element
         self.type = None
@@ -88,7 +88,7 @@ class BaseElement(BaseAbstractMeshObject):
         return intersected_points
 
 
-    def intersect_with_fracture(self, fracture: Fracture, export_all_points=True):
+    def intersect_with_fracture(self, fracture: Fracture, export_all_points=False):
         """Intersects an element with a fracture"""
         intersected_lines = []
         intersected_points = []
@@ -187,13 +187,25 @@ class BaseElement(BaseAbstractMeshObject):
         # self.plot_normal_vectors()
         # contains = Delaunay(self.coords).find_simplex(point) >= 0
         # return contains
-
+        initial_sign = None
         for face in self.faces:
             face_centroid = self.faces[face].centroid
             vec = point - face_centroid
             norm_vec = vec / np.linalg.norm(vec)
             dot_plane_point = np.dot(self.faces[face].unit_normal_vector, norm_vec)
-            if dot_plane_point > self.eps * sign:
+            # add a tolerance to the dot product
+            if abs(dot_plane_point) < self.eps:
+                # Set the same sign as initial_sign
+                if initial_sign == None:
+                    continue
+                elif initial_sign == 1.0:
+                    dot_plane_point = 1.0
+                elif initial_sign == -1.0:
+                    dot_plane_point = -1.0
+            if initial_sign is None:
+                initial_sign = np.sign(dot_plane_point)
+                continue
+            if np.sign(dot_plane_point) != initial_sign:
                 # self.plot_normal_vectors(point=point, value=dot_plane_point, error_face=face_centroid)
                 return False
         return True
@@ -314,7 +326,7 @@ class BaseElement(BaseAbstractMeshObject):
         for face in self.faces:
             face_centroid = self.faces[face].centroid
             ax.quiver(face_centroid[0], face_centroid[1], face_centroid[2], self.faces[face].unit_normal_vector[0],
-                      self.faces[face].unit_normal_vector[1], self.faces[face].unit_normal_vector[2], length=0.1,
+                      self.faces[face].unit_normal_vector[1], self.faces[face].unit_normal_vector[2], length=0.5,
                       normalize=True)
         # Add transparent faces
         for face in self.faces:
@@ -332,4 +344,12 @@ class BaseElement(BaseAbstractMeshObject):
 
         if error_face is not None:
             ax.scatter(error_face[0], error_face[1], error_face[2], color='g')
+        # Set aspect ratio
+        limits = np.array([ax.get_xlim3d(), ax.get_ylim3d(), ax.get_zlim3d()])
+        origin = np.mean(limits, axis=1)
+        radius = 0.5 * np.max(np.abs(limits[:, 1] - limits[:, 0]))
+        ax.set_xlim3d([origin[0] - radius, origin[0] + radius])
+        ax.set_ylim3d([origin[1] - radius, origin[1] + radius])
+        ax.set_zlim3d([origin[2] - radius, origin[2] + radius])
+
         plt.show()
