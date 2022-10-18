@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pydelling"
-version = "1.8"
+version = "1.8.1"
 description = "Package providing a variety of utility methods for mathematical modelling"
 authors = ["Aitor <aitirga@gmail.com>"]
 license = "MIT"
