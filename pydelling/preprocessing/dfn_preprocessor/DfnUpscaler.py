@@ -246,9 +246,13 @@ class DfnUpscaler:
             min_percentile = min_percentile + 1
         print("Porosity will be truncated to Percentile = " + str(min_percentile))
 
-        maximum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)], truncate_to_max_percentile)
+        # Truncate to max
+        maximum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)],
+                                            truncate_to_max_percentile)  # TODO: check if this is correct (strange results with small datasets)
+        maximum_porosity = np.max(np.array(resulting_porosity)[~np.isnan(resulting_porosity)])
 
         for elem in tqdm(self.mesh.elements, desc="Truncating porosity values to P1 and P99"):
+
             if math.isnan(upscaled_porosity[elem.local_id]):
                 upscaled_porosity[elem.local_id] = minimum_porosity
             elif upscaled_porosity[elem.local_id] > maximum_porosity:
