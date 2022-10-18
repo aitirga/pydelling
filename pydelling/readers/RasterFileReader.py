@@ -60,6 +60,7 @@ class RasterFileReader(BaseReader):
                                 self.reader_info["cellsize"])
             y_range = np.arange(self.reader_info["yllcorner"], self.reader_info["yllcorner"] + self.reader_info["ncols"] * self.reader_info["cellsize"],
                                 self.reader_info["cellsize"])
+            print(self.reader_info['xllcorner'], self.reader_info['yllcorner'], self.reader_info['cellsize'], self.reader_info['nrows'], self.reader_info['ncols'])
         else:
             x_range = np.arange(self.reader_info["xllcorner"], self.reader_info["xllcorner"] + self.reader_info["nrows"] * self.reader_info["dx"],
                                 self.reader_info["dx"])
@@ -85,10 +86,12 @@ class RasterFileReader(BaseReader):
             return self.get_xy_data()
 
     def rebuild_x_y(self):
-        x_range = np.arange(self.info["reader"]["xllcorner"], self.info["reader"]["nrows"] * self.info["reader"]["dx"],
-                            self.info["reader"]["dx"])
-        y_range = np.arange(self.info["reader"]["yllcorner"], self.info["reader"]["ncols"] * self.info["reader"]["dy"],
-                            self.info["reader"]["dy"])
+        x_range = np.arange(self.info['reader']["xllcorner"],
+                            self.info['reader']["xllcorner"] + self.info['reader']["nrows"] * self.info['reader']["cellsize"],
+                            self.info['reader']["cellsize"])
+        y_range = np.arange(self.info['reader']["yllcorner"],
+                            self.info['reader']["yllcorner"] + self.info['reader']["ncols"] * self.info['reader']["cellsize"],
+                            self.info['reader']["cellsize"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
 
     def get_xy_data(self) -> np.ndarray:
@@ -200,17 +203,13 @@ class RasterFileReader(BaseReader):
         iy = int(self.reader_info["ncols"] - iy - 1)
         return self.data[iy, ix]
 
-    # def flip_x(self):
-    #     self.data = np.fliplr(self.data)
-    #     self.info["xllcorner"] = self.info["xllcorner"] + self.info["cellsize"] * self.info["ncols"]
-    #     self.info["ncols"] = self.info["ncols"] * -1
-    #     RasterFileReader.rebuild_x_y(self)
-    #
-    # def flip_y(self):
-    #     self.data = np.flipud(self.data)
-    #     self.info["yllcorner"] = self.info["yllcorner"] + self.info["cellsize"] * self.info["nrows"]
-    #     self.info["nrows"] = self.info["nrows"] * -1
-    #     RasterFileReader.rebuild_x_y(self)
+    def flip_y(self):
+        self.info['reader']["yllcorner"] = self.info['reader']["yllcorner"] + self.info['reader']["cellsize"] * self.info['reader']["nrows"]
+        RasterFileReader.rebuild_x_y(self)
+
+    def flip_x(self):
+        self.info['reader']["xllcorner"] = self.info['reader']["xllcorner"] + self.info['reader']["cellsize"] * self.info['reader']["ncols"]
+        RasterFileReader.rebuild_x_y(self)
 
     def get_plot_image(self, ax=None,
                        fig=None,
