@@ -1,13 +1,14 @@
 from pathlib import Path
 from jinja2 import Template
 import shutil
+from pydelling.utils import UnitConverter
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class BaseManager:
+class BaseManager(UnitConverter):
     """This class contains the core methods for all the other child Manager classes.
     A manager is supposed to control the simulations run on a given software automatically.
 
@@ -47,7 +48,7 @@ class BaseManager:
     def _find_tags(self, tag: str, ignore_case: bool = True):
         """This method finds the line index of the tag in the raw text.
         """
-        logger.info(f"Finding tag '{tag}'")
+        logger.debug(f"Finding tag '{tag}'")
         lines = self.raw_text.splitlines()
         if ignore_case:
             lines = [line.lower() for line in lines]
@@ -108,8 +109,8 @@ class BaseManager:
                 **kwargs):
         """This method renders the input file and saves it to a file.
         """
-        logger.info(f"Saving input files to {output_folder}")
         output_folder = output_folder if output_folder is not None else f'case-{BaseManager.count}'
+        logger.info(f"Saving input files to {output_folder}")
         BaseManager.count += 1
         output_folder = Path(output_folder)
         output_folder.mkdir(exist_ok=True)
