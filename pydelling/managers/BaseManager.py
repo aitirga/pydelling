@@ -1,5 +1,6 @@
 from pathlib import Path
 from jinja2 import Template
+import shutil
 
 import logging
 
@@ -21,6 +22,7 @@ class BaseManager:
     - The user can add variables to change, or can specify directly on the input file using {{var}} notation (jinja2)
     - The input file is rendered using jinja2 for each specific case
     """
+    count = 0
 
     def __init__(self, input_file: str):
         """This method initializes the manager.
@@ -41,6 +43,41 @@ class BaseManager:
             var_name = var
         self.raw_text = self.raw_text.replace(var, f"{{{{ {var_name} }}}}")
         self.jinja_settings[var_name] = {"value": value}
+
+    def _find_tags(self, tag: str, ignore_case: bool = True):
+        """This method finds the line index of the tag in the raw text.
+        """
+        logger.info(f"Finding tag '{tag}'")
+        lines = self.raw_text.splitlines()
+        if ignore_case:
+            lines = [line.lower() for line in lines]
+            tag = tag.lower()
+        return [i for i, line in enumerate(lines) if tag in line]
+
+    def _get_line(self, line_index: int):
+        """This method returns the line of the raw text.
+        """
+        return self.raw_text.splitlines()[line_index]
+
+    def _get_nth_previous_line(self, line_index: int, n: int = 1):
+        """This method returns the nth previous line of the raw text.
+        """
+        return self.raw_text.splitlines()[line_index - n]
+
+    def _get_nth_next_line(self, line_index: int, n: int = 1):
+        """This method returns the nth next line of the raw text.
+        """
+        return self.raw_text.splitlines()[line_index + n]
+
+    def _replace_line(self, line_index: int, new_line: list, sep: str = ' '):
+        """This method replaces a line in the raw text.
+        """
+        logger.debug(f"Replacing line {line_index} with {new_line}")
+        lines = self.raw_text.splitlines()
+        lines[line_index] = sep.join(new_line)
+        self.raw_text = '\n'.join(lines)
+
+
 
     def render(self, **kwargs):
         """This method renders the input file using jinja2.
@@ -65,24 +102,27 @@ class BaseManager:
         self.aux_files[file_path.name] = file_path
 
     def to_file(self,
-                output_folder: str='result',
+                output_folder: str=None,
                 output_file: str=None,
                 auxiliary_folder: str=None,
                 **kwargs):
         """This method renders the input file and saves it to a file.
         """
         logger.info(f"Saving input files to {output_folder}")
+        output_folder = output_folder if output_file is not None else f'case-{BaseManager.count}'
+        BaseManager.count += 1
         output_folder = Path(output_folder)
         output_folder.mkdir(exist_ok=True)
         output_file = output_folder / (output_file or self.input_file.name)
         output_file.write_text(self.render(**kwargs))
 
         # Copy the auxiliary files
-        auxiliary_folder = auxiliary_folder if auxiliary_folder is not None else 'input_files'
-        auxiliary_folder = output_folder / auxiliary_folder
-        auxiliary_folder.mkdir(exist_ok=True)
-        for aux_file in self.aux_files:
-            self.aux_files[aux_file].copy(auxiliary_folder / aux_file)
+        if len(self.aux_files) > 0:
+            auxiliary_folder = auxiliary_folder if auxiliary_folder is not None else 'input_files'
+            auxiliary_folder = output_folder / auxiliary_folder
+            auxiliary_folder.mkdir(exist_ok=True)
+            for aux_file in self.aux_files:
+                shutil.copy(self.aux_files[aux_file], auxiliary_folder / aux_file)
 
 
 
