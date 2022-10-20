@@ -109,7 +109,7 @@ class BaseManager:
         """This method renders the input file and saves it to a file.
         """
         logger.info(f"Saving input files to {output_folder}")
-        output_folder = output_folder if output_file is not None else f'case-{BaseManager.count}'
+        output_folder = output_folder if output_folder is not None else f'case-{BaseManager.count}'
         BaseManager.count += 1
         output_folder = Path(output_folder)
         output_folder.mkdir(exist_ok=True)
@@ -123,6 +123,9 @@ class BaseManager:
             auxiliary_folder.mkdir(exist_ok=True)
             for aux_file in self.aux_files:
                 shutil.copy(self.aux_files[aux_file], auxiliary_folder / aux_file)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__} (input template: {self.input_file.name})"
 
 
 
