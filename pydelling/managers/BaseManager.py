@@ -55,6 +55,15 @@ class BaseManager(UnitConverter):
             tag = tag.lower()
         return [i for i, line in enumerate(lines) if tag in line]
 
+    def _find_tags_in_subset(self, tags: list, subset: list, ignore_case: bool = True):
+        """This method finds the line index of the tag in the raw text.
+        """
+        logger.debug(f"Finding tags '{tags}' in subset")
+        if ignore_case:
+            subset = [line.lower() for line in subset]
+            tags = [tag.lower() for tag in tags]
+        return [i for i, line in enumerate(subset) if any(tag in line for tag in tags)]
+
     def _get_line(self, line_index: int):
         """This method returns the line of the raw text.
         """
