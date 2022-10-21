@@ -31,17 +31,28 @@ class BaseManager(ABC):
             self.run_study(study.name)
 
     @abstractmethod
-    def run_study(self, study_name: str):
+    def _run_study(self, study_name: str, n_cores: int = 1):
         """This method runs a study.
         """
         logger.info(f"Running study {study_name}")
         pass
 
     @abstractmethod
-    def get_study_status(self, study_name: str):
+    def _get_study_status(self, study_name: str):
         """This method returns the status of a study.
         """
         pass
+
+    def run_study(self, study_name: str, n_cores: int = 1):
+        """This method runs a study.
+        """
+        logger.info(f"Running study {study_name}")
+        self._run_study(study_name, n_cores=n_cores)
+
+    def get_study_status(self, study_name: str):
+        """This method returns the status of a study.
+        """
+        return self._get_study_status(study_name)
 
     @property
     def n_studies(self):
