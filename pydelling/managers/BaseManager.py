@@ -47,6 +47,9 @@ class BaseManager(ABC):
         """This method runs a study.
         """
         logger.info(f"Running study {study_name}")
+        # Create the study files
+
+        # Run the study
         self._run_study(study_name, n_cores=n_cores)
 
     def get_study_status(self, study_name: str):
