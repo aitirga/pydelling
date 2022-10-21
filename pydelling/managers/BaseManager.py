@@ -54,8 +54,11 @@ class BaseManager(UnitConverter):
             lines = [line.lower() for line in lines]
             tag = tag.lower()
         # Delete lines starting with #
-        lines = [line for line in lines if not line.startswith('#')]
-        return [i for i, line in enumerate(lines) if tag in line]
+        # lines = [line for line in lines if not line.startswith('#')]
+        line_idx = [i for i, line in enumerate(lines) if tag in line]
+        # Clean for comments
+        line_idx = [i for i in line_idx if not lines[i].startswith('#')]
+        return line_idx
 
     def _find_tags_in_subset(self, tags: list, subset: list, ignore_case: bool = True):
         """This method finds the line index of the tag in the raw text.
