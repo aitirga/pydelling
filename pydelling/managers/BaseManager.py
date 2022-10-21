@@ -53,6 +53,8 @@ class BaseManager(UnitConverter):
         if ignore_case:
             lines = [line.lower() for line in lines]
             tag = tag.lower()
+        # Delete lines starting with #
+        lines = [line for line in lines if not line.startswith('#')]
         return [i for i, line in enumerate(lines) if tag in line]
 
     def _find_tags_in_subset(self, tags: list, subset: list, ignore_case: bool = True):
@@ -68,6 +70,14 @@ class BaseManager(UnitConverter):
         """This method returns the line of the raw text.
         """
         return self.raw_text.splitlines()[line_index]
+
+    def _add_line(self, line_index: int, new_line: list, sep: str = ' '):
+        """This method adds a line in the raw text.
+        """
+        logger.debug(f"Adding line {line_index} with {new_line}")
+        lines = self.raw_text.splitlines()
+        lines.insert(line_index, sep.join(new_line))
+        self.raw_text = '\n'.join(lines)
 
     def _get_nth_previous_line(self, line_index: int, n: int = 1):
         """This method returns the nth previous line of the raw text.

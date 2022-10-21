@@ -33,6 +33,19 @@ class PflotranManager(BaseManager):
         value_unit = time_lines.split()[2]
         return self.convert_time(value=value, initial_unit=value_unit, final_unit=time_unit)
 
+    def get_checkpoint(self):
+        """This method returns the checkpoint times of the simulation.
+        """
+        checkpoint_lines = self._find_tags('CHECKPOINT')
+        if len(checkpoint_lines) == 0:
+            return None
+        checkpoint_line = checkpoint_lines[0]
+        checkpoint_block = self._get_block_lines(checkpoint_line)
+        for line in checkpoint_block:
+            if 'times' in line.lower():
+                return line
+        return None
+
     def replace_simulation_time(self, new_time: float, time_unit: str = 'y'):
         """This method replaces the simulation time of the simulation.
         """
@@ -64,8 +77,37 @@ class PflotranManager(BaseManager):
             if 'file' in line.lower():
                 self._replace_line(line_index=line_idx, new_line=['FILE', new_file])
 
+    def add_checkpoint(self, times: Union[float, List[float]], time_unit: str = 'y'):
+        """This method adds a checkpoint to the simulation.
+        """
+        logger.info(f"Adding checkpoint at {times} {time_unit}")
+        if isinstance(times, float):
+            times = [times]
+        times = [self.convert_time(value=time, initial_unit=time_unit, final_unit=time_unit) for time in times]
+        times = [str(time) for time in times]
+        # Check if the checkpoint tag is already in the input file
+        if self.has_tag('CHECKPOINT'):
+            checkpoint_line = self._find_tags('CHECKPOINT')[0]
+            checkpoint_block = self._get_block_lines(checkpoint_line)
+            checkpoint_block_idx = self._get_block_line_idx(checkpoint_line)
+            for line_idx, line in zip(checkpoint_block_idx, checkpoint_block):
+                if 'times' in line.lower():
+                    self._replace_line(line_index=line_idx, new_line=['TIMES', time_unit, *times])
+        else:
+            # Find simulation block
+            simulation_block_idx = self._get_block_line_idx(self._find_tags('SIMULATION')[0])
+            # Find the last line of the simulation block
+            last_line_idx = simulation_block_idx[-1] - 1
+            # Add the checkpoint block
+            self._add_line(line_index=last_line_idx, new_line=['CHECKPOINT'])
+            self._add_line(line_index=last_line_idx + 1, new_line=['TIMES', time_unit, *times])
+            self._add_line(line_index=last_line_idx + 2, new_line=['FORMAT', 'HDF5'])
+            self._add_line(line_index=last_line_idx + 3, new_line=['/'])
 
-
+    def has_tag(self, tag: str):
+        """This method returns True if the tag is in the input file.
+        """
+        return len(self._find_tags(tag)) > 0
 
     def _get_parent_tag_name_(self, line_index: int):
         """This method returns the parent tag of the line.
