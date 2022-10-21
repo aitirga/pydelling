@@ -1,2 +1,2 @@
-from .BaseCase import BaseCase
-from .PflotranCase import PflotranCase
+from .BaseStudy import BaseStudy
+from .PflotranStudy import PflotranStudy

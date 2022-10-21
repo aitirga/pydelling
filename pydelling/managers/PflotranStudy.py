@@ -1,12 +1,12 @@
-from .BaseCase import BaseCase
+from .BaseStudy import BaseStudy
 import logging
 from typing import Union, List, Dict
 
 logger = logging.getLogger(__name__)
 
 
-class PflotranCase(BaseCase):
-    """This class extends the BaseCase class to manage PFLOTRAN related simulations.
+class PflotranStudy(BaseStudy):
+    """This class extends the BaseStudy class to manage PFLOTRAN related simulations.
     """
     def __init__(self, input_file: str):
         """This method initializes the class.
