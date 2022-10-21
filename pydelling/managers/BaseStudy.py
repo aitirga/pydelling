@@ -25,11 +25,12 @@ class BaseStudy(UnitConverter):
     """
     count = 0
 
-    def __init__(self, input_file: str):
+    def __init__(self, input_file: str, study_name: str = None):
         """This method initializes the manager.
         """
-        self.idx = self.__class__.count
         self.__class__.count += 1
+        self.idx = self.__class__.count
+        self.name = study_name if study_name is not None else f"{self.__class__.__name__}-{self.idx}"
         logger.info(f"Initializing {self.__class__.__name__} manager")
         self.input_file = Path(input_file)
         self.settings = {}
@@ -153,9 +154,16 @@ class BaseStudy(UnitConverter):
         return f"{self.__class__.__name__} (input template: {self.input_file.name})"
 
     # Properties
-    @property
-    def name(self):
-        return f"{self.__class__.__name__}-{self.__class__.count}"
+    def __deepcopy__(self, memodict={}):
+        return self.__class__(str(self.input_file))
+
+    def __copy__(self):
+        return self.__class__(str(self.input_file))
+
+    def copy(self):
+        return self.__class__(str(self.input_file))
+
+
 
 
 

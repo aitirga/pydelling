@@ -1,6 +1,11 @@
 from .BaseStudy import BaseStudy
 from abc import ABC, abstractmethod
 from typing import Dict, List, Union
+import logging
+from alive_progress import alive_bar
+from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 
 class BaseManager(ABC):
@@ -10,23 +15,26 @@ class BaseManager(ABC):
     - Read the output status of the simulation
     """
     def __init__(self):
-        self.studies: Dict[str, BaseStudy]  = {}
+        self.studies: Dict[str, BaseStudy] = {}
 
     def add_study(self, study: BaseStudy):
         """This method adds a study to the manager.
         """
+        assert isinstance(study, BaseStudy), f"Study must be a object from a class inherited from BaseStudy, not {type(study)}"
         self.studies[study.name] = study
 
     def run(self):
         """This method runs all the studies.
         """
-        for study in self.studies.values():
+        logger.info(f"Running {self.n_studies} studies")
+        for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
             self.run_study(study.name)
 
     @abstractmethod
     def run_study(self, study_name: str):
         """This method runs a study.
         """
+        logger.info(f"Running study {study_name}")
         pass
 
     @abstractmethod
@@ -34,6 +42,12 @@ class BaseManager(ABC):
         """This method returns the status of a study.
         """
         pass
+
+    @property
+    def n_studies(self):
+        """This method returns the number of studies.
+        """
+        return len(self.studies)
 
 
 

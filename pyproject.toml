@@ -38,6 +38,7 @@ mpmath = "*"
 paramiko = "*"
 rich = "*"
 numpy-stl = "*"
+#alive-progress = "*"
 
 
 [build-system]
