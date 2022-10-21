@@ -1,11 +1,11 @@
 from unittest import TestCase
-from pydelling.managers import BaseManager
+from pydelling.managers import BaseCase
 from pydelling.utils.configuration_utils import test_data_path
 
 
-class TestBaseManager(TestCase):
+class TestBaseCase(TestCase):
     def setUp(self) -> None:
-        self.base_manager = BaseManager(str(test_data_path() / 'test_manager.in'))
+        self.base_manager = BaseCase(str(test_data_path() / 'test_manager.in'))
 
     def test_replace_tag(self):
         regions = self.base_manager._find_tags('region')

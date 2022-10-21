@@ -1,2 +1,2 @@
-from .BaseManager import BaseManager
-from .PflotranManager import PflotranManager
+from .BaseCase import BaseCase
+from .PflotranCase import PflotranCase

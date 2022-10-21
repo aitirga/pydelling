@@ -1,11 +1,11 @@
 from unittest import TestCase
-from pydelling.managers import PflotranManager
+from pydelling.managers import PflotranCase
 from pydelling.utils.configuration_utils import test_data_path
 
 
-class TestBaseManager(TestCase):
+class TestPflotranCase(TestCase):
     def setUp(self) -> None:
-        self.base_manager = PflotranManager(str(test_data_path() / 'test_manager.in'))
+        self.base_manager = PflotranCase(str(test_data_path() / 'test_manager.in'))
 
     def test_get_regions(self):
         regions = self.base_manager.get_regions()
@@ -41,7 +41,7 @@ class TestBaseManager(TestCase):
         self.base_manager.add_checkpoint(times=times, time_unit=time_unit)
         checkpoints = self.base_manager.get_checkpoint()
         self.assertEqual(checkpoints, 'TIMES d 1.0 2.0 3.0')
-        manager_no_checkpoint = PflotranManager(str(test_data_path() / 'test_pflotran_manager_nocheckpoint.in'))
+        manager_no_checkpoint = PflotranCase(str(test_data_path() / 'test_pflotran_manager_nocheckpoint.in'))
         self.assertEqual(manager_no_checkpoint.get_checkpoint(), None)
         manager_no_checkpoint.add_checkpoint(times=times, time_unit=time_unit)
         self.assertEqual(manager_no_checkpoint.get_checkpoint(), 'TIMES d 1.0 2.0 3.0')

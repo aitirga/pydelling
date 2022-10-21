@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class BaseManager(UnitConverter):
+class BaseCase(UnitConverter):
     """This class contains the core methods for all the other child Manager classes.
     A manager is supposed to control the simulations run on a given software automatically.
 
@@ -131,9 +131,9 @@ class BaseManager(UnitConverter):
                 **kwargs):
         """This method renders the input file and saves it to a file.
         """
-        output_folder = output_folder if output_folder is not None else f'case-{BaseManager.count}'
+        output_folder = output_folder if output_folder is not None else f'case-{BaseCase.count}'
         logger.info(f"Saving input files to {output_folder}")
-        BaseManager.count += 1
+        BaseCase.count += 1
         output_folder = Path(output_folder)
         output_folder.mkdir(exist_ok=True)
         output_file = output_folder / (output_file or self.input_file.name)
