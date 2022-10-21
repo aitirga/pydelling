@@ -28,6 +28,8 @@ class BaseStudy(UnitConverter):
     def __init__(self, input_file: str):
         """This method initializes the manager.
         """
+        self.idx = self.__class__.count
+        self.__class__.count += 1
         logger.info(f"Initializing {self.__class__.__name__} manager")
         self.input_file = Path(input_file)
         self.settings = {}
@@ -149,6 +151,12 @@ class BaseStudy(UnitConverter):
 
     def __repr__(self):
         return f"{self.__class__.__name__} (input template: {self.input_file.name})"
+
+    # Properties
+    @property
+    def name(self):
+        return f"{self.__class__.__name__}-{self.__class__.count}"
+
 
 
 
