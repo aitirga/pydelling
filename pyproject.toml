@@ -38,7 +38,7 @@ mpmath = "*"
 paramiko = "*"
 rich = "*"
 numpy-stl = "*"
-#alive-progress = "*"
+docker = "*"
 
 
 [build-system]

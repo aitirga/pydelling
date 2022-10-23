@@ -48,13 +48,13 @@ def initialize_config(config_file="./config/config.yaml"):
         print(f"ERROR: Config file({config_file}) not found.")
         exit(1)
 
-def create_results_folder():
-    output_folder = Path('./results')
+def create_results_folder(folder_name='results'):
+    output_folder = Path(folder_name)
     output_folder.mkdir(parents=True, exist_ok=True)
     return output_folder
 
-def create_output_folder():
-    output_folder = Path('./output')
+def create_output_folder(folder_name='output'):
+    output_folder = Path(folder_name)
     output_folder.mkdir(parents=True, exist_ok=True)
     return output_folder
 

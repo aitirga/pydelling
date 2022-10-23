@@ -154,14 +154,15 @@ class BaseStudy(UnitConverter):
         return f"{self.__class__.__name__} (input template: {self.input_file.name})"
 
     # Properties
-    def __deepcopy__(self, memodict={}):
-        return self.__class__(str(self.input_file))
-
-    def __copy__(self):
-        return self.__class__(str(self.input_file))
-
     def copy(self):
-        return self.__class__(str(self.input_file))
+        """This method returns a copy of the object.
+        """
+        new_obj = self.__class__(self.input_file)
+        for attr in self.__dict__:
+            if attr in ['idx', 'name']:
+                continue
+            setattr(new_obj, attr, getattr(self, attr))
+        return new_obj
 
 
 

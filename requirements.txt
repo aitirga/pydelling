@@ -27,3 +27,4 @@ paramiko
 extra-streamlit-components
 numpy-stl
 rich
+docker
