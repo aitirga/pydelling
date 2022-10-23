@@ -30,12 +30,13 @@ class BaseManager(ABC):
     def run(self,
             studies_folder: str = './studies',
             n_cores: int = 1,
+            docker_image: str = None,
             ):
         """This method runs all the studies.
         """
         self.generate_run_files(studies_folder=studies_folder)
         for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
-            self.run_study(study.name)
+            self.run_study(study.name, docker_image=docker_image, n_cores=n_cores)
 
     def generate_run_files(self, studies_folder: str = './studies'):
         """This method generates the run files for all the studies.
@@ -96,7 +97,6 @@ class BaseManager(ABC):
         """This method returns the number of studies.
         """
         return len(self.studies)
-
 
 
 

@@ -1,5 +1,6 @@
 from .BaseManager import BaseManager
 import subprocess
+import docker
 
 class PflotranManager(BaseManager):
     def _get_study_status(self, study_id: int):
@@ -27,7 +28,20 @@ class PflotranManager(BaseManager):
                           ):
         """This method runs a study using docker.
         """
-        return NotImplementedError(f'Docker solver is not implemented for {self.__class__.__name__}')
+        docker_client = docker.from_env()
+        study = self.studies[study_name]
+        if n_cores == 1:
+            # Run the study in serial
+            container = docker_client.containers.run(docker_image, ['pflotran', '-pflotranin', study.input_file.name],
+                                                     detach=True,
+                                                     )
+
+        else:
+            # Run the study in parallel
+            container = docker_client.containers.run(docker_image, ['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file.name],
+                                                     detach=True,
+                                                     )
+
 
 
 
