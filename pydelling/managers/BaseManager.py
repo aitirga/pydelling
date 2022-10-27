@@ -78,6 +78,9 @@ class BaseManager(ABC):
         logger.info(f"Running study {study.name}")
         # Create the study files
         study.pre_run()
+        for callback in study.callbacks:
+            if callback.kind == 'pre':
+                callback.run()
         # Run the study
         if docker_image is None:
             self._run_study(study, n_cores=n_cores)
@@ -85,6 +88,9 @@ class BaseManager(ABC):
             self._run_study_docker(study, docker_image, n_cores=n_cores)
         # Post run
         study.post_run()
+        for callback in study.callbacks:
+            if callback.kind == 'post':
+                callback.run()
 
 
     @property

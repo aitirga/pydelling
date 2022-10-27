@@ -27,6 +27,8 @@ class TestBaseStudy(TestCase):
         dummy_manager.add_study(dummy_study)
         dummy_manager.run()
         self.assertEqual(dummy_study.callbacks[0].kind, 'pre')
+        self.assertEqual(dummy_study.callbacks[0].study, dummy_study)
+        self.assertEqual(dummy_study.callbacks[0].manager, dummy_manager)
 
 
 
