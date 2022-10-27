@@ -41,6 +41,16 @@ class BaseStudy(UnitConverter):
         self.aux_files = {}
         self.output_folder = None
 
+    def pre_run(self):
+        """This method is executed before the run.
+        """
+        pass
+
+    def post_run(self):
+        """This method is executed after the run.
+        """
+        pass
+
     def _replace_with_jinja_variable(self, var, var_name=None, value=None):
         """This method replaces a variable in the raw text with a jinja variable.
         """
@@ -191,6 +201,11 @@ class BaseStudy(UnitConverter):
                 continue
             setattr(new_obj, attr, getattr(self, attr))
         return new_obj
+
+    def __str__(self):
+        return self.__repr__()
+
+
 
 
 

@@ -1,4 +1,5 @@
 from .BaseManager import BaseManager
+from . import PflotranStudy
 import subprocess
 import docker
 from docker.models.containers import Container
@@ -12,11 +13,10 @@ class PflotranManager(BaseManager):
         pass
 
     def _run_study(self,
-                   study_name: str,
+                   study: PflotranStudy,
                    n_cores: int = 1):
         """This method runs a study.
         """
-        study = self.studies[study_name]
         if n_cores == 1:
             # Run the study in serial
             subprocess.run(['pflotran', '-pflotranin', study.input_file.name])
@@ -25,32 +25,36 @@ class PflotranManager(BaseManager):
             subprocess.run(['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file.name])
 
     def _run_study_docker(self,
-                          study_name: str,
+                          study: PflotranStudy,
                           docker_image: str,
                           n_cores: int = 1,
                           ):
         """This method runs a study using docker.
         """
         docker_client = docker.from_env()
-        study = self.studies[study_name]
             # Run the study in serial
-            # Add current folder to the container
-        container = docker_client.api.create_container(
-            image=docker_image,
-            command='/bin/sh',
-            detach=True,
-            tty=True,
-            volumes=[f'/home/pflotran/'],
-            host_config=docker_client.api.create_host_config(
-                binds={
-                    Path().cwd() / f'studies/{study.name}': {
-                        'bind': f'/home/pflotran/{study.name}',
-                        'mode': 'rw',
-                    }
-                })
-        )
-        docker_client.api.start(container=container['Id'])
-        container = docker_client.containers.get(container['Id'])
+
+        try:
+            container = docker_client.containers.get(self.manager_name)
+        except:
+            docker_client.api.create_container(
+                name=self.manager_name,
+                image=docker_image,
+                command='/bin/sh',
+                detach=True,
+                tty=True,
+                volumes=[f'/home/pflotran/'],
+                host_config=docker_client.api.create_host_config(
+                    binds={
+                        Path().cwd() / f'studies/{study.name}': {
+                            'bind': f'/home/pflotran/{study.name}',
+                            'mode': 'rw',
+                        }
+                    })
+            )
+            docker_client.api.start(container=self.manager_name)
+            container = docker_client.containers.get(self.manager_name)
+
         # Compress study folder to a tar file
         bytes_io = BytesIO()
         import tarfile

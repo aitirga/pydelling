@@ -17,9 +17,10 @@ class BaseManager(ABC):
     - Run simulations on a given software
     - Read the output status of the simulation
     """
-    def __init__(self):
+    def __init__(self, name: str = None):
         self.results_folder = None
         self.studies: Dict[str, BaseStudy] = {}
+        self.manager_name = name if name is not None else self.__class__.__name__
 
     def add_study(self, study: BaseStudy):
         """This method adds a study to the manager.
@@ -36,7 +37,7 @@ class BaseManager(ABC):
         """
         self.generate_run_files(studies_folder=studies_folder)
         for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
-            self.run_study(study.name, docker_image=docker_image, n_cores=n_cores)
+            self.run_study(study, docker_image=docker_image, n_cores=n_cores)
 
     def generate_run_files(self, studies_folder: str = './studies'):
         """This method generates the run files for all the studies.
@@ -47,50 +48,39 @@ class BaseManager(ABC):
             study.to_file(self.results_folder / study.name)
 
     @abstractmethod
-    def _run_study(self, study_name: str, n_cores: int = 1):
+    def _run_study(self, study: BaseStudy, n_cores: int = 1):
         """This method runs a study.
         """
-        logger.info(f"Running study {study_name}")
+        logger.info(f"Running study {study.name}")
         pass
 
     @abstractmethod
     def _run_study_docker(self,
-                          study_name: str,
+                          study: BaseStudy,
                           docker_image: str,
                           n_cores: int = 1,
                           ):
         """This method runs a study using docker.
         """
-        logger.info(f"Running study {study_name} using docker image {docker_image}")
+        logger.info(f"Running study {study.name} using docker image {docker_image}")
 
-
-    @abstractmethod
-    def _get_study_status(self, study_name: str):
-        """This method returns the status of a study.
-        """
-        pass
 
     def run_study(self,
-                  study_name: str,
+                  study: BaseStudy,
                   n_cores: int = 1,
                   docker_image: str = None,
                   ):
         """This method runs a study.
         """
-        logger.info(f"Running study {study_name}")
+        logger.info(f"Running study {study.name}")
         # Create the study files
 
         # Run the study
         if docker_image is None:
-            self._run_study(study_name, n_cores=n_cores)
+            self._run_study(study, n_cores=n_cores)
         else:
-            self._run_study_docker(study_name, docker_image, n_cores=n_cores)
+            self._run_study_docker(study, docker_image, n_cores=n_cores)
 
-
-    def get_study_status(self, study_name: str):
-        """This method returns the status of a study.
-        """
-        return self._get_study_status(study_name)
 
     @property
     def n_studies(self):
