@@ -13,6 +13,7 @@ class PflotranStudy(BaseStudy):
         """
         super().__init__(input_file)
         self.regions_to_idx = {}
+        self.datasets_to_idx = {}
 
     def get_regions(self):
         """This method returns the regions of the simulation.
@@ -64,6 +65,21 @@ class PflotranStudy(BaseStudy):
                 return line.split()[1]
         return None
 
+    def get_datasets(self) -> List[str]:
+        """This method returns the datasets of the simulation.
+        """
+        datasets = []
+        for line_idx in self._find_tags('DATASET'):
+            line = self._get_line(line_idx)
+            if line.split()[0].lower() == 'hdf5_dataset_name':
+                continue
+            if self._get_parent_tag_name_(line_idx).lower() == 'dataset':
+                datasets.append(line.split()[1])
+                self.datasets_to_idx[line.split()[1]] = line_idx
+        return datasets
+
+
+
     def replace_region_file(self, region: str, new_file: str):
         """This method replaces the file of the region.
         """
@@ -104,6 +120,39 @@ class PflotranStudy(BaseStudy):
             self._add_line(line_index=last_line_idx + 2, new_line=['FORMAT', 'HDF5'])
             self._add_line(line_index=last_line_idx + 3, new_line=['/'])
 
+    def add_dataset(self, name: str, filename: str, hdf5_dataset_name: str):
+        """This method adds a dataset to the simulation.
+        """
+        logger.info(f"Adding dataset {name} to the simulation")
+        # Find simulation block
+        if name in self.get_datasets():
+            idx = self.datasets_to_idx[name]
+            inside_block = self._get_block_line_idx(idx)
+            for line_idx in inside_block:
+                line = self._get_line(line_idx)
+                print(line)
+                if 'file' in line.lower():
+                    self._replace_line(line_index=line_idx, new_line=['FILE', filename])
+                if 'hdf5_dataset' in line.lower():
+                    self._replace_line(line_index=line_idx, new_line=['HDF5_DATASET', hdf5_dataset_name])
+        else:
+            subsurface_block_start = self.get_subsurface_idx()
+            # Find the last line of the simulation block
+            last_line_idx = subsurface_block_start + 2
+            # Add the checkpoint block
+            self._add_line(line_index=last_line_idx, new_line=['DATASET', name])
+            self._add_line(line_index=last_line_idx + 1, new_line=['FILE', filename])
+            self._add_line(line_index=last_line_idx + 2, new_line=['HDF5_DATASET', hdf5_dataset_name])
+            self._add_line(line_index=last_line_idx + 3, new_line=['/'])
+
+    def get_subsurface_idx(self) -> int:
+        """This method returns the index of the subsurface tag.
+        """
+        subsurface_idx = self._find_tags('SUBSURFACE')
+        for idx in subsurface_idx:
+            if self._get_parent_tag_name_(idx) == 'SUBSURFACE':
+                return idx
+
     def has_tag(self, tag: str):
         """This method returns True if the tag is in the input file.
         """
@@ -117,15 +166,18 @@ class PflotranStudy(BaseStudy):
         temp_list = []
         temp_list.append(self._get_line(line_index))
         while not has_end_tag:
-            line_index -= 1
             line = self._get_line(line_index)
+            line_index -= 1
             if len(line.split()) == 0:
                 continue
             if line[0] == '#':
                 continue
+            if 'subsurface' in line.lower():
+                has_end_tag = True
             temp_list.append(line)
             if 'end' in line.lower():
                 has_end_tag = True
+
         return temp_list[-2].split()[0]
 
     def _get_block_lines(self, line_index: int):
