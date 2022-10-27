@@ -31,12 +31,17 @@ class BaseStudy(UnitConverter):
     """
     count = 0
 
-    def __init__(self, input_file: str, study_name: str = None):
+    def __init__(self, input_file: str, study_name: str = None, is_independent: bool = False,):
         """This method initializes the manager.
         """
-        self.__class__.count += 1
-        self.idx = self.__class__.count
-        self.name = study_name if study_name is not None else f"{self.__class__.__name__}-{self.idx}"
+        if not is_independent:
+            self.idx = self.__class__.count
+            self.__class__.count += 1
+            self.is_independent = False
+        else:
+            self.idx = None
+            self.is_independent = True
+        self.name = study_name if study_name is not None else f"{self.__class__.__name__}-{self.idx + 1}"
         self.input_file_name = Path(input_file).name
         logger.info(f"Initializing {self.__class__.__name__} manager")
         self.input_file = Path(input_file)

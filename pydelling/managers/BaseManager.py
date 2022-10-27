@@ -32,6 +32,7 @@ class BaseManager(ABC):
             studies_folder: str = './studies',
             n_cores: int = 1,
             docker_image: str = None,
+            dummy: bool = False,
             ):
         """This method runs all the studies.
         """
@@ -39,14 +40,14 @@ class BaseManager(ABC):
         for study in self.studies.values():
             study.initialize_callbacks(self)
 
-        self.generate_run_files(studies_folder=studies_folder)
+        self.results_folder = create_results_folder(studies_folder)
+        # self.generate_run_files(studies_folder=studies_folder)
         for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
-            self.run_study(study, docker_image=docker_image, n_cores=n_cores)
+            self.run_study(study, docker_image=docker_image, n_cores=n_cores, dummy=dummy)
 
     def generate_run_files(self, studies_folder: str = './studies'):
         """This method generates the run files for all the studies.
         """
-        self.results_folder = create_results_folder(studies_folder)
         for study in self.studies.values():
             study: BaseStudy
             study.to_file(self.results_folder / study.name)
@@ -72,18 +73,25 @@ class BaseManager(ABC):
                   study: BaseStudy,
                   n_cores: int = 1,
                   docker_image: str = None,
+                  dummy: bool = False,
                   ):
         """This method runs a study.
         """
         logger.info(f"Running study {study.name}")
         # Create the study files
+        study.output_folder = self.results_folder / study.name
         study.pre_run()
         for callback in study.callbacks:
             if callback.kind == 'pre':
                 callback.run()
+
+        study.to_file(self.results_folder / study.name)
         # Run the study
         if docker_image is None:
-            self._run_study(study, n_cores=n_cores)
+            if dummy:
+                logger.info("Dummy run, not running the study")
+            else:
+                self._run_study(study, n_cores=n_cores)
         else:
             self._run_study_docker(study, docker_image, n_cores=n_cores)
         # Post run

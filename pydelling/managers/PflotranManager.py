@@ -35,6 +35,7 @@ class PflotranManager(BaseManager):
             # Run the study in serial
 
         try:
+            docker_client.api.start(self.manager_name)
             container = docker_client.containers.get(self.manager_name)
         except:
             docker_client.api.create_container(
