@@ -143,7 +143,7 @@ class PflotranStudy(BaseStudy):
             self._add_line(line_index=last_line_idx, new_line=['DATASET', name])
             self._add_line(line_index=last_line_idx + 1, new_line=['FILE', filename])
             self._add_line(line_index=last_line_idx + 2, new_line=['HDF5_DATASET', hdf5_dataset_name])
-            self._add_line(line_index=last_line_idx + 3, new_line=['/'])
+            self._add_line(line_index=last_line_idx + 3, new_line=['END'])
 
     def get_subsurface_idx(self) -> int:
         """This method returns the index of the subsurface tag.
