@@ -9,10 +9,12 @@ class BaseCallback(ABC):
         self.study = study
         self.kind = kind
         self.kwargs = kwargs
+        self.is_run = False
 
     @abstractmethod
     def run(self):
         """This method executes the callback."""
+        self.is_run = True
         pass
 
 

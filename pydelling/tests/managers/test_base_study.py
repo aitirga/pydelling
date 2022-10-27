@@ -22,6 +22,7 @@ class TestBaseStudy(TestCase):
 
         dummy_study = BaseStudy(str(test_data_path() / 'test_manager.in'))
         dummy_study.add_callback(BaseCallback, kind='pre')
+        dummy_study.add_callback(BaseCallback, kind='hehe')
 
         dummy_manager = BaseManager()
         dummy_manager.add_study(dummy_study)
@@ -29,6 +30,8 @@ class TestBaseStudy(TestCase):
         self.assertEqual(dummy_study.callbacks[0].kind, 'pre')
         self.assertEqual(dummy_study.callbacks[0].study, dummy_study)
         self.assertEqual(dummy_study.callbacks[0].manager, dummy_manager)
+        self.assertEqual(dummy_study.callbacks[0].is_run, True)
+        self.assertEqual(dummy_study.callbacks[1].is_run, False)
 
 
 
