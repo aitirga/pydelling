@@ -187,7 +187,6 @@ class BaseStudy(UnitConverter):
             tar.add('temp', arcname=os.path.basename('temp'))
         shutil.rmtree('temp')
 
-
     def __repr__(self):
         return f"{self.__class__.__name__} (input template: {self.input_file.name})"
 

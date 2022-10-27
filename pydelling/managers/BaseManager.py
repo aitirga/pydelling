@@ -74,12 +74,14 @@ class BaseManager(ABC):
         """
         logger.info(f"Running study {study.name}")
         # Create the study files
-
+        study.pre_run()
         # Run the study
         if docker_image is None:
             self._run_study(study, n_cores=n_cores)
         else:
             self._run_study_docker(study, docker_image, n_cores=n_cores)
+        # Post run
+        study.post_run()
 
 
     @property
