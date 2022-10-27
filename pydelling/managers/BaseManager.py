@@ -35,6 +35,10 @@ class BaseManager(ABC):
             ):
         """This method runs all the studies.
         """
+        # Initialize callbacks
+        for study in self.studies.values():
+            study.initialize_callbacks(self)
+
         self.generate_run_files(studies_folder=studies_folder)
         for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
             self.run_study(study, docker_image=docker_image, n_cores=n_cores)
@@ -63,7 +67,6 @@ class BaseManager(ABC):
         """This method runs a study using docker.
         """
         logger.info(f"Running study {study.name} using docker image {docker_image}")
-
 
     def run_study(self,
                   study: BaseStudy,

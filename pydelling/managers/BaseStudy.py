@@ -1,7 +1,13 @@
+from __future__ import annotations
 from pathlib import Path
 from jinja2 import Template
 import shutil
 from pydelling.utils import UnitConverter
+from typing import Callable
+
+from typing import TYPE_CHECKING, List, Union
+if TYPE_CHECKING:
+    from pydelling.managers import BaseCallback, BaseManager
 
 import logging
 
@@ -40,6 +46,8 @@ class BaseStudy(UnitConverter):
         self.raw_text = self.input_file.read_text()
         self.aux_files = {}
         self.output_folder = None
+        self._callbacks: List[Callable] = []
+        self.callbacks: List[BaseCallback] = []
 
     def pre_run(self):
         """This method is executed before the run.
@@ -152,6 +160,21 @@ class BaseStudy(UnitConverter):
             self.aux_files[file.name] = file
         logger.info(f"Adding input folder {folder_path} with {len(self.aux_files)} files")
 
+    def add_callback(self, callback: Callable, kind: str = 'pre', **kwargs):
+        """This method adds a callback to the manager.
+        """
+        kwargs['kind'] = kind
+        self._callbacks.append(lambda manager: callback(manager, self, **kwargs))
+
+    def initialize_callbacks(self, manager: BaseManager):
+        """This method initializes the callbacks.
+        """
+        temp_callbacks = []
+        for callback in self._callbacks:
+            temp_callbacks.append(callback(manager))
+        self.callbacks = temp_callbacks
+
+
     def to_file(self,
                 output_folder: str=None,
                 output_file: str=None,
@@ -200,6 +223,8 @@ class BaseStudy(UnitConverter):
                 continue
             setattr(new_obj, attr, getattr(self, attr))
         return new_obj
+
+
 
     def __str__(self):
         return self.__repr__()
