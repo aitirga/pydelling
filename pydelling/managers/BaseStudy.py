@@ -150,7 +150,7 @@ class BaseStudy(UnitConverter):
         file_path = Path(file_path)
         self.aux_files[file_path.name] = file_path
 
-    def add_input_file(self, file_path: str):
+    def add_input_file(self, file_path: Union[Path, str]):
         """This method adds an auxiliary file to the manager.
         """
         logger.info(f"Adding input file {file_path}")

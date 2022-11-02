@@ -94,11 +94,11 @@ class BaseManager(ABC):
                 self._run_study(study, n_cores=n_cores)
         else:
             self._run_study_docker(study, docker_image, n_cores=n_cores)
-        # Post run
-        study.post_run()
+
         for callback in study.callbacks:
             if callback.kind == 'post':
                 callback.run()
+        study.post_run()
 
 
     @property
