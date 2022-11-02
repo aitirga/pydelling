@@ -140,19 +140,18 @@ class PflotranStudy(BaseStudy):
             inside_block = self._get_block_line_idx(idx)
             for line_idx in inside_block:
                 line = self._get_line(line_idx)
-                print(line)
                 if 'file' in line.lower():
-                    self._replace_line(line_index=line_idx, new_line=['FILE', filename])
+                    self._replace_line(line_index=line_idx, new_line=['FILENAME', filename])
                 if 'hdf5_dataset' in line.lower():
-                    self._replace_line(line_index=line_idx, new_line=['HDF5_DATASET', hdf5_dataset_name])
+                    self._replace_line(line_index=line_idx, new_line=['HDF5_DATASET_NAME', hdf5_dataset_name])
         else:
             subsurface_block_start = self.get_subsurface_idx()
             # Find the last line of the simulation block
             last_line_idx = subsurface_block_start + 2
             # Add the checkpoint block
             self._add_line(line_index=last_line_idx, new_line=['DATASET', name])
-            self._add_line(line_index=last_line_idx + 1, new_line=['FILE', filename])
-            self._add_line(line_index=last_line_idx + 2, new_line=['HDF5_DATASET', hdf5_dataset_name])
+            self._add_line(line_index=last_line_idx + 1, new_line=['FILENAME', filename])
+            self._add_line(line_index=last_line_idx + 2, new_line=['HDF5_DATASET_NAME', hdf5_dataset_name])
             self._add_line(line_index=last_line_idx + 3, new_line=['END'])
 
     def get_subsurface_idx(self) -> int:

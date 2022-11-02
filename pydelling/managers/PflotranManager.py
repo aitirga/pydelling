@@ -5,7 +5,11 @@ import docker
 from docker.models.containers import Container
 from io import BytesIO
 from pathlib import Path
+from pydelling.utils import create_results_folder
+from pydelling.managers.PflotranPostprocessing import PflotranPostprocessing
+import logging
 
+logger = logging.getLogger(__name__)
 class PflotranManager(BaseManager):
     def _get_study_status(self, study_id: int):
         """This method returns the status of a study.
@@ -78,9 +82,47 @@ class PflotranManager(BaseManager):
                                    f"export PETSC_ARCH=docker-petsc && "
                                    f"cd /home/pflotran/{study.output_folder.name} && "
                                    f"$PETSC_DIR/$PETSC_ARCH/bin/mpiexec -np {n_cores} pflotran -pflotranin {study.input_file_name}'")
-            print(result)
         container.stop()
         container.remove()
+
+    def merge_results(self, move=False, postprocess=True):
+        """This method merges the results of all the studies.
+        """
+        self.run(dummy=True)
+        import shutil
+        # results_folder = create_results_folder(list(self.studies.values())[0].output_folder)
+        self.merged_folder = create_results_folder(self.results_folder / 'merged_results')
+        for study in self.studies.values():
+            hdf5_files = list(study.output_folder.glob('*.h5'))
+            for file in hdf5_files:
+                if 'restart' not in file.name:
+                    if not move:
+                        shutil.copy(file, self.results_folder / 'merged_results')
+                    else:
+                        shutil.move(file, self.results_folder / 'merged_results')
+
+        # Copy -domain.h5 file
+        domain_folder = list(self.studies.values())[0].output_folder / 'input_files'
+        domain_file = list(domain_folder.glob('*-domain.h5'))[0]
+        shutil.copy(domain_file, self.results_folder / 'merged_results')
+
+        if postprocess:
+            logger.info('Postprocessing results')
+            pflotran_postprocesser = PflotranPostprocessing()
+            # Change the working directory to the results folder
+            import os
+            os.chdir(self.results_folder / 'merged_results')
+            pflotran_postprocesser.run()
+            # Return to the original working directory
+
+
+
+
+
+
+
+
+
 
 
 
