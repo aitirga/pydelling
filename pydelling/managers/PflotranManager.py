@@ -102,11 +102,12 @@ class PflotranManager(BaseManager):
                         shutil.move(file, self.results_folder / 'merged_results')
 
         # Copy -domain.h5 file
-        domain_folder = list(self.studies.values())[0].output_folder / 'input_files'
-        domain_file = list(domain_folder.glob('*-domain.h5'))[0]
-        shutil.copy(domain_file, self.results_folder / 'merged_results')
+
 
         if postprocess:
+            domain_folder = list(self.studies.values())[0].output_folder / 'input_files'
+            domain_file = list(domain_folder.glob('*-domain.h5'))[0]
+            shutil.copy(domain_file, self.results_folder / 'merged_results')
             logger.info('Postprocessing results')
             pflotran_postprocesser = PflotranPostprocessing()
             # Change the working directory to the results folder

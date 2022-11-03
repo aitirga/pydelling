@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class BaseCallback(ABC):
     """Base class for callbacks."""
     def __init__(self, manager: BaseManager, study: BaseStudy, kind: str = None, **kwargs):
@@ -13,6 +14,7 @@ class BaseCallback(ABC):
         self.kind = kind
         self.kwargs = kwargs
         self.is_run = False
+        self.process_kwargs()
 
     @abstractmethod
     def run(self):
@@ -20,6 +22,10 @@ class BaseCallback(ABC):
         self.is_run = True
         logger.info(f"Running callback {self.__class__.__name__} for study {self.study.name}")
         pass
+
+    def process_kwargs(self):
+        for kwarg_name, kwarg in self.kwargs.items():
+            setattr(self, kwarg_name, kwarg)
 
 
 

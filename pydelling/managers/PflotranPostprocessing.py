@@ -7,12 +7,11 @@ from pathlib import Path
 import h5py
 import os
 import shutil
-import sys
-import pandas as pd
-import vtk
 import numpy as np
 from typing import Dict
-import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class PflotranPostprocessing:
     """This class manages the structure of the output files"""
@@ -21,6 +20,7 @@ class PflotranPostprocessing:
         self.unit = unit
         self.output_times = []
         self.output_units = []
+        self.project_name = None
 
     def run(self):
         "Method that runs the post-processing engine"
@@ -51,10 +51,13 @@ class PflotranPostprocessing:
                 # assert len(self.output_h5_files) > 0, "Output hdf5 files couldn't be found"
                 self.output_directory = self.current_directory / "output-hdf5"
         # Take out the domain hdf5 file from the output file list
+        # Set the project name
         domain_file = [file for file in self.output_h5_files if "domain" in file.name]
-        if domain_file:
-            self.output_h5_files.remove(domain_file[0])
-        self.n_output_files = len(self.output_h5_files)
+        assert len(domain_file) > 0, "Domain file couldn't be found"
+        self.output_h5_files.remove(domain_file[0])
+        self.project_name = self.output_h5_files[0].stem.split('-')[0]
+        # Rename domain file using the project name
+        domain_file[0].rename(self.output_directory / f"{self.project_name}-domain.h5")
         self.output_h5_files = sorted(self.output_h5_files)
         # Process the VTK files
         if self.current_directory.stem == "output-vtk":
@@ -90,12 +93,15 @@ class PflotranPostprocessing:
         if len(list(self.input_directory.glob("*-domain.h5"))) > 0:
             self.domain_file = list(self.input_directory.glob("*-domain.h5"))[0]
         else:
-            print(self.current_directory)
             self.domain_file = list(self.current_directory.glob("*-domain.h5"))[0]
         return self.domain_file
 
     def find_input_file(self):
-        self.input_file = list(self.root_directory.glob("*.in"))[0]
+        self.input_file = None
+        try:
+            self.input_file = list(self.input_directory.glob("*.in"))[0]
+        except:
+            logger.warning("Input file couldn't be found")
         return self.input_file
 
     def add_velocity_to_hdf5(self):
@@ -112,7 +118,6 @@ class PflotranPostprocessing:
                         hdf5_group.create_dataset(name=var, data=vtk_file_dict[var]["data"])
 
     def find_attributes(self):
-        self.input_stem = self.input_file.stem
         # Find number of cells and number of vertices
         with h5py.File(self.domain_file, "r") as file:
             self.n_vertices = len(file["Domain"]["Vertices"])
@@ -123,6 +128,11 @@ class PflotranPostprocessing:
             self.output_variables = [item[0] for item in hdf5_group.items()]
             self.n_cells = len(hdf5_group[self.output_variables[0]])
         for hdf5_file in self.output_h5_files:
+            if 'domain' in hdf5_file.name:
+                # Delete the domain file from the list
+                self.output_h5_files.remove(hdf5_file)
+                continue
+
             with h5py.File(hdf5_file, "r") as hdf5_file:
                 attribute_list = list(hdf5_file.items())[0][0].split()
                 self.output_times.append(float(attribute_list[2]))
@@ -130,16 +140,17 @@ class PflotranPostprocessing:
 
     def copy_domain_file(self):
         # check if file exists and delete otherwise
-        if list(self.output_directory.glob("*-domain.h5")):
-            os.remove(list(self.output_directory.glob("*-domain.h5"))[0])
-        target_file = self.output_directory / "{}-domain.h5".format(self.input_stem)
-        domain_file = str(self.domain_file)
-        shutil.copy2(domain_file, str(target_file))
+        # if list(self.output_directory.glob("*-domain.h5")):
+        #     os.remove(list(self.output_directory.glob("*-domain.h5"))[0])
+        # target_file = self.output_directory / "{}-domain.h5".format(self.project_name)
+        # domain_file = str(self.domain_file)
+        # shutil.copy(domain_file, str(target_file))
+        pass
 
     def export_xmf(self):
         # Input variables
         dt = self.dt  # time interval between individual result files
-        file_name = self.input_stem
+        file_name = self.project_name
         Nelements = self.n_cells
         Nvertices = self.pflotran_vertices - self.n_cells
         Nvertices_pflotran = self.n_vertices
@@ -178,7 +189,7 @@ class PflotranPostprocessing:
     def export_attribute(self, var, i):
         self.output_file.write('\t\t<Attribute Name="%s" AttributeType="Scalar"  Center="Cell">\n' % var)
         self.output_file.write('\t\t\t<DataItem Dimensions="%s 1" Format="HDF">\n' % self.n_cells)
-        self.output_file.write('\t\t\t\t{}-{:03d}.h5:/{:4d} Time  {:1.5E} {}/{}\n'.format(self.input_stem, i, i, self.output_times[i], self.output_units[i], var))
+        self.output_file.write('\t\t\t\t{}-{:03d}.h5:/{:4d} Time  {:1.5E} {}/{}\n'.format(self.project_name, i, i, self.output_times[i], self.output_units[i], var))
         self.output_file.write('\t\t\t</DataItem>\n')
         self.output_file.write('\t\t</Attribute>\n')
 
@@ -220,3 +231,7 @@ class PflotranPostprocessing:
             data_dict[current_reading]["data"] = np.concatenate(temp_array)
             data_dict[current_reading]["shape"] = np.concatenate(temp_array).shape
         return data_dict
+
+    @property
+    def n_output_files(self):
+        return len(self.output_h5_files)
