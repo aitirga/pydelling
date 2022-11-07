@@ -222,6 +222,7 @@ class DfnUpscaler:
                               existing_fractures_fraction=1.0,
                               truncate_to_min_percentile=5,
                               truncate_to_max_percentile=95,
+                              truncate=True,
                               ):
         # Compute upscaled porosity for each element.
         matrix_porosity = 0.0
@@ -237,30 +238,31 @@ class DfnUpscaler:
                 upscaled_porosity[element.local_id] = fault.porosity
 
         #Post-processing: Truncate values to P5 and P95.
-        resulting_porosity = [upscaled_porosity[local_id] for local_id in upscaled_porosity]
-        minimum_porosity = -1.0
-        min_percentile = truncate_to_min_percentile - 1
-        while minimum_porosity <= 0:
-            minimum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)],
-                                             min_percentile)
-            min_percentile = min_percentile + 1
-        print("Porosity will be truncated to Percentile = " + str(min_percentile))
+        if truncate:
+            resulting_porosity = [upscaled_porosity[local_id] for local_id in upscaled_porosity]
+            minimum_porosity = -1.0
+            min_percentile = truncate_to_min_percentile - 1
+            while minimum_porosity <= 0:
+                minimum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)],
+                                                 min_percentile)
+                min_percentile = min_percentile + 1
+            print("Porosity will be truncated to Percentile = " + str(min_percentile))
 
-        # Truncate to max
-        maximum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)],
-                                            truncate_to_max_percentile)  # TODO: check if this is correct (strange results with small datasets)
-        maximum_porosity = np.max(np.array(resulting_porosity)[~np.isnan(resulting_porosity)])
+            # Truncate to max
+            maximum_porosity = np.percentile(np.array(resulting_porosity)[~np.isnan(resulting_porosity)],
+                                                truncate_to_max_percentile)  # TODO: check if this is correct (strange results with small datasets)
+            maximum_porosity = np.max(np.array(resulting_porosity)[~np.isnan(resulting_porosity)])
 
-        for elem in tqdm(self.mesh.elements, desc="Truncating porosity values to P1 and P99"):
+            for elem in tqdm(self.mesh.elements, desc="Truncating porosity values to P1 and P99"):
 
-            if math.isnan(upscaled_porosity[elem.local_id]):
-                upscaled_porosity[elem.local_id] = minimum_porosity
-            elif upscaled_porosity[elem.local_id] > maximum_porosity:
-                upscaled_porosity[elem.local_id] = maximum_porosity
-            elif upscaled_porosity[elem.local_id] <= 0.0:
-                upscaled_porosity[elem.local_id] = minimum_porosity
-            else:
-                continue
+                if math.isnan(upscaled_porosity[elem.local_id]):
+                    upscaled_porosity[elem.local_id] = minimum_porosity
+                elif upscaled_porosity[elem.local_id] > maximum_porosity:
+                    upscaled_porosity[elem.local_id] = maximum_porosity
+                elif upscaled_porosity[elem.local_id] <= 0.0:
+                    upscaled_porosity[elem.local_id] = minimum_porosity
+                else:
+                    continue
 
         vtk_porosity = np.asarray(self.mesh.elements)
         for local_id in upscaled_porosity:
@@ -273,7 +275,12 @@ class DfnUpscaler:
 
         return upscaled_porosity
 
-    def upscale_mesh_storativity(self, matrix_storativity=None, truncate_to_min_percentile=5,truncate_to_max_percentile=95):
+    def upscale_mesh_storativity(self,
+                                 matrix_storativity=None,
+                                 truncate_to_min_percentile=5,
+                                 truncate_to_max_percentile=95,
+                                 truncate=True,
+                                 ):
 
         upscaled_storativity = {}
 
@@ -297,27 +304,28 @@ class DfnUpscaler:
 
 
         #Post-processing: Truncate values to P5 and P95.
-        resulting_storativity = [upscaled_storativity[local_id] for local_id in upscaled_storativity]
-        minimum_storativity = -1.0
-        min_percentile = truncate_to_min_percentile - 1
-        while minimum_storativity <= 0:
-            minimum_storativity = np.percentile(np.array(resulting_storativity)[~np.isnan(resulting_storativity)], min_percentile)
-            min_percentile = min_percentile + 1
-            print(min_percentile)
+        if truncate:
+            resulting_storativity = [upscaled_storativity[local_id] for local_id in upscaled_storativity]
+            minimum_storativity = -1.0
+            min_percentile = truncate_to_min_percentile - 1
+            while minimum_storativity <= 0:
+                minimum_storativity = np.percentile(np.array(resulting_storativity)[~np.isnan(resulting_storativity)], min_percentile)
+                min_percentile = min_percentile + 1
+                print(min_percentile)
 
-        print("Storativity will be truncated to Percentile = " + str(min_percentile))
+            print("Storativity will be truncated to Percentile = " + str(min_percentile))
 
-        maximum_storativity = np.percentile(np.array(resulting_storativity)[~np.isnan(resulting_storativity)], truncate_to_max_percentile)
+            maximum_storativity = np.percentile(np.array(resulting_storativity)[~np.isnan(resulting_storativity)], truncate_to_max_percentile)
 
-        for elem in tqdm(self.mesh.elements, desc="Truncating porosity values to P1 and P99"):
-            if math.isnan(upscaled_storativity[elem.local_id]):
-              upscaled_storativity[elem.local_id] = minimum_storativity
-            elif upscaled_storativity[elem.local_id] > maximum_storativity:
-                upscaled_storativity[elem.local_id] = maximum_storativity
-            elif upscaled_storativity[elem.local_id] <= minimum_storativity:
-                upscaled_storativity[elem.local_id] = minimum_storativity
-            else:
-                continue
+            for elem in tqdm(self.mesh.elements, desc="Truncating porosity values to P1 and P99"):
+                if math.isnan(upscaled_storativity[elem.local_id]):
+                  upscaled_storativity[elem.local_id] = minimum_storativity
+                elif upscaled_storativity[elem.local_id] > maximum_storativity:
+                    upscaled_storativity[elem.local_id] = maximum_storativity
+                elif upscaled_storativity[elem.local_id] <= minimum_storativity:
+                    upscaled_storativity[elem.local_id] = minimum_storativity
+                else:
+                    continue
 
         vtk_storativity = np.asarray(self.mesh.elements)
         for local_id in upscaled_storativity:
@@ -368,7 +376,9 @@ class DfnUpscaler:
                                   mu=8.9e-4,
                                   mode='full_tensor',
                                   truncate_to_min_percentile=5,
-                                  truncate_to_max_percentile=95):
+                                  truncate_to_max_percentile=95,
+                                  truncate=True,
+                                  ):
 
         matrix_permeability = {}
 
@@ -513,30 +523,30 @@ class DfnUpscaler:
             upscaled_hk[elem.local_id] = upscaled_hk[elem.local_id] + fault_hk[elem.local_id]
 
         #Post-processing: Truncate values in each direction.
+        if truncate:
+            for i in range(0,3):
+                for j in range(0,3):
+                    resulting_hk = [upscaled_hk[local_id][0,0] for local_id in upscaled_hk]
+                    minimum_hk = -1.0
+                    min_percentile = truncate_to_min_percentile - 1
+                    while minimum_hk <= 0:
+                        minimum_hk = np.percentile(np.array(resulting_hk)[~np.isnan(resulting_hk)], min_percentile)
+                        min_percentile = min_percentile + 1
+                        print(min_percentile)
 
-        for i in range(0,3):
-            for j in range(0,3):
-                resulting_hk = [upscaled_hk[local_id][0,0] for local_id in upscaled_hk]
-                minimum_hk = -1.0
-                min_percentile = truncate_to_min_percentile - 1
-                while minimum_hk <= 0:
-                    minimum_hk = np.percentile(np.array(resulting_hk)[~np.isnan(resulting_hk)], min_percentile)
-                    min_percentile = min_percentile + 1
-                    print(min_percentile)
+                    print("HK will be truncated to Percentile = " + str(min_percentile))
 
-                print("HK will be truncated to Percentile = " + str(min_percentile))
+                    maximum_hk = np.percentile(np.array(resulting_hk)[~np.isnan(resulting_hk)], truncate_to_max_percentile)
 
-                maximum_hk = np.percentile(np.array(resulting_hk)[~np.isnan(resulting_hk)], truncate_to_max_percentile)
-
-                for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
-                    if math.isnan(upscaled_hk[elem.local_id][i,j]):
-                        upscaled_hk[elem.local_id][i,j] = minimum_hk
-                    elif upscaled_hk[elem.local_id][i,j] > maximum_hk:
-                        upscaled_hk[elem.local_id][i,j] = maximum_hk
-                    elif upscaled_hk[elem.local_id][i,j] <= minimum_hk:
-                        upscaled_hk[elem.local_id][i,j] = minimum_hk
-                    else:
-                        continue
+                    for elem in tqdm(self.mesh.elements, desc="Truncating permeability values"):
+                        if math.isnan(upscaled_hk[elem.local_id][i,j]):
+                            upscaled_hk[elem.local_id][i,j] = minimum_hk
+                        elif upscaled_hk[elem.local_id][i,j] > maximum_hk:
+                            upscaled_hk[elem.local_id][i,j] = maximum_hk
+                        elif upscaled_hk[elem.local_id][i,j] <= minimum_hk:
+                            upscaled_hk[elem.local_id][i,j] = minimum_hk
+                        else:
+                            continue
 
         # Export values to VTK
         vtk_kxx = np.asarray(self.mesh.elements)
