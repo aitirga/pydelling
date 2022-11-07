@@ -1,6 +1,7 @@
 from typing import Dict
 
 import pandas as pd
+from copy import deepcopy
 
 
 class BaseReader:
@@ -11,3 +12,7 @@ class BaseReader:
     def read(self):
         """This function should read the data automatically from the config file"""
         pass
+
+    def copy(self):
+        """This function returns a copy of the reader"""
+        return deepcopy(self)

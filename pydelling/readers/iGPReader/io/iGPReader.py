@@ -16,6 +16,7 @@ from pydelling.preprocessing.mesh_preprocessor.geometry import *
 from pydelling.readers.iGPReader.io import BaseReader
 from pydelling.readers.iGPReader.utils import get_output_path, RegionOperations
 from tqdm import tqdm
+from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,9 @@ class iGPReader(BaseReader, RegionOperations):
         # Create output folder if it is not created
         if self.output_folder:
             os.makedirs(self.output_folder, exist_ok=True)
-        self.initialize_info_dicts()
+        self.mesh_data = None
+        self.centroid_data = None
+        self.region_data = None
 
     def read_mesh_data(self):
         """Reads mesh data
@@ -847,8 +850,6 @@ class iGPReader(BaseReader, RegionOperations):
         '''Returns the names of the materials'''
         return list(self.material_dict.keys())
 
-
-
     def __repr__(self):
         import rich
         from rich.markdown import Markdown
@@ -862,6 +863,13 @@ class iGPReader(BaseReader, RegionOperations):
 
     def __str__(self):
         return self.__repr__()
+
+    def copy(self):
+        """Create a copy of the class"""
+        temp_class = iGPReader(path=self.path, project_name=self.project_name)
+        for key in self.__dict__:
+            temp_class.__dict__[key] = self.__dict__[key]
+
 
 
 def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_size, centroids):
@@ -894,6 +902,7 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
             amount = id_local / int(len(elements))
             logger.info(f"Process {chunk_index} completed amount: {amount * 100:3.0f} %")
             amount_read += 0.1
+
 
 
 
