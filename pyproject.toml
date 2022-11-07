@@ -39,7 +39,8 @@ paramiko = "*"
 rich = "*"
 numpy-stl = "*"
 docker = "*"
-
+scikit-learn = "*"
+alive-progress = "*"
 
 [build-system]
 requires = ["poetry-core"]
