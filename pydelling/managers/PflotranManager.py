@@ -24,6 +24,7 @@ class PflotranManager(BaseManager):
         """
         # Change the working directory to the study folder
         os.chdir(study.output_folder)
+        # test comment
         if n_cores == 1:
             # Run the study in serial
             subprocess.run(['pflotran', '-pflotranin', study.input_file.name])
