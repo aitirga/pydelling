@@ -145,14 +145,16 @@ class PflotranStudy(BaseStudy):
                 if 'hdf5_dataset' in line.lower():
                     self._replace_line(line_index=line_idx, new_line=['HDF5_DATASET_NAME', hdf5_dataset_name])
         else:
+            logger.warning(f"Dataset {name} not found in the simulation. Adding it.")
             subsurface_block_start = self.get_subsurface_idx()
             # Find the last line of the simulation block
             last_line_idx = subsurface_block_start + 2
             # Add the checkpoint block
-            self._add_line(line_index=last_line_idx, new_line=['DATASET', name])
-            self._add_line(line_index=last_line_idx + 1, new_line=['FILENAME', filename])
-            self._add_line(line_index=last_line_idx + 2, new_line=['HDF5_DATASET_NAME', hdf5_dataset_name])
-            self._add_line(line_index=last_line_idx + 3, new_line=['END'])
+            self._add_line(line_index=last_line_idx, new_line=['# Automatically added by pydelling'])
+            self._add_line(line_index=last_line_idx + 1, new_line=['DATASET', name])
+            self._add_line(line_index=last_line_idx + 2, new_line=['FILENAME', filename])
+            self._add_line(line_index=last_line_idx + 3, new_line=['HDF5_DATASET_NAME', hdf5_dataset_name])
+            self._add_line(line_index=last_line_idx + 4, new_line=['END'])
 
     def get_subsurface_idx(self) -> int:
         """This method returns the index of the subsurface tag.

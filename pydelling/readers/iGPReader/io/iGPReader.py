@@ -591,6 +591,7 @@ class iGPReader(BaseReader, RegionOperations):
         return [l[i:i + n] for i in range(0, len(l), n)]
 
     def build_mesh_data(self, processes=1,
+                        generate_cells=True,
                         generate_boundaries=True,
                         ):
         """
@@ -603,30 +604,31 @@ class iGPReader(BaseReader, RegionOperations):
             logger.info("Building implicit mesh structure")
             temp = []
             amount_read = 0.0
-            for id_local, element in tqdm(enumerate(self.element_nodes), total=len(self.element_nodes), desc='Building mesh'):
-                n_type = len(element)
-                if n_type == 4:  # This is a Wedge object
-                    temp.append(TetrahedraElement(node_ids=element,
-                                                  node_coords=self.nodes[element],
-                                                  local_id=id_local,
-                                                  centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
-                                                  # centroid_coords=self.centroids[id_local]
-                                                  ))
-                if n_type == 6:  # This is a Wedge object
-                    temp.append(WedgeElement(node_ids=element,
-                                             node_coords=self.nodes[element],
-                                             local_id=id_local,
-                                             centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
-                                             # centroid_coords=self.centroids[id_local]
-                                             ))
-                if n_type == 8:  # This is a Hexahedra object
-                    temp.append(HexahedraElement(node_ids=element,
+            if generate_cells:
+                for id_local, element in tqdm(enumerate(self.element_nodes), total=len(self.element_nodes), desc='Building mesh'):
+                    n_type = len(element)
+                    if n_type == 4:  # This is a Wedge object
+                        temp.append(TetrahedraElement(node_ids=element,
+                                                      node_coords=self.nodes[element],
+                                                      local_id=id_local,
+                                                      centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
+                                                      # centroid_coords=self.centroids[id_local]
+                                                      ))
+                    if n_type == 6:  # This is a Wedge object
+                        temp.append(WedgeElement(node_ids=element,
                                                  node_coords=self.nodes[element],
                                                  local_id=id_local,
                                                  centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
                                                  # centroid_coords=self.centroids[id_local]
                                                  ))
-            self.elements = temp
+                    if n_type == 8:  # This is a Hexahedra object
+                        temp.append(HexahedraElement(node_ids=element,
+                                                     node_coords=self.nodes[element],
+                                                     local_id=id_local,
+                                                     centroid_coords=self.centroids[id_local] if config.general.constant_centroids else None,
+                                                     # centroid_coords=self.centroids[id_local]
+                                                     ))
+                self.elements = temp
             # Generate boundary information
             if generate_boundaries:
                 for boundary in tqdm(self.region_dict, desc='Generating boundary mesh'):
@@ -658,6 +660,7 @@ class iGPReader(BaseReader, RegionOperations):
                 number_of_processes = processes if processes is not None else mp.cpu_count() - 1
                 chunk_size = int(total_number_of_elements / number_of_processes)
                 chunks = self.chunks(self.element_nodes, chunk_size)
+
                 for i, chunk in enumerate(chunks):
                     p = Process(target=parallel_build_mesh_data, args=(chunk, self.nodes, shared_list, i, chunk_size, self.centroids))
                     processes_list.append(p)
@@ -670,6 +673,7 @@ class iGPReader(BaseReader, RegionOperations):
                 self.elements = list(shared_list)
             # Order self.elements list following the local_id
             self.elements = sorted(self.elements, key=lambda x: x.local_id)
+
             self.is_mesh_built = True
 
     def set_material_z_ranges(self):
@@ -864,11 +868,6 @@ class iGPReader(BaseReader, RegionOperations):
     def __str__(self):
         return self.__repr__()
 
-    def copy(self):
-        """Create a copy of the class"""
-        temp_class = iGPReader(path=self.path, project_name=self.project_name)
-        for key in self.__dict__:
-            temp_class.__dict__[key] = self.__dict__[key]
 
 
 
@@ -902,6 +901,7 @@ def parallel_build_mesh_data(elements, nodes, shared_list, chunk_index, chunk_si
             amount = id_local / int(len(elements))
             logger.info(f"Process {chunk_index} completed amount: {amount * 100:3.0f} %")
             amount_read += 0.1
+
 
 
 
