@@ -8,6 +8,7 @@ from pathlib import Path
 from pydelling.utils import create_results_folder
 from pydelling.managers.PflotranPostprocessing import PflotranPostprocessing
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 class PflotranManager(BaseManager):
@@ -21,6 +22,9 @@ class PflotranManager(BaseManager):
                    n_cores: int = 1):
         """This method runs a study.
         """
+        import os
+        # Change the working directory to the study folder
+        os.chdir(study.output_folder)
         if n_cores == 1:
             # Run the study in serial
             subprocess.run(['pflotran', '-pflotranin', study.input_file.name])
