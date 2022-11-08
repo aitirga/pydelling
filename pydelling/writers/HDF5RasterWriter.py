@@ -8,7 +8,7 @@ from .BaseWriter import BaseWriter
 
 
 class HDF5RasterWriter(BaseWriter):
-    def __init__(self, filename, data=None, region_name="region", times=0.0, attributes={}, **kwargs):
+    def __init__(self, filename, data=None, dataset_name="region", times=0.0, attributes={}, **kwargs):
         super().__init__(self, data=data, **kwargs)
         if self.info["interpolation"]["type"] == "regular_mesh":
             if len(self.data.shape) == 2:
@@ -30,7 +30,7 @@ class HDF5RasterWriter(BaseWriter):
                 self.data = np.swapaxes(self.data, 1, 2)
         if self.data is not None:
             self.data_loaded = True
-        self.region_name = region_name
+        self.region_name = dataset_name
         self.times = times
         self.attributes = attributes
 
