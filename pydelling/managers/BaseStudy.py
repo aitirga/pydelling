@@ -197,7 +197,7 @@ class BaseStudy(UnitConverter):
         BaseStudy.count += 1
         output_folder = Path(self.output_folder)
         output_folder.mkdir(exist_ok=True)
-        output_file = output_folder / (output_file or self.input_file.name)
+        output_file = output_folder / (output_file if output_file is not None else Path(self.input_file_name))
         output_file.write_text(self.render(**kwargs))
 
         # Copy the auxiliary files
