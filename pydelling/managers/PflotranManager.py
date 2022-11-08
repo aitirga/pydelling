@@ -22,15 +22,13 @@ class PflotranManager(BaseManager):
                    n_cores: int = 1):
         """This method runs a study.
         """
-        # cd to the study folder
-        subprocess.run(f'cd {study.output_folder.absolute()}', shell=True)
         # test comment
         if n_cores == 1:
             # Run the study in serial
-            subprocess.run(['pflotran', '-pflotranin', study.input_file_name])
+            subprocess.run(['pflotran', '-pflotranin', study.input_file_name], cwd=study.output_folder.absolute())
         else:
             # Run the study in parallel
-            subprocess.run(['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file_name])
+            subprocess.run(['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file_name], cwd=study.output_folder.absolute())
 
     def _run_study_docker(self,
                           study: PflotranStudy,
