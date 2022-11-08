@@ -86,7 +86,7 @@ class BaseManager(ABC):
         for callback in study.callbacks:
             if callback.kind == 'pre':
                 callback.run()
-
+        print(self.results_folder.absolute())
         study.to_file(self.results_folder / study.name)
         # Run the study
         if docker_image is None:

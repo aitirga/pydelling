@@ -20,6 +20,8 @@ class PflotranRestartCallback(BaseCallback):
             return
         output_files = list(prev_study.output_folder.glob('*.h5'))
         target_file = None
+        print(prev_study.output_folder)
+        print(prev_study.output_folder.absolute())
         print(output_files)
         for file in output_files:
             if 'restart' in file.name:
