@@ -20,6 +20,7 @@ class PflotranRestartCallback(BaseCallback):
             return
         output_files = list(prev_study.output_folder.glob('*.h5'))
         target_file = None
+        print(output_files)
         for file in output_files:
             if 'restart' in file.name:
                 target_file = file
@@ -27,5 +28,9 @@ class PflotranRestartCallback(BaseCallback):
             raise FileNotFoundError('Restart file not found')
         else:
             self.study.add_input_file(target_file)
+
+    def run_dummy(self):
+        """This method is called when the callback is run in dummy mode"""
+        pass
 
 

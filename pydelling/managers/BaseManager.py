@@ -21,6 +21,7 @@ class BaseManager(ABC):
         self.results_folder = None
         self.studies: Dict[str, BaseStudy] = {}
         self.manager_name = name if name is not None else self.__class__.__name__
+        self.is_dummy = False
 
     def add_study(self, study: BaseStudy):
         """This method adds a study to the manager.
@@ -36,6 +37,7 @@ class BaseManager(ABC):
             ):
         """This method runs all the studies.
         """
+        self.is_dummy = dummy
         # Initialize callbacks
         for study in self.studies.values():
             study.initialize_callbacks(self)
