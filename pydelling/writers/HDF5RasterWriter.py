@@ -11,7 +11,14 @@ class HDF5RasterWriter(BaseWriter):
     def __init__(self, filename, data=None, dataset_name="region", times=0.0, attributes={}, **kwargs):
         super().__init__(self, data=data, **kwargs)
         if self.info["interpolation"]["type"] == "regular_mesh":
-            if len(self.data.shape) == 2:
+            if len(self.data.shape) == 1:
+                self.data = self.transform_flatten_to_regular_mesh(self.data)
+                self.data = np.array(self.data)
+                plt.imshow(self.data[0, :, :])
+                plt.show()
+                self.data = np.swapaxes(np.array(self.data), 0, 1)
+                self.data = np.swapaxes(self.data, 1, 2)
+            elif len(self.data.shape) == 2:
                 if self.data.shape[1] == 3:
                     self.data = self.centroid_transform_to_mesh()
                 else:
@@ -35,11 +42,12 @@ class HDF5RasterWriter(BaseWriter):
         self.attributes = attributes
 
     def transform_flatten_to_regular_mesh(self, data):
-        assert len(self.data[1].shape) == 1, "A flatten data array needs to be given"
         aux_array = []
         if len(data.shape) == 2:
             for case in data:
                 aux_array.append(np.reshape(case, (self.info["interpolation"]["n_y"], self.info["interpolation"]["n_x"])).T)
+        elif len(data.shape) == 1:
+            aux_array.append(np.reshape(data, (self.info["interpolation"]["n_y"], self.info["interpolation"]["n_x"])).T)
         return np.array(aux_array)
 
     def centroid_transform_to_mesh(self):
@@ -49,7 +57,7 @@ class HDF5RasterWriter(BaseWriter):
         return _data
 
     def _centroid_transform_to_mesh(self, data):
-        assert len(data.shape) >= 2 and data.shape[1] == 3
+        assert len(data.shape) >= 1 and data.shape[1] == 3
         _data = data[:, 2]
         _data = np.reshape(_data, (self.info["interpolation"]["n_x"], self.info["interpolation"]["n_y"]))
         return _data
