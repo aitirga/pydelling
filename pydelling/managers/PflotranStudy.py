@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 class PflotranStudy(BaseStudy):
     """This class extends the BaseStudy class to manage PFLOTRAN related simulations.
     """
-    def __init__(self, input_file: str):
+    def __init__(self, input_file: str, *args, **kwargs):
         """This method initializes the class.
         """
-        super().__init__(input_file)
+        super().__init__(input_file, *args, **kwargs)
         self.regions_to_idx = {}
         self.datasets_to_idx = {}
 
