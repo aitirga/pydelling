@@ -27,10 +27,10 @@ class PflotranManager(BaseManager):
         # test comment
         if n_cores == 1:
             # Run the study in serial
-            subprocess.run(['pflotran', '-pflotranin', study.input_file.name])
+            subprocess.run(['pflotran', '-pflotranin', study.input_file_name])
         else:
             # Run the study in parallel
-            subprocess.run(['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file.name])
+            subprocess.run(['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file_name])
 
     def _run_study_docker(self,
                           study: PflotranStudy,

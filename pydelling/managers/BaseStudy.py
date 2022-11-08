@@ -143,7 +143,7 @@ class BaseStudy(UnitConverter):
     def render(self, **kwargs):
         """This method renders the input file using jinja2.
         """
-        logger.info(f"Rendering input file {self.input_file}")
+        logger.info(f"Rendering input file {self.input_file_name}")
         template = Template(self.raw_text)
         return template.render(**kwargs)
 
