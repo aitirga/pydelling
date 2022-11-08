@@ -22,8 +22,8 @@ class PflotranManager(BaseManager):
                    n_cores: int = 1):
         """This method runs a study.
         """
-        # Change the working directory to the study folder
-        os.chdir(study.output_folder)
+        # cd to the study folder
+        subprocess.run(f'cd {study.output_folder.absolute()}', shell=True)
         # test comment
         if n_cores == 1:
             # Run the study in serial
