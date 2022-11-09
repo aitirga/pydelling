@@ -35,6 +35,7 @@ class BaseManager(ABC):
             docker_image: str = None,
             dummy: bool = False,
             start_from: int = None,
+            **kwargs,
             ):
         """This method runs all the studies.
         """
@@ -51,7 +52,7 @@ class BaseManager(ABC):
                 logger.info(f"Skipping study {study.name} (idx: {study.idx}) because start_from is set to {start_from}")
                 if study.idx < start_from:
                     continue
-            self.run_study(study, docker_image=docker_image, n_cores=n_cores, dummy=dummy)
+            self.run_study(study, docker_image=docker_image, n_cores=n_cores, dummy=dummy, **kwargs)
 
     def generate_run_files(self, studies_folder: str = './studies'):
         """This method generates the run files for all the studies.
@@ -61,7 +62,7 @@ class BaseManager(ABC):
             study.to_file(self.results_folder / study.name)
 
     @abstractmethod
-    def _run_study(self, study: BaseStudy, n_cores: int = 1):
+    def _run_study(self, study: BaseStudy, n_cores: int = 1, **kwargs):
         """This method runs a study.
         """
         logger.info(f"Running study {study.name}")
@@ -72,6 +73,7 @@ class BaseManager(ABC):
                           study: BaseStudy,
                           docker_image: str,
                           n_cores: int = 1,
+                          **kwargs,
                           ):
         """This method runs a study using docker.
         """
@@ -82,6 +84,7 @@ class BaseManager(ABC):
                   n_cores: int = 1,
                   docker_image: str = None,
                   dummy: bool = False,
+                  **kwargs,
                   ):
         """This method runs a study.
         """
@@ -98,9 +101,9 @@ class BaseManager(ABC):
             if dummy:
                 logger.info("Dummy run, not running the study")
             else:
-                self._run_study(study, n_cores=n_cores)
+                self._run_study(study, n_cores=n_cores, **kwargs)
         else:
-            self._run_study_docker(study, docker_image, n_cores=n_cores)
+            self._run_study_docker(study, docker_image, n_cores=n_cores, **kwargs)
 
         for callback in study.callbacks:
             if callback.kind == 'post':

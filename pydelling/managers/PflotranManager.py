@@ -19,7 +19,11 @@ class PflotranManager(BaseManager):
 
     def _run_study(self,
                    study: PflotranStudy,
-                   n_cores: int = 1):
+                   n_cores: int = 1,
+                   petsc_dir: str = '/opt/pflotran-dev/petsc',
+                   petsc_arch: str = 'arch-linux-c-opt',
+                   **kwargs,
+                   ):
         """This method runs a study.
         """
         # test comment
@@ -28,12 +32,16 @@ class PflotranManager(BaseManager):
             subprocess.run(['pflotran', '-pflotranin', study.input_file_name], cwd=study.output_folder.absolute())
         else:
             # Run the study in parallel
-            subprocess.run(['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file_name], cwd=study.output_folder.absolute())
+            subprocess.run(['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file_name],
+                           cwd=study.output_folder.absolute(),
+                           env=dict(os.environ, PETSC_DIR=petsc_dir, PETSC_ARCH=petsc_arch),
+                           )
 
     def _run_study_docker(self,
                           study: PflotranStudy,
                           docker_image: str,
                           n_cores: int = 1,
+                          **kwargs,
                           ):
         """This method runs a study using docker.
         """
