@@ -32,9 +32,9 @@ class PflotranManager(BaseManager):
             subprocess.run(['pflotran', '-pflotranin', study.input_file_name], cwd=study.output_folder.absolute())
         else:
             # Run the study in parallel
-            subprocess.run(['$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file_name],
+            subprocess.run([f'export PETSC_DIR={petsc_dir} && ', f'export PETSC_ARCH={petsc_arch} && ',
+                            '$PETSC_DIR/$PETSC_ARCH/bin/mpirun', '-np', str(n_cores), 'pflotran', '-pflotranin', study.input_file_name],
                            cwd=study.output_folder.absolute(),
-                           env=dict(os.environ, PETSC_DIR=petsc_dir, PETSC_ARCH=petsc_arch),
                            )
 
     def _run_study_docker(self,
