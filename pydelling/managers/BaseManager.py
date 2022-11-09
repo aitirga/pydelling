@@ -34,6 +34,7 @@ class BaseManager(ABC):
             n_cores: int = 1,
             docker_image: str = None,
             dummy: bool = False,
+            start_from: int = None,
             ):
         """This method runs all the studies.
         """
@@ -45,6 +46,9 @@ class BaseManager(ABC):
         self.results_folder = create_results_folder(studies_folder)
         # self.generate_run_files(studies_folder=studies_folder)
         for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
+            if start_from is not None:
+                if study.id < start_from:
+                    continue
             self.run_study(study, docker_image=docker_image, n_cores=n_cores, dummy=dummy)
 
     def generate_run_files(self, studies_folder: str = './studies'):
