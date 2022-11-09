@@ -35,6 +35,8 @@ class BaseManager(ABC):
             docker_image: str = None,
             dummy: bool = False,
             start_from: int = None,
+            petsc_dir: str = '/opt/pflotran-dev/petsc',
+            petsc_arch: str = 'arch-linux-c-opt',
             **kwargs,
             ):
         """This method runs all the studies.
@@ -52,7 +54,12 @@ class BaseManager(ABC):
                 logger.info(f"Skipping study {study.name} (idx: {study.idx}) because start_from is set to {start_from}")
                 if study.idx < start_from:
                     continue
-            self.run_study(study, docker_image=docker_image, n_cores=n_cores, dummy=dummy, **kwargs)
+            self.run_study(study,
+                           docker_image=docker_image,
+                           n_cores=n_cores,
+                           dummy=dummy,
+                           petsc_dir=petsc_dir,
+                           petsc_arch=petsc_arch,**kwargs)
 
     def generate_run_files(self, studies_folder: str = './studies'):
         """This method generates the run files for all the studies.
