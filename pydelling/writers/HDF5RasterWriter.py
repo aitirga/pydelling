@@ -8,7 +8,14 @@ from .BaseWriter import BaseWriter
 
 
 class HDF5RasterWriter(BaseWriter):
-    def __init__(self, filename, data=None, dataset_name="region", times=0.0, attributes={}, **kwargs):
+    def __init__(self,
+                 filename,
+                 data=None,
+                 dataset_name="region",
+                 times=0.0,
+                 attributes={},
+                 **kwargs,
+                 ):
         super().__init__(self, data=data, **kwargs)
         if self.info["interpolation"]["type"] == "regular_mesh":
             if len(self.data.shape) == 1:

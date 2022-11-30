@@ -273,14 +273,22 @@ class iGPReader(BaseReader, RegionOperations):
         conn_dict_ordered = OrderedDict(conn_dict)
         self.connections = sorted(conn_dict_ordered.items())
 
-    def raster_interpolator(self, raster_folder, raster_filenames):
+    def raster_interpolator(self,
+                            regions: List,
+                            raster_folder,
+                            raster_filenames,
+                            top_regions: List = None,
+                            top_region_offset: float = None,
+                            second_layer = None,
+                            second_layer_offset = None,
+                            ):
         """Performs layer based raster interpolation
         This function approximates the node_ids that lay on each of the layers with the rasterized data of such layer.
         The current approach is based on nearest neighbours approximation
         :return np.array of interpolated node_ids
         """
         logger.info("Interpolating raster regions to mesh")
-        for region in config.raster_refinement.regions:
+        for region in regions:
             self._raster_max_error = 0.0
             logger.info(f"Interpolating region {region}")
             raster_current_region_filename = os.path.join(raster_folder, raster_filenames[region])
@@ -288,10 +296,12 @@ class iGPReader(BaseReader, RegionOperations):
             # print(f"Elements in face length is {len(iGP_data.region_dict[region]['elements'])}")
             id_list = np.unique(self.region_dict[region]["elements"].flatten())
             _test = []
-            if region in config.raster_refinement.top_regions:
-                logger.info(f"An offset of +{config.raster_refinement.top_offset} m will be applied in the z-direction to region {region}")
-            if region == config.raster_refinement.second_layer:
-                logger.info(f"Region {region} has been selected as the second layer region. Thus, its node_ids will be displaced {config.raster_refinement.first_layer_to_second_layer_difference}m from the top raster file")
+            if region in top_regions:
+                assert top_region_offset is not None, "Top region offset is not defined"
+                logger.info(f"An offset of +{top_region_offset} m will be applied in the z-direction to region {region}")
+            if region == second_layer:
+                assert second_layer_offset is not None, "Second layer offset (difference between the top layer) is not defined"
+                logger.info(f"Region {region} has been selected as the second layer region. Thus, its node_ids will be displaced {second_layer_offset}m from the top raster file")
             for mesh_id in id_list:
                 x_mesh = self.nodes[mesh_id][0]
                 y_mesh = self.nodes[mesh_id][1]
@@ -305,10 +315,10 @@ class iGPReader(BaseReader, RegionOperations):
                 # the floor function
                 iy = int(raster_data.info_dict["ncols"] - iy - 1)
                 z_raster = raster_data.data[iy, ix]
-                z_offset = config.raster_refinement.top_offset if region in config.raster_refinement.top_regions else 0.0
+                z_offset = top_region_offset if region in top_regions else 0.0
                 interpolation_difference = abs((z_raster + z_offset) - self.nodes[mesh_id][2])
                 self._raster_max_error = interpolation_difference if interpolation_difference > self._raster_max_error else self._raster_max_error
-                z_second_layer_diff = config.raster_refinement.first_layer_to_second_layer_difference if region == config.raster_refinement.second_layer else 0.0  # Corrects the second layer on a layer based mesh
+                z_second_layer_diff = second_layer_offset if region == second_layer else 0.0  # Corrects the second layer on a layer based mesh
                 self.nodes[mesh_id][2] = z_raster + z_offset + z_second_layer_diff
             logger.info(f"Interpolation of region {region} completed. Max absolute difference {self._raster_max_error:1.2f}m")
 
