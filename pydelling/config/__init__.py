@@ -1,6 +1,7 @@
 import logging.config
 import os
 from pathlib import Path
+from rich.logging import RichHandler
 
 import yaml
 from box import Box
@@ -46,22 +47,25 @@ with open(Path(__file__).parent / "logger_config.yaml", "r") as ymlfile:
     log_config = yaml.safe_load(ymlfile)
 logging.config.dictConfig(log_config)
 
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+logging.basicConfig(level=logging.INFO, format="%(message)s", datefmt="[%X]", handlers=[RichHandler(rich_tracebacks=True, show_path=False)])
 
-# Fix logging issue caused by streamlit
-loggers = [handler for handler in logging.root.handlers if isinstance(handler, logging.StreamHandler)]
-strange_logger = loggers[-1]
-strange_logger.setLevel(logging.ERROR)
+# # Fix logging issue caused by streamlit
+# loggers = [handler for handler in logging.root.handlers if isinstance(handler, logging.StreamHandler)]
+# strange_logger = loggers[-1]
+# strange_logger.setLevel(logging.ERROR)
 
 # Capture warnings
 logging.captureWarnings(True)
 logging.getLogger("py.warnings").setLevel(logging.ERROR)
 
 # Add welcome message, get the version from the setup.py file
-# with open(Path(__file__).parent.parent.parent / "setup.py", "r") as setup_file:
-#     setup_file = setup_file.read()
-#     version = setup_file.split("version=")[1].split(",")[0].strip().strip("'")
+with open(Path(__file__).parent.parent.parent / "pyproject.toml", "r") as setup_file:
+    setup_file = setup_file.read()
+    version = setup_file.split("version = \"")[1].split("\"")[0]
 logging.info(f"-----------------------------------")
-logging.info(f"Welcome to Pydelling")
+logging.info(f"[blue bold]Welcome to Pydelling {version}", extra={"markup": True})
 logging.info(f"-----------------------------------")
 
 
