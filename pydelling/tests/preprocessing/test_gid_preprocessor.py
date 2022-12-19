@@ -100,6 +100,12 @@ class GidPreprocessorTest(unittest.TestCase):
         self.assertFalse(Line.check_lines_equal(line_1, line_3))
         self.assertTrue(Line.check_lines_equal(line_1, line_4))
 
+    def tearDown(self) -> None:
+        from pathlib import Path
+        gid_file = Path("gid_batch.bch")
+        if gid_file.exists():
+            gid_file.unlink()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -267,11 +267,7 @@ class IntersectionCase(unittest.TestCase):
         dfn_preprocessor.dfn.append(fracture)
         dfn_preprocessor.to_vtk('test_dfn.vtk')
         element.to_obj('test_element.obj')
-        intersections = element.intersect_with_fracture(dfn_preprocessor[0], export_all_points=True)
-        with open('computed_intersections.csv', 'w') as f:
-            import csv
-            writer = csv.writer(f)
-            writer.writerows(intersections)
+        intersections = element.intersect_with_fracture(dfn_preprocessor[0], export_all_points=False)
         self.assertEqual(len(intersections), 3)
 
     def test_problematic_fracture_2(self):
@@ -320,6 +316,20 @@ class IntersectionCase(unittest.TestCase):
         solution = np.sort(solution, axis=0)
 
         nptest.assert_array_almost_equal(intersections, solution)
+
+
+    def tearDown(self) -> None:
+        from pathlib import Path
+        for file in Path().glob('*.pkl'):
+            file.unlink()
+        for file in Path().glob('*.obj'):
+            file.unlink()
+        for file in Path().glob('*.vtk'):
+            file.unlink()
+        for file in Path().glob('*.json'):
+            file.unlink()
+
+
 
 
 
