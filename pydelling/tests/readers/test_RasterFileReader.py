@@ -1,16 +1,29 @@
 import unittest
 from pydelling.readers import RasterFileReader
 from pydelling.utils import test_data_path
+import numpy.testing as npt
 
 
 class TestSMeshMeshReader(unittest.TestCase):
     def setUp(self) -> None:
         self.top_surface = RasterFileReader(test_data_path() / 'top_surface.asc')
         self.bottom_surface = RasterFileReader(test_data_path() / 'bottom_surface.asc')
-
+        self.bottom_surface_irregular = RasterFileReader(test_data_path() / 'bottom_surface_irregular.asc')
     def test_read_data(self):
         self.assertEqual(self.top_surface.nx, 250)
         self.assertEqual(self.top_surface.ny, 250)
+
+    def test_write_read_irregular(self):
+        self.bottom_surface_irregular.to_asc('test.asc')
+        import matplotlib.pyplot as plt
+        new_raster = RasterFileReader('test.asc')
+        self.assertEqual(self.bottom_surface_irregular.nx, new_raster.nx)
+        self.assertEqual(self.bottom_surface_irregular.ny, new_raster.ny)
+        # Check the data is the same
+        npt.assert_array_equal(self.bottom_surface_irregular.data, new_raster.data)
+
+
+
 
     def test_operations(self):
         # constant sum

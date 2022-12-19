@@ -174,7 +174,7 @@ class RasterFileReader(BaseReader):
 
 
     def write_asc_data(self, file):
-        np.savetxt(file, self.data, fmt="%3.2f")
+        np.savetxt(file, self.data)
 
     def downsample_data(self, slice_factor=2):
         '''
