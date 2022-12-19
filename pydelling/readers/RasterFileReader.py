@@ -349,10 +349,12 @@ class RasterFileReader(BaseReader):
         Returns:
             The value of the raster at the given coordinates
         """
-        x_idx = np.argmin(np.abs(self.y - x))
-        y_idx = np.argmin(np.abs(self.x - y))
+        x_idx = np.argmin(np.abs(self.y - y))
+        y_idx = np.argmin(np.abs(self.x - x))
         print(x_idx, y_idx)
-        return self.data[x_idx, y_idx]
+        print(self.nrows)
+        print(self.data.shape)
+        return self.data[self.nrows - x_idx - 1, y_idx]
 
     @property
     def x(self):

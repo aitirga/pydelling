@@ -51,6 +51,15 @@ class TestSMeshMeshReader(unittest.TestCase):
         quot = self.top_surface / self.bottom_surface
         self.assertEqual(self.top_surface.values[0, 2] / self.bottom_surface.values[0, 2], quot.values[0, 2])
 
+    def test_get_data_from_coordinates(self):
+        data = self.top_surface.get_data_from_coordinates(0.001240760000, 0.199278)
+        self.assertAlmostEqual(data, 0.1182)
+
+    def tearDown(self) -> None:
+        from pathlib import Path
+        if Path('test.asc').exists():
+            Path('test.asc').unlink()
+
 
 
 if __name__ == '__main__':
