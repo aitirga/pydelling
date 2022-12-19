@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+from typing import Tuple, List, Union
 
 from .BaseReader import BaseReader
 
@@ -11,7 +12,8 @@ class RasterFileReader(BaseReader):
     """
     Class that contains functions to read a rasterized file in .asc format
     """
-    def __init__(self, filename=None,
+    def __init__(self,
+                 filename=None,
                  header=False,
                  read_data=True,
                  **kwargs,):
@@ -51,7 +53,6 @@ class RasterFileReader(BaseReader):
 
     def build_structure(self):
         assert self.info is not {}
-        self.reader_info = self.info["reader"]
         self.xydata_computed = False
         self.data = np.zeros(shape=(int(self.reader_info["nrows"]), int(self.reader_info["ncols"])))
 
@@ -152,16 +153,25 @@ class RasterFileReader(BaseReader):
         print(f"The data has been properly exported to the {output_file} file")
 
     def to_asc(self, output_file):
-        print(f"Starting dump into {output_file}")
-        file = open(output_file, "w")
-        self.write_asc_header(file)
-        self.write_asc_data(file)
-        file.close()
+        logger.info(f"Starting dump into {output_file}")
+        with open(output_file, 'w') as file:
+            self.write_asc_header(file)
+            self.write_asc_data(file)
 
     def write_asc_header(self, file):
         # assert isinstance(file, type(open)), "is not a correct file"
-        for head in self.info:
-            file.write(f"{head} {self.info[head]}\n")
+        # Write info in ASC format
+        file.write(f"ncols {self.info['reader']['ncols']}\n")
+        file.write(f"nrows {self.info['reader']['nrows']}\n")
+        if 'cellsize' in self.info:
+            file.write(f"cellsize {self.info['reader']['cellsize']}\n")
+        else:
+            file.write(f"dx {self.info['reader']['dx']}\n")
+            file.write(f"dy {self.info['reader']['dy']}\n")
+        file.write(f"xllcorner {self.info['reader']['xllcorner']}\n")
+        file.write(f"yllcorner {self.info['reader']['yllcorner']}\n")
+        file.write(f"NODATA_value {self.info['reader']['NODATA_value']}\n")
+
 
     def write_asc_data(self, file):
         np.savetxt(file, self.data, fmt="%3.2f")
@@ -264,31 +274,107 @@ class RasterFileReader(BaseReader):
 
     @property
     def dx(self):
-        if 'dx' in self.info:
+        if 'dx' in self.info['reader']:
             return self.info['reader']['dx']
         else:
             return self.info['reader']["cellsize"]
 
     @property
     def dy(self):
-        if 'dy' in self.info:
+        if 'dy' in self.info['reader']:
             return self.info['reader']['dy']
         else:
             return self.info['reader']["cellsize"]
 
+    # Read raster file from a .csv file
+    @classmethod
+    def from_xyz_csv(self, file_name, dims=None,):
+        data = np.loadtxt(file_name, delimiter=",", skiprows=1)
+        if dims is None:
+            dims = self._guess_raster_dimensions_from_data(data)
+        else:
+            assert dims[0] * dims[1] == data.shape[0], "The dimensions are not correct"
+            dims = (dims[1], dims[0])
+
+        info = {'reader': {}}
+        info['reader']["ncols"] = dims[1]
+        info['reader']["nrows"] = dims[0]
+        info['reader']["xllcorner"] = data[:, 0].min()
+        info['reader']["yllcorner"] = data[:, 1].min()
+        info['reader']['dx'] = data[1, 0] - data[0, 0]
+        info['reader']['dy'] = data[dims[1], 1] - data[0, 1]
+        info['reader']['dx'] = info['reader']['dx']
+        info['reader']['dy'] = - info['reader']['dy']
+        info['reader']["NODATA_value"] = -9999
+        return_raster = RasterFileReader(filename=file_name, data=data, info=info, read_data=False)
+        return_raster.build_structure()
+        return_raster.data = data[:, 2].reshape(dims[0], dims[1])
+        return return_raster
+
+    @staticmethod
+    def _guess_raster_dimensions_from_data(data: np.ndarray) -> Tuple[int, int]:
+        """
+        This method guesses the raster dimensions from the data
+        Args:
+            data: array with the raster data
+
+        Returns:
+            Tuple with the number of rows and columns
+        """
+        if data.shape[0] == data.shape[1]:
+            # Square raster
+            return data.shape[0], data.shape[1]
+        else:
+            # Assume dimensions are ordered in x, y, target
+            first_x_value = data[0, 0]
+            first_y_value = data[0, 1]
+            steps_with_same_x = 1
+            steps_with_same_y = 1
+
+            for idx in range(1, data.shape[0]):
+                if data[idx, 0] == first_x_value:
+                    steps_with_same_x += 1
+                if data[idx, 1] == first_y_value:
+                    steps_with_same_y += 1
+            assert steps_with_same_x * steps_with_same_y == data.shape[0], f"Cant guess dimensions from data. Computed dimensions are {steps_with_same_x}x{steps_with_same_y}={steps_with_same_x * steps_with_same_y} and data has {data.shape[0]} elements"
+            return steps_with_same_x, steps_with_same_y
+
+    def get_data_from_coordinates(self, x, y):
+        """
+        This method returns the data from the raster at the given coordinates
+        Args:
+            x: x coordinate
+            y: y coordinate
+
+        Returns:
+            The value of the raster at the given coordinates
+        """
+        x_idx = np.argmin(np.abs(self.y - x))
+        y_idx = np.argmin(np.abs(self.x - y))
+        print(x_idx, y_idx)
+        return self.data[x_idx, y_idx]
+
+    @property
+    def x(self):
+        return self.info['reader']["xllcorner"] + np.arange(self.nx) * self.dx
+
+    @property
+    def y(self):
+        return self.info['reader']["yllcorner"] + np.arange(self.ny) * self.dy
+
     # Add difference of two raster files
     def __sub__(self, other):
         if isinstance(other, RasterFileReader):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data - other.data)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data - other.data
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
             return new_raster
         elif isinstance(other, (int, float)):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data - other)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data - other
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
 
             return new_raster
         else:
@@ -297,17 +383,17 @@ class RasterFileReader(BaseReader):
     # Add sum of two raster files
     def __add__(self, other):
         if isinstance(other, RasterFileReader):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data + other.data)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data + other.data
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
 
             return new_raster
         elif isinstance(other, (int, float)):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data + other)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data + other
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
 
             return new_raster
         else:
@@ -315,17 +401,17 @@ class RasterFileReader(BaseReader):
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data * other)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data * other
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
             return new_raster
 
         elif isinstance(other, RasterFileReader):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data * other.data)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data * other.data
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
 
             return new_raster
 
@@ -334,17 +420,17 @@ class RasterFileReader(BaseReader):
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data / other)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data / other
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
             return new_raster
 
         elif isinstance(other, RasterFileReader):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data / other.data)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data / other.data
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
 
             return new_raster
 
@@ -353,23 +439,31 @@ class RasterFileReader(BaseReader):
 
     def __pow__(self, other):
         if isinstance(other, (int, float)):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data ** other)
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data ** other
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
             return new_raster
 
         elif isinstance(other, RasterFileReader):
-            new_raster = RasterFileReader(filename=self.filename, read_data=False)
+            new_raster = RasterFileReader(filename=self.filename, read_data=False, info=self.info, data=self.data ** other.data)
             new_raster.info = self.info
             for key in self.__dict__.keys():
-                new_raster.__dict__[key] = self.__dict__[key]
-            new_raster.data = self.data ** other.data
+                if key != "data" and key != "info":
+                    new_raster.__dict__[key] = self.__dict__[key]
+
 
             return new_raster
 
         else:
             raise ValueError("The other object is not a RasterFileReader or a number")
+
+    @property
+    def reader_info(self):
+        return self.info['reader']
+
+
+
 
 
 

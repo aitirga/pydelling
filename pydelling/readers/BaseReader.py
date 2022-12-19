@@ -18,6 +18,8 @@ class BaseReader:
     def __init__(self, filename=None,
                  header=False,
                  read_data=True,
+                 info=None,
+                 data=None,
                  **kwargs,
                  ):
         self.filename = Path(filename)
@@ -27,6 +29,11 @@ class BaseReader:
         self.__dict__.update(kwargs)
         if read_data:
             self.open_file(filename, **kwargs)
+        else:
+            assert data is not None, "Error: data is None"
+            assert info is not None, "Error: info is None"
+            self.data = data
+            self.info = info
 
     def read_file(self, opened_file):
         """

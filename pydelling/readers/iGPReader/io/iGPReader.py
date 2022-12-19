@@ -14,6 +14,7 @@ from pydelling.config import config
 # from pydelling.readers.iGPReader.geometry import *
 from pydelling.preprocessing.mesh_preprocessor.geometry import *
 from pydelling.readers.iGPReader.io import BaseReader
+from pydelling.readers import RasterFileReader
 from pydelling.readers.iGPReader.utils import get_output_path, RegionOperations
 from tqdm import tqdm
 from copy import deepcopy
@@ -37,7 +38,7 @@ class iGPReader(BaseReader, RegionOperations):
         self.ExplicitWriter = PflotranExplicitWriter
         self.ImplicitWriter = PflotranImplicitWriter
         self.CsvWriter = CsvWriter
-        self.AscReader = AscReader
+        self.AscReader = RasterFileReader
         self.BoreholeReader = BoreholeReader
         self.path: Path
         if type(path) is not Path:
@@ -275,11 +276,11 @@ class iGPReader(BaseReader, RegionOperations):
 
     def raster_interpolator(self,
                             regions: List,
-                            raster_folder,
-                            raster_filenames,
+                            raster_filenames: dict,
+                            raster_folder=None,
                             top_regions: List = None,
                             top_region_offset: float = None,
-                            second_layer = None,
+                            second_layer: str = None,
                             second_layer_offset = None,
                             ):
         """Performs layer based raster interpolation
@@ -288,6 +289,11 @@ class iGPReader(BaseReader, RegionOperations):
         :return np.array of interpolated node_ids
         """
         logger.info("Interpolating raster regions to mesh")
+        if top_regions is None:
+            top_regions = []
+        if raster_folder is None:
+            raster_folder = './'
+
         for region in regions:
             self._raster_max_error = 0.0
             logger.info(f"Interpolating region {region}")
@@ -302,19 +308,22 @@ class iGPReader(BaseReader, RegionOperations):
             if region == second_layer:
                 assert second_layer_offset is not None, "Second layer offset (difference between the top layer) is not defined"
                 logger.info(f"Region {region} has been selected as the second layer region. Thus, its node_ids will be displaced {second_layer_offset}m from the top raster file")
+            xy_raster = raster_data.get_xy_data()
             for mesh_id in id_list:
                 x_mesh = self.nodes[mesh_id][0]
                 y_mesh = self.nodes[mesh_id][1]
                 # Raster data
-                d_raster = raster_data.info_dict["cellsize"]
-                origin_x = raster_data.info_dict["xllcorner"]
-                origin_y = raster_data.info_dict["yllcorner"]
-                ix = int(np.floor((x_mesh - origin_x) / (1.001 * d_raster)))  # 1.001 value is used to avoid issues with
+                d_raster_x = raster_data.reader_info["dx"]
+                d_raster_y = raster_data.reader_info["dy"]
+                origin_x = raster_data.reader_info["xllcorner"]
+                origin_y = raster_data.reader_info["yllcorner"]
+                ix = int(np.floor((x_mesh - origin_x) / (1.001 * d_raster_x)))  # 1.001 value is used to avoid issues with
                 # the floor function
-                iy = int(np.floor((y_mesh - origin_y) / (1.001 * d_raster)))  # 1.001 value is used to avoid issues with
+                iy = -int(np.floor((y_mesh - origin_y) / (1.001 * d_raster_y)))  # 1.001 value is used to avoid issues with
+                print(ix, iy)
                 # the floor function
-                iy = int(raster_data.info_dict["ncols"] - iy - 1)
-                z_raster = raster_data.data[iy, ix]
+                # iy = int(raster_data.reader_info["ncols"] - iy - 1)
+                z_raster = raster_data.data[ix, iy]
                 z_offset = top_region_offset if region in top_regions else 0.0
                 interpolation_difference = abs((z_raster + z_offset) - self.nodes[mesh_id][2])
                 self._raster_max_error = interpolation_difference if interpolation_difference > self._raster_max_error else self._raster_max_error
