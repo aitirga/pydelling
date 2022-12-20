@@ -38,7 +38,7 @@ class iGPReader(BaseReader, RegionOperations):
         self.ExplicitWriter = PflotranExplicitWriter
         self.ImplicitWriter = PflotranImplicitWriter
         self.CsvWriter = CsvWriter
-        self.AscReader = RasterFileReader
+        self.RasterReader = RasterFileReader
         self.BoreholeReader = BoreholeReader
         self.path: Path
         if type(path) is not Path:
@@ -282,6 +282,7 @@ class iGPReader(BaseReader, RegionOperations):
                             top_region_offset: float = None,
                             second_layer: str = None,
                             second_layer_offset = None,
+                            max_error: float = None, # Maximum error allowed in the interpolation
                             ):
         """Performs layer based raster interpolation
         This function approximates the node_ids that lay on each of the layers with the rasterized data of such layer.
@@ -289,6 +290,8 @@ class iGPReader(BaseReader, RegionOperations):
         :return np.array of interpolated node_ids
         """
         logger.info("Interpolating raster regions to mesh")
+        if max_error is not None:
+            logger.info(f"Maximum error allowed: {max_error} m")
         if top_regions is None:
             top_regions = []
         if raster_folder is None:
@@ -298,7 +301,7 @@ class iGPReader(BaseReader, RegionOperations):
             self._raster_max_error = 0.0
             logger.info(f"Interpolating region {region}")
             raster_current_region_filename = os.path.join(raster_folder, raster_filenames[region])
-            raster_data = self.AscReader(raster_current_region_filename)
+            raster_data = self.RasterReader(raster_current_region_filename)
             # print(f"Elements in face length is {len(iGP_data.region_dict[region]['elements'])}")
             id_list = np.unique(self.region_dict[region]["elements"].flatten())
             _test = []
@@ -313,22 +316,19 @@ class iGPReader(BaseReader, RegionOperations):
                 x_mesh = self.nodes[mesh_id][0]
                 y_mesh = self.nodes[mesh_id][1]
                 # Raster data
-                d_raster_x = raster_data.reader_info["dx"]
-                d_raster_y = raster_data.reader_info["dy"]
-                origin_x = raster_data.reader_info["xllcorner"]
-                origin_y = raster_data.reader_info["yllcorner"]
-                ix = int(np.floor((x_mesh - origin_x) / (1.001 * d_raster_x)))  # 1.001 value is used to avoid issues with
-                # the floor function
-                iy = -int(np.floor((y_mesh - origin_y) / (1.001 * d_raster_y)))  # 1.001 value is used to avoid issues with
-                print(ix, iy)
-                # the floor function
-                # iy = int(raster_data.reader_info["ncols"] - iy - 1)
-                z_raster = raster_data.data[ix, iy]
+                z_raster = raster_data.get_data_from_coordinates(x_mesh, y_mesh)
                 z_offset = top_region_offset if region in top_regions else 0.0
                 interpolation_difference = abs((z_raster + z_offset) - self.nodes[mesh_id][2])
-                self._raster_max_error = interpolation_difference if interpolation_difference > self._raster_max_error else self._raster_max_error
                 z_second_layer_diff = second_layer_offset if region == second_layer else 0.0  # Corrects the second layer on a layer based mesh
-                self.nodes[mesh_id][2] = z_raster + z_offset + z_second_layer_diff
+                if max_error is None:
+                    self.nodes[mesh_id][2] = z_raster + z_offset + z_second_layer_diff
+                    self._raster_max_error = interpolation_difference if interpolation_difference > self._raster_max_error else self._raster_max_error
+                else:
+                    if interpolation_difference < max_error:
+                        self.nodes[mesh_id][2] = z_raster + z_offset + z_second_layer_diff
+                        self._raster_max_error = interpolation_difference if interpolation_difference > self._raster_max_error else self._raster_max_error
+                    else:
+                        pass
             logger.info(f"Interpolation of region {region} completed. Max absolute difference {self._raster_max_error:1.2f}m")
 
         # node_ids = raster_interpolator(self.path, raster_folder, raster_filenames)
@@ -466,7 +466,7 @@ class iGPReader(BaseReader, RegionOperations):
             f"Adding linear {property} value taking into account topography of layer {material_features.topography_region} to material {material} in such a way that f(z_topography) = {material_features.value_top}."
             f"{f' Values below {material_features.z_bot}m are kept constant and equal to {material_features.value_bot}' if material_features.bottom_constant else ''}")
         raster_current_region_filename = Path(config.data_files.raster_file_folder) / config.data_files.raster_filenames[material_features.topography_region]
-        raster_data = self.AscReader(raster_current_region_filename)
+        raster_data = self.RasterReader(raster_current_region_filename)
 
         for centroid in self.centroids[self.material_dict[material] - 1]:
             x_mesh = centroid[0]  # x-coordinate of centroid
@@ -708,7 +708,7 @@ class iGPReader(BaseReader, RegionOperations):
         logger.info(f"Exporting raster files read from {config.data_files.raster_file_folder}")
         for region in config.raster_refinement.regions:
             raster_current_region_filename = os.path.join(config.data_files.raster_file_folder, config.data_files.raster_filenames[region])
-            raster_data = self.AscReader(raster_current_region_filename)
+            raster_data = self.RasterReader(raster_current_region_filename)
             if downsample_factor:
                 raster_data.downsample_data(slice_factor=downsample_factor)
             if file_format == 'asc':
@@ -719,7 +719,7 @@ class iGPReader(BaseReader, RegionOperations):
     def export_recharge_file(self, csv_export=False):
         if config.data_files.recharge_file:
             logger.info(f"Processing recharge file located at {config.data_files.recharge_file}")
-            recharge_data = self.AscReader(config.data_files.recharge_file)
+            recharge_data = self.RasterReader(config.data_files.recharge_file)
         else:
             logger.error("A recharge file has to be submitted in the configuration file")
             raise FileNotFoundError("Recharge file was not submitted in the configuration file")
