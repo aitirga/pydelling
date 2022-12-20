@@ -87,12 +87,20 @@ class RasterFileReader(BaseReader):
             return self.get_xy_data()
 
     def rebuild_x_y(self):
-        x_range = np.arange(self.info['reader']["xllcorner"],
-                            self.info['reader']["xllcorner"] + self.info['reader']["nrows"] * self.info['reader']["cellsize"],
-                            self.info['reader']["cellsize"])
-        y_range = np.arange(self.info['reader']["yllcorner"],
-                            self.info['reader']["yllcorner"] + self.info['reader']["ncols"] * self.info['reader']["cellsize"],
-                            self.info['reader']["cellsize"])
+        if 'cellsize' in self.info['reader']:
+            x_range = np.arange(self.info['reader']["xllcorner"],
+                                self.info['reader']["xllcorner"] + self.info['reader']["nrows"] * self.info['reader']["cellsize"],
+                                self.info['reader']["cellsize"])
+            y_range = np.arange(self.info['reader']["yllcorner"],
+                                self.info['reader']["yllcorner"] + self.info['reader']["ncols"] * self.info['reader']["cellsize"],
+                                self.info['reader']["cellsize"])
+        else:
+            x_range = np.arange(self.info['reader']["xllcorner"],
+                                self.info['reader']["xllcorner"] + self.info['reader']["nrows"] * self.info['reader']["dx"],
+                                self.info['reader']["dx"])
+            y_range = np.arange(self.info['reader']["yllcorner"],
+                                self.info['reader']["yllcorner"] + self.info['reader']["ncols"] * self.info['reader']["dy"],
+                                self.info['reader']["dy"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
 
     def get_xy_data(self) -> np.ndarray:
@@ -184,12 +192,16 @@ class RasterFileReader(BaseReader):
         :return: downsampled dataset
         '''
         self.data = self.data[0::slice_factor, 0::slice_factor]
-        self.info["nrows"] = self.data.shape[0]
-        self.info["ncols"] = self.data.shape[1]
-        self.info["cellsize"] *= slice_factor
-        RasterFileReader.rebuild_x_y(self)
-        print("Data has been downsampled, the new settings are these:")
-        print(self.info)
+        self.info['reader']["nrows"] = self.data.shape[0]
+        self.info['reader']["ncols"] = self.data.shape[1]
+        if "cellsize" in self.info["reader"]:
+            self.info['reader']["cellsize"] *= slice_factor
+        else:
+            self.info['reader']["dx"] *= slice_factor
+            self.info['reader']["dy"] *= slice_factor
+
+        self.rebuild_x_y()
+        logger.info(f"Data has been downsampled by a factor of {slice_factor}")
 
     def get_value_from_coord(self, x: float, y: float):
         """

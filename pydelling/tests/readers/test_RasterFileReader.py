@@ -55,6 +55,11 @@ class TestSMeshMeshReader(unittest.TestCase):
         data = self.top_surface.get_data_from_coordinates(0.001240760000, 0.199278)
         self.assertAlmostEqual(data, 0.1182)
 
+    def test_downsample(self):
+        self.top_surface.downsample_data(2)
+        self.assertEqual(self.top_surface.nx, 125)
+        self.assertEqual(self.top_surface.ny, 125)
+
     def tearDown(self) -> None:
         from pathlib import Path
         if Path('test.asc').exists():
