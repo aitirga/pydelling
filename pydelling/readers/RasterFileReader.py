@@ -102,14 +102,16 @@ class RasterFileReader(BaseReader):
                                 self.info['reader']["yllcorner"] + self.info['reader']["ncols"] * self.info['reader']["dy"],
                                 self.info['reader']["dy"])
         self.x_mesh, self.y_mesh = np.meshgrid(x_range, y_range)
+        self.y_mesh = np.flipud(self.y_mesh)  # To fit into the .asc format criteria
+
 
     def get_xy_data(self) -> np.ndarray:
         ndata = int(self.info["reader"]["nrows"] * self.info["reader"]["ncols"])
         self.xydata = np.zeros(shape=(ndata, 3))
-        x_mesh_flatten = self.x_mesh.flatten()
-        y_mesh_flatten = self.y_mesh.flatten()
+        rows_mesh_flatten = np.fliplr(self.x_mesh).T.flatten()
+        cols_mesh_flatten = np.flipud(self.y_mesh).T.flatten()
         for id, data in enumerate(self.data.flatten()):
-            self.xydata[id] = (x_mesh_flatten[id], y_mesh_flatten[id], data)
+            self.xydata[id] = (cols_mesh_flatten[id], rows_mesh_flatten[id], data)
         self.xydata_computed = True
         return self.xydata
 
@@ -117,10 +119,10 @@ class RasterFileReader(BaseReader):
         assert hasattr(self, "z_coord"), "The z-coordinate of this raster file is not given"
         ndata = int(self.info["reader"]["nrows"] * self.info["reader"]["ncols"])
         self.flatten_data = np.zeros(shape=(ndata, 4))
-        x_mesh_flatten = self.x_mesh.flatten()
-        y_mesh_flatten = self.y_mesh.flatten()
+        rows_mesh_flatten = np.fliplr(self.x_mesh).T.flatten()
+        cols_mesh_flatten = np.flipud(self.y_mesh).T.flatten()
         for id, data in enumerate(self.data.flatten()):
-            self.flatten_data[id] = (x_mesh_flatten[id], y_mesh_flatten[id], self.z_coord, data)
+            self.flatten_data[id] = (cols_mesh_flatten[id], rows_mesh_flatten[id], self.z_coord, data)
         self.xydata_computed = True
         return self.flatten_data
 
@@ -131,10 +133,7 @@ class RasterFileReader(BaseReader):
         :return:
         """
 
-        if not self.xydata_computed:
-            xydata = self.get_xy_data()
-        else:
-            xydata = self.xydata
+        xydata = self.get_xy_data()
         f = open(output_file, "w")
         if z_coord is not None:
             f.write(f"x,y,z,data\n")
@@ -199,7 +198,7 @@ class RasterFileReader(BaseReader):
         else:
             self.info['reader']["dx"] *= slice_factor
             self.info['reader']["dy"] *= slice_factor
-
+        print(self.data.shape)
         self.rebuild_x_y()
         logger.info(f"Data has been downsampled by a factor of {slice_factor}")
 
