@@ -10,8 +10,8 @@ from .BaseWriter import BaseWriter
 class HDF5RasterWriter(BaseWriter):
     def __init__(self,
                  filename,
+                 dataset_name,
                  data=None,
-                 dataset_name="region",
                  times=0.0,
                  attributes={},
                  **kwargs,
