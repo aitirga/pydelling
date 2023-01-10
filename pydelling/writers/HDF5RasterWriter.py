@@ -80,7 +80,7 @@ class HDF5RasterWriter(BaseWriter):
         delta_y = (l_y_dilatated - l_y) / 2.0
         dy = self.info["interpolation"]["d_y"] * dilatation_factor
 
-        hdf5_group.attrs.create('Dimension', "XY", dtype="S3")
+        hdf5_group.attrs.create('Dimension', self.attributes['Dimension'] if 'Dimension' in self.attributes else 'XY', dtype="S3")
         hdf5_group.attrs["Discretization"] = [dx, dy]
         hdf5_group.attrs["Origin"] = [self.info["interpolation"]["x_min"] - delta_x, self.info["interpolation"]["y_min"] - delta_y]
         hdf5_group.attrs["Interpolation_Method"] = "STEP"
@@ -91,6 +91,11 @@ class HDF5RasterWriter(BaseWriter):
 
         if self.check_data():
             if not os.path.exists(self.filename):
+                h5temp = h5py.File(self.filename, "w")
+                h5temp.close()
+            else:
+                # Delete the file if it exists
+                os.remove(self.filename)
                 h5temp = h5py.File(self.filename, "w")
                 h5temp.close()
             with h5py.File(self.filename, "r+") as h5temp:
@@ -107,6 +112,13 @@ class HDF5RasterWriter(BaseWriter):
                 # Extends the default attributes to the ones defined by the user
                 if self.attributes is not {}:
                     for attribute in self.attributes:
-                        temp_group.attrs[attribute] = self.attributes[attribute]
+                        if attribute == "Dimension":
+                            temp_group.attrs.create(attribute, self.attributes[attribute], dtype="S3")
+                        else:
+                            temp_group.attrs[attribute] = self.attributes[attribute]
+
         else:
             print("Couldn't find data to dump!")
+
+    def add_dimension_attribute(self, dimension):
+        self.attributes["Dimension"] = dimension
