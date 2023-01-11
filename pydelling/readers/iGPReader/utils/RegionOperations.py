@@ -5,6 +5,8 @@ if TYPE_CHECKING:
 import logging
 
 logger = logging.getLogger(__name__)
+import numpy as np
+from pydelling.utils.utility_subclasses import SemistructuredFinder
 
 
 class RegionOperations:
@@ -12,7 +14,8 @@ class RegionOperations:
     region_dict: dict
     # Add iGPReader class methods to this class namespace
 
-    def divide_topography_by_z(self: iGPReader, z: float,
+    def divide_topography_by_z(self: iGPReader,
+                               z: float,
                                region_name: str,
                                name_below='below',
                                name_above='above',
@@ -61,5 +64,54 @@ class RegionOperations:
         # Remove the old region
         self.region_dict.pop(region_name)
 
+    def get_nodes_from_x_y(self: iGPReader,
+                           x: float,
+                           y: float,
+                           materials: list = None,
+                           top_region_name: str = None,
+                           tol: float = 5.0,
+                           eps: float = 2.5,
+                           min_samples: int = 20,
+                           ) -> list:
+        if not hasattr(self, 'is_subset_generated'):
+            self._setup_cluster_and_subset(eps=eps,
+                                           min_samples=min_samples,
+                                           top_region_name=top_region_name,
+                                           materials=materials,
+                                           )
+            self.is_subset_generated = True
 
+        # # Filter out only the nodes with the given x and y coordinates
+        #
+        # node_id = [node_id for node_id in self.node_id_subset if abs(self.nodes[node_id][0] - x) <= tol and abs(self.nodes[node_id][1] - y) <= tol]
+        # sorted_ids = sorted(node_id, key=lambda x: self.nodes[x][2])
+        # return sorted_ids
+
+    def _setup_cluster_and_subset(self: iGPReader,
+                                    eps: float,
+                                    min_samples: int,
+                                    top_region_name: str = None,
+                                    materials: list = None,
+                                    ):
+        logger.info(f'Setting up cluster engine (DBSCAN with eps={eps} and min_samples={min_samples}) and subset of nodes for materials {materials}')
+        self.is_subset_generated = False
+        temp_node_id = []
+        if materials is not None:
+            for material in materials:
+                element_nodes = [self.element_nodes[element_id] for element_id in self.get_material_elements(material)]
+                element_nodes = np.unique(np.array(element_nodes).flatten())
+                temp_node_id.append(element_nodes)
+        else:
+            element_nodes = np.unique(np.array(self.element_nodes).flatten())
+            temp_node_id.append(element_nodes)
+        temp_node_id = np.concatenate(temp_node_id)
+        self.node_id_subset = np.unique(temp_node_id)
+        self.cluster_engine = SemistructuredFinder(self.nodes[self.node_id_subset], eps=eps, min_samples=min_samples)
+        logger.info(f'A total of {self.cluster_engine.n_clusters} clusters were found in the subset of nodes. Play with eps (eps={eps}) and min_samples (min_samples={min_samples}) to find more clusters.')
+        try:
+            top_region_elements = self.get_region_nodes(top_region_name)
+            if self.cluster_engine.n_clusters != len(top_region_elements):
+                logger.warning(f'The number of clusters found ({self.cluster_engine.n_clusters}) does not match the number of elements in the top region ({len(top_region_elements)}).')
+        except:
+            logger.warning(f'No top region was provided. The number of clusters found ({self.cluster_engine.n_clusters}) may not match the number of elements in the top region.')
 

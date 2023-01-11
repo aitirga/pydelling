@@ -319,6 +319,7 @@ class iGPReader(BaseReader, RegionOperations):
                 z_raster = raster_data.get_data_from_coordinates(x_mesh, y_mesh)
                 z_offset = top_region_offset if region in top_regions else 0.0
                 interpolation_difference = abs((z_raster + z_offset) - self.nodes[mesh_id][2])
+
                 z_second_layer_diff = second_layer_offset if region == second_layer else 0.0  # Corrects the second layer on a layer based mesh
                 if max_error is None:
                     self.nodes[mesh_id][2] = z_raster + z_offset + z_second_layer_diff
@@ -792,7 +793,6 @@ class iGPReader(BaseReader, RegionOperations):
         return self.boundaries[region_name]
 
     def get_material_elements(self, material_name) -> List[BaseElement]:
-        assert self.is_mesh_built, "Mesh has to be built before calling this method"
         return self.material_dict[material_name]
 
     def get_material_centroids(self, material_name):
