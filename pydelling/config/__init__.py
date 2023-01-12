@@ -2,6 +2,7 @@ import logging.config
 import os
 from pathlib import Path
 from rich.logging import RichHandler
+import pkg_resources
 
 import yaml
 from box import Box
@@ -61,9 +62,12 @@ logging.captureWarnings(True)
 logging.getLogger("py.warnings").setLevel(logging.ERROR)
 
 # Add welcome message, get the version from the setup.py file
-with open(Path(__file__).parent.parent.parent / "pyproject.toml", "r") as setup_file:
-    setup_file = setup_file.read()
-    version = setup_file.split("version = \"")[1].split("\"")[0]
+try:
+    with open(Path(__file__).parent.parent.parent / "pyproject.toml", "r") as setup_file:
+        setup_file = setup_file.read()
+        version = setup_file.split("version = \"")[1].split("\"")[0]
+except:
+    version = pkg_resources.get_distribution("pydelling").version
 logging.info(f"-----------------------------------")
 logging.info(f"[blue bold]Welcome to Pydelling {version}", extra={"markup": True})
 logging.info(f"-----------------------------------")
