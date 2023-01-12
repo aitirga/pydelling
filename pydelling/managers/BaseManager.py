@@ -6,6 +6,7 @@ from alive_progress import alive_bar
 from tqdm import tqdm
 from pydelling.utils import create_results_folder
 from docker import DockerClient
+import subprocess
 
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ class BaseManager(ABC):
             start_from: int = None,
             petsc_dir: str = '/opt/pflotran-dev/petsc',
             petsc_arch: str = 'arch-linux-c-opt',
+            pre_commands: List[str] = None,
             **kwargs,
             ):
         """This method runs all the studies.
@@ -48,6 +50,11 @@ class BaseManager(ABC):
 
         self.results_folder = create_results_folder(studies_folder)
         # self.generate_run_files(studies_folder=studies_folder)
+        # Run the precommands if any
+        if pre_commands is not None:
+            for command in pre_commands:
+                logger.info(f"Running precommand: {command}")
+                subprocess.run(command, shell=True)
         for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
             study: BaseStudy
             if start_from is not None:
@@ -59,7 +66,8 @@ class BaseManager(ABC):
                            n_cores=n_cores,
                            dummy=dummy,
                            petsc_dir=petsc_dir,
-                           petsc_arch=petsc_arch,**kwargs)
+                           petsc_arch=petsc_arch,
+                           **kwargs)
 
     def generate_run_files(self, studies_folder: str = './studies'):
         """This method generates the run files for all the studies.

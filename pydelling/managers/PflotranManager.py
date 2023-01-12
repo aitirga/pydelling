@@ -26,7 +26,6 @@ class PflotranManager(BaseManager):
                    ):
         """This method runs a study.
         """
-        # test comment
         if n_cores == 1:
             # Run the study in serial
             subprocess.run(['pflotran', '-pflotranin', study.input_file_name], cwd=study.output_folder.absolute())
