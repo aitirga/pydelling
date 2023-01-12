@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pydelling.readers.iGPReader import iGPReader
 import logging
+from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 import numpy as np
@@ -19,6 +20,7 @@ class RegionOperations:
                                region_name: str,
                                name_below='below',
                                name_above='above',
+                               cache_old_results: bool = False,
                                ):
         """
         Divide the topography into two regions, one above and one below a given z coordinate.
@@ -28,10 +30,16 @@ class RegionOperations:
             region_name: The name of the region to divide.
             name_below: The name of the region below the z coordinate.
             name_above: The name of the region above the z coordinate.
+            cache_old_results: If True, each time this method is called the original region_dict will be used.
 
         Returns:
             None
         """
+        if cache_old_results:
+            if hasattr(self, 'old_region_dict'):
+                self.region_dict = self.old_region_dict
+            if hasattr(self, 'old_boundaries'):
+                self.boundaries = self.old_boundaries
         boundary_faces = self.get_boundary_faces(region_name)
         name_below = name_below if name_below != 'below' else f"{region_name}_below"
         name_above = name_above if name_above != 'above' else f"{region_name}_above"
@@ -47,11 +55,15 @@ class RegionOperations:
                 new_boundaries[name_above].append(face_idx)
 
         # Update the boundaries dict
+        if cache_old_results:
+            self.old_boundaries = deepcopy(self.boundaries)
         for name in new_boundaries:
             self.boundaries[name] = [boundary_faces[idx] for idx in new_boundaries[name]]
         self.boundaries.pop(region_name)
 
         # Update the region dict
+        if cache_old_results:
+            self.old_region_dict = deepcopy(self.region_dict)
         get_old_region = self.region_dict[region_name]
         # Divide the region elements based on the found idx
         self.region_dict[name_below] = {'elements': get_old_region['elements'][new_boundaries[name_below]],
