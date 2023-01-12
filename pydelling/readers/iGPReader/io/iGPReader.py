@@ -29,7 +29,12 @@ class iGPReader(BaseReader, RegionOperations):
     """
     element_dict = {"4": "T", "5": "P", "6": "W", "8": "H"}
 
-    def __init__(self, path, project_name='iGP_project', build_mesh=False, output_folder='./results', write_materials=True):
+    def __init__(self, path,
+                 project_name='iGP_project',
+                 build_mesh=False,
+                 output_folder='./results',
+                 write_materials=True,
+                 ):
         self.elements = None
         self.boundaries = {}
         self.element_nodes = None
@@ -185,7 +190,11 @@ class iGPReader(BaseReader, RegionOperations):
         logger.info(f"Region data has been read from {self.path / 'source.ss'}")
 
     # @timer_min
-    def implicit_to_explicit(self, dump_mesh_info=True):
+    def implicit_to_explicit(self,
+                             dump_mesh_info=True,
+                             write_cells=True,
+                             write_regions=True,
+                             ):
         """
         Function that transforms an implicit mesh into an explicit mesh
         :param dump_mesh_info: set it True in order to write the primal mesh into the same unstructured explicit mesh
@@ -193,25 +202,28 @@ class iGPReader(BaseReader, RegionOperations):
         if not self.is_mesh_built:
             self.build_mesh_data()
         logger.info("Converting PFLOTRAN implicit mesh to explicit format")
-        self.find_connectivities()  # Find the connections of the mesh
-        # Write mesh file
-        logger.info(f'Writing mesh file to {self.output_folder}')
-        exp_mesh_filename = f"{self.project_name}.mesh"
-        if self.output_folder is None:
-            output_file = open(exp_mesh_filename, "w")
-        else:
-            output_file = open(os.path.join(self.output_folder, exp_mesh_filename), "w")
-        self.ExplicitWriter.write_cells(self, output_file)
-        self.ExplicitWriter.write_connections(self, output_file)
-        if dump_mesh_info:
-            self.ImplicitWriter.write_elements(self, output_file)  # Write elements for mesh visualization
-            self.ImplicitWriter.write_nodes(self, output_file)  # Write node_ids for mesh visualization
-        output_file.close()
+        if write_cells:
+            self.find_connectivities()  # Find the connections of the mesh
+            # Write mesh file
+            logger.info(f'Writing mesh file to {self.output_folder}')
+            exp_mesh_filename = f"{self.project_name}.mesh"
+            if self.output_folder is None:
+                output_file = open(exp_mesh_filename, "w")
+            else:
+                output_file = open(os.path.join(self.output_folder, exp_mesh_filename), "w")
+            self.ExplicitWriter.write_cells(self, output_file)
+            self.ExplicitWriter.write_connections(self, output_file)
+            if dump_mesh_info:
+                self.ImplicitWriter.write_elements(self, output_file)  # Write elements for mesh visualization
+                self.ImplicitWriter.write_nodes(self, output_file)  # Write node_ids for mesh visualization
+            output_file.close()
+            self.write_hdf5_domain()
+
         # Write condition data
-        self.ExplicitWriter.write_condition_data(self)
-        if self.is_write_materials:
-            self.ExplicitWriter.write_materials(self)
-        self.write_hdf5_domain()
+        if write_regions:
+            self.ExplicitWriter.write_condition_data(self)
+            if self.is_write_materials:
+                self.ExplicitWriter.write_materials(self)
 
     def write_explicit_mesh_in_csv(self):
         """
@@ -742,7 +754,7 @@ class iGPReader(BaseReader, RegionOperations):
                 self.elements = temp
             # Generate boundary information
             if generate_boundaries:
-                for boundary in tqdm(self.region_dict, desc='Generating boundary mesh'):
+                for boundary in tqdm(self.region_dict, desc='Building boundary mesh'):
                     temp_boundary = []
                     for element in self.region_dict[boundary]['elements']:
                         n_type = len(element)
