@@ -1,2 +1,3 @@
 include pydelling/config/*.yaml
+include pydelling/pyproject.toml
 include *
