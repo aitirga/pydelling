@@ -81,11 +81,14 @@ class RegionOperations:
                                            )
             self.is_subset_generated = True
 
-        # # Filter out only the nodes with the given x and y coordinates
-        #
-        # node_id = [node_id for node_id in self.node_id_subset if abs(self.nodes[node_id][0] - x) <= tol and abs(self.nodes[node_id][1] - y) <= tol]
-        # sorted_ids = sorted(node_id, key=lambda x: self.nodes[x][2])
-        # return sorted_ids
+        closest_cluster_ids = self.cluster_engine.get_closest_point_ids_from_xy(x, y)
+        closest_cluster_nodes = self.nodes[self.node_id_subset[closest_cluster_ids]]
+        # Sort the closest_cluster_ids by z coordinate
+
+
+        return self.node_id_subset[closest_cluster_ids]
+        # Order
+
 
     def _setup_cluster_and_subset(self: iGPReader,
                                     eps: float,

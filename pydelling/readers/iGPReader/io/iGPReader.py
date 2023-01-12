@@ -336,6 +336,97 @@ class iGPReader(BaseReader, RegionOperations):
         # self.node_ids = node_ids  # Update the mesh with the moved node_ids
         return self.nodes
 
+    def raster_interpolator_semistructured(self,
+                                           regions: List,
+                                           raster_filenames: dict,
+                                           raster_folder=None,
+                                           n_nearest: int = 5,
+                                           material_subset: List = None,
+                                           min_samples: int = 10,
+                                           eps: float = 0.5,
+                                           growth_rate: float = None,
+                                           ):
+        """
+        Performs a raster interpolation for semi-structured (layer based) meshes.
+        This method computes the first n_nearest nearest neighbours (in the z-direction) and
+        moves the mesh nodes proportionally to the raster surface
+
+        Args:
+            regions: List of regions to interpolate
+            raster_filenames: Dictionary with the raster filenames for each region
+            raster_folder: Folder where the raster files are located
+            n_nearest: Number of nearest neighbours (in z) to consider
+            material_subset: List of materials to consider in the interpolation
+            min_samples: Minimum samples used in the DBSCAN clustering
+            eps: Epsilon value used in the DBSCAN clustering
+            growth_rate: Growth rate of the mesh in the z-direction
+        Returns:
+
+        """
+
+        logger.info("Interpolating topography layers to the mesh")
+        if raster_folder is None:
+            raster_folder = './'
+
+        for region in regions:
+            self._raster_max_error = 0.0
+            logger.info(f"Interpolating region {region}")
+            raster_current_region_filename = os.path.join(raster_folder, raster_filenames[region])
+            raster_data = self.RasterReader(raster_current_region_filename)
+            # print(f"Elements in face length is {len(iGP_data.region_dict[region]['elements'])}")
+            id_list = np.unique(self.region_dict[region]["elements"].flatten())
+            _test = []
+            for mesh_id in tqdm(id_list, desc=f"Interpolating region {region}"):
+                x_mesh = self.nodes[mesh_id][0]
+                y_mesh = self.nodes[mesh_id][1]
+                # Raster data
+                z_raster = raster_data.get_data_from_coordinates(x_mesh, y_mesh)
+                # Get the nearest neighbours in the z-direction
+                z_nearest_ids = self.get_nodes_from_x_y(
+                    x=x_mesh,
+                    y=y_mesh,
+                    materials=material_subset,
+                    min_samples=min_samples,
+                    eps=eps,
+                    top_region_name=region,
+                )
+                if n_nearest is not None:
+                    z_nearest_ids = z_nearest_ids[-n_nearest:]
+                z_nearest_nodes = self.nodes[z_nearest_ids]
+                # Proportionally move the mesh node
+                z_nearest_new = z_nearest_nodes.copy()
+                z_nearest_new[:, 2] -= z_nearest_new[:, 2].min()
+                z_nearest_new[:, 2] /= z_nearest_new[:, 2].max()
+                # Apply a logarithmic growth
+                if growth_rate is not None:
+                    z_nearest_new[:, 2] = self.geometric_growth(len(z_nearest_new), growth_rate)
+                    if not hasattr(self, "info_geometric_growth"):
+                        geometryic_growth_formatted_string = [f"{i:1.2f}" for i in z_nearest_new[:, 2]]
+                        logger.info(f"The following geometrical spacing (growth_rate {growth_rate}) has been applied to the z-nodes: {geometryic_growth_formatted_string}")
+                        self.info_geometric_growth = True
+
+                z_nearest_new[:, 2] *= (z_raster - z_nearest_nodes[:, 2].min())
+                z_nearest_new[:, 2] += z_nearest_nodes[:, 2].min()
+                for z_id in z_nearest_ids:
+                    self.nodes[z_id][2] = z_nearest_new[z_nearest_ids == z_id][0][2]
+            logger.info(f"Interpolation of region {region} completed.")
+
+    def geometric_growth(self, n, growth_rate=0.3) -> list:
+        """
+        Generates a geometric growth function from 0.0 to 1.0
+        Args:
+            n: Number of points
+            growth_rate: Growth rate
+
+        Returns: List of values
+
+        """
+        values = [1.0 - (1.0 - growth_rate) ** i for i in range(n)]
+        values = np.array(values)
+        values /= values.max()
+        return list(values)
+
+
     def write_ASCII_meshfile(self, filename):
         """
         Writes the mesh in PFLOTRAN ascii file

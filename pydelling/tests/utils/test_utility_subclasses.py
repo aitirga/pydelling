@@ -42,7 +42,6 @@ class GeometryUtilsCase(unittest.TestCase):
         # plt.show()
 
 
-
     def test_semistructured_finder_point_columns(self):
         n_clusters_x = 10
         n_clusters_y = 10
@@ -53,7 +52,7 @@ class GeometryUtilsCase(unittest.TestCase):
         points = np.array(points)
 
         cluster_finder = SemistructuredFinder(points, eps=0.05, min_samples=20, projection_axis='z')
-        target_point = [5.0, 5, 5]
+        target_point = np.array([5.0, 5, 5])
         closest_cluster = cluster_finder.get_closest_cluster_from_point(target_point)
         self.assertLess(np.linalg.norm(target_point - np.array(closest_cluster).mean()), 0.3)
         # Plot the clusters with high alpha, the selected cluster opaque and the point
@@ -62,6 +61,13 @@ class GeometryUtilsCase(unittest.TestCase):
         # plt.scatter(x, y)
         # plt.scatter(target_point[0], target_point[1], alpha=1)
         # plt.show()
+
+        closest_cluster = cluster_finder.get_closest_cluster_from_xy(x=5.0, y=5.0)
+        self.assertLess(np.linalg.norm(target_point - np.array(closest_cluster).mean()), 0.3)
+
+        # Get the point ids instead of the points
+        closest_cluster = cluster_finder.get_closest_point_ids_from_point(target_point)
+
 
 
 

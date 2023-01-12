@@ -1,5 +1,7 @@
 import logging
 import numpy as np
+import functools
+import scipy
 
 logger = logging.getLogger(__name__)
 
@@ -139,12 +141,12 @@ class SemistructuredFinder:
             clusters[label].append(self.points[i])
         return clusters
 
-    @property
+    @functools.cached_property
     def n_clusters(self):
         """Returns the number of clusters."""
         return len(self.clusters)
 
-    @property
+    @functools.cached_property
     def point_idx(self):
         """Returns a list of indices of the points in the clusters."""
         point_idx = []
@@ -155,6 +157,10 @@ class SemistructuredFinder:
                 point_idx[label].append(i)
         return point_idx
 
+    def get_point_idx_in_cluster(self, cluster_idx):
+        """Returns the indices of the points in the specified cluster."""
+        return self.point_idx[cluster_idx]
+
     def get_closest_cluster_from_point(self, point: np.array):
         """Returns the cluster closest to a point."""
         dist = []
@@ -164,17 +170,34 @@ class SemistructuredFinder:
             if i != self.projection_dict[self.projection_axis]:
                 projected_point.append(point[i])
         projected_point = np.array(projected_point)
-        print(projected_point)
         for cluster_center in self.projected_cluster_centers:
             dist.append(np.linalg.norm(projected_point - cluster_center))
-        print(dist)
-        print(np.argmin(dist))
-        print(self.clusters[11])
         return self.clusters[np.argmin(dist)]
 
-    @property
+    def get_closest_cluster_from_xy(self, x: float, y: float):
+        """Returns the cluster closest to a point."""
+        return self.get_closest_cluster_from_point(np.array([x, y, 0]))
+
+    def get_closest_point_ids_from_point(self, point: np.array):
+        """Returns the cluster closest to a point using KDTree."""
+        import numpy as np
+        from scipy.spatial import KDTree
+        projected_point = []
+        for i in range(0, 3):
+            if i != self.projection_dict[self.projection_axis]:
+                projected_point.append(point[i])
+        projected_point = np.array(projected_point)
+        dist, idx = self.projected_cluster_centers_kdtree.query(projected_point)
+        return self.point_idx[idx]
+
+    def get_closest_point_ids_from_xy(self, x: float, y: float):
+        """Returns the cluster closest to a point."""
+        return self.get_closest_point_ids_from_point(np.array([x, y, 0]))
+
+    @functools.cached_property
     def projected_cluster_centers(self):
         """Returns the cluster centers."""
+
         centers = []
         for cluster in self.clusters:
             projected_points = []
@@ -187,7 +210,14 @@ class SemistructuredFinder:
             centers.append(np.mean(projected_points, axis=0))
         return centers
 
-    @property
+    @functools.cached_property
+    def projected_cluster_centers_kdtree(self) -> scipy.spatial.KDTree:
+        """Returns the cluster centers."""
+        return scipy.spatial.KDTree(self.projected_cluster_centers)
+
+
+
+    @functools.cached_property
     def cluster_centers(self):
         """Returns the cluster centers."""
         centers = []
