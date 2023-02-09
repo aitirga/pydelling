@@ -85,6 +85,24 @@ class RegionOperations:
                            eps: float = 2.5,
                            min_samples: int = 20,
                            ) -> list:
+        """
+        Returns a list of nodes closest to the specified x and y coordinates.
+
+        Args:
+            self: The iGPReader object that calls this method.
+            x: The x-coordinate for which to find closest nodes.
+            y: The y-coordinate for which to find closest nodes.
+            materials: The materials of the nodes to consider.
+            top_region_name: The top region name of the nodes to consider.
+            tol: The tolerance used in the computation.
+            eps: The epsilon value used in clustering.
+            min_samples: The minimum number of samples required for a cluster.
+
+        Returns:
+            A list of node IDs closest to the specified x and y coordinates.
+        """
+
+
         if not hasattr(self, 'is_subset_generated'):
             self._setup_cluster_and_subset(eps=eps,
                                            min_samples=min_samples,
@@ -108,6 +126,17 @@ class RegionOperations:
                                     top_region_name: str = None,
                                     materials: list = None,
                                     ):
+
+        """
+        Initialize the cluster engine (DBSCAN) and create a subset of nodes from the material specified
+
+        Args:
+            eps: The maximum distance between two samples for one to be considered as in the neighborhood of the other
+            min_samples: The number of samples in a neighborhood for a point to be considered as a core point.
+            top_region_name: The name of the top region.
+            materials: List of materials.
+
+        """
         logger.info(f'Setting up cluster engine (DBSCAN with eps={eps} and min_samples={min_samples}) and subset of nodes for materials {materials}')
         self.is_subset_generated = False
         temp_node_id = []

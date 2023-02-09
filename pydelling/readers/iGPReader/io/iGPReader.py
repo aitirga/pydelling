@@ -693,10 +693,13 @@ class iGPReader(BaseReader, RegionOperations):
             hdf5_file.create_dataset(name, data=dataset)
 
     def write_csv(self, filename):
-        """
-        Writes the mesh centroids in .csv format
-        :param filename:
-        :return:
+        """Write the processed mesh data to a csv file.
+
+        Args:
+            filename: The name of the csv file to be created.
+
+        Returns:
+            None
         """
         # TODO: set-up default filename
         if self.output_folder is None:
