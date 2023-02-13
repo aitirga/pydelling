@@ -124,7 +124,7 @@ class PflotranStudy(BaseStudy):
         # Find simulation block
         simulation_block_idx = self._get_block_line_idx(self._find_tags('SIMULATION')[0])
         # Find the last line of the simulation block
-        last_line_idx = simulation_block_idx[-1] - 1
+        last_line_idx = simulation_block_idx[-1]
         # Add the checkpoint block
         self._add_line(line_index=last_line_idx, new_line=['RESTART'])
         self._add_line(line_index=last_line_idx + 1, new_line=['FILENAME', filename])
