@@ -58,8 +58,9 @@ class BaseManager(ABC):
         for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
             study: BaseStudy
             if start_from is not None:
-                logger.info(f"Skipping study {study.name} (idx: {study.idx}) because start_from is set to {start_from}")
                 if study.idx < start_from:
+                    logger.info(
+                        f"Skipping study {study.name} (idx: {study.idx}) because start_from is set to {start_from}")
                     self.run_study(study,
                                    docker_image=docker_image,
                                    n_cores=n_cores,
