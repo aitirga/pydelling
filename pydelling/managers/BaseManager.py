@@ -60,6 +60,13 @@ class BaseManager(ABC):
             if start_from is not None:
                 logger.info(f"Skipping study {study.name} (idx: {study.idx}) because start_from is set to {start_from}")
                 if study.idx < start_from:
+                    self.run_study(study,
+                                   docker_image=docker_image,
+                                   n_cores=n_cores,
+                                   dummy=True,
+                                   petsc_dir=petsc_dir,
+                                   petsc_arch=petsc_arch,
+                                   **kwargs)
                     continue
             self.run_study(study,
                            docker_image=docker_image,
