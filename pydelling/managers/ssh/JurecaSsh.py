@@ -21,6 +21,7 @@ class JurecaSsh(BaseSsh):
         """
         super().__init__(user, pkey_path)
         self.project_name = project_name
+        self.current_job_id = None
 
     def connect(self):
         # Ask for password using a hidden input
@@ -69,6 +70,52 @@ class JurecaSsh(BaseSsh):
         Changes the current working directory to the project directory in the remote server.
         """
         self.cd(f'/p/scratch/cjiek63/{self.project_name}')
+
+    def send_job(self, job_path):
+        """
+        Sends a job to the remote server.
+        Args:
+            job_path: path to the job file
+        """
+        job_path = Path(job_path)
+        logger.info(f'Sending job {job_path} to the remote server')
+        self.cd(job_path.parent)
+        self.run_command(f"cd {self.pwd} && sbatch {job_path.name}")
+
+    def cancel_job(self, job_id):
+        """
+        Cancels a job in the remote server.
+        Args:
+            job_id: id of the job
+        """
+        logger.info(f'Cancelling job {job_id} in the remote server')
+        self.run_command(f"scancel {job_id}")
+
+    def cancel_all_jobs(self):
+        """
+        Cancels all jobs in the remote server.
+        """
+        get_user_jobs = self.user_queue['JOBID']
+        for job in get_user_jobs:
+            self.cancel_job(job)
+
+    def get_job_status(self, job_id):
+        """
+        Returns the status of a job in the remote server.
+        Args:
+            job_id: id of the job
+
+        Returns: status of the job
+        """
+        return self.general_queue[self.general_queue['JOBID'] == job_id]['ST'].values[0]
+
+    @property
+    def user_job_ids(self):
+        """
+        Returns the jobs of the user in the remote server.
+        Returns: jobs of the user
+        """
+        return self.user_queue['JOBID'].values
 
 
 
