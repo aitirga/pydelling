@@ -8,7 +8,9 @@ from pathlib import Path
 class BaseSsh(ABC):
     client: paramiko.SSHClient
     sftp: paramiko.SFTPClient
-    def __init__(self, user,  pkey_path):
+    def __init__(self, user,
+                 pkey_path,
+                 password=None):
         """
         Connects to the remote server.
         Args:
@@ -17,7 +19,7 @@ class BaseSsh(ABC):
         """
         self.pkey_path = pkey_path
         self.user = user
-        self.password = None
+        self.password = password
         self.connect()
 
     @abstractmethod
@@ -128,6 +130,31 @@ class BaseSsh(ABC):
                 self.cpdir(file, str(dst / file.name))
             else:
                 self.cp(file, str(dst / file.name))
+
+    def get(self, src, dst):
+        """
+        Copies a file from the remote server to the local machine.
+        Args:
+            src: source file
+            dst: destination file
+        """
+        self.sftp.get(src, dst)
+        logger.info(f'Copied {src} to {dst}')
+
+    def getdir(self, src, dst):
+        """
+        Copies a directory from the remote server to the local machine.
+        Args:
+            src: source directory
+            dst: destination directory
+        """
+        src = Path(src)
+        dst = Path(dst)
+
+        dst.mkdir(parents=True, exist_ok=True)
+        self.cd(src)
+        for file in self.ls:
+            self.get(file, dst / Path(file).name)
 
 
     @property

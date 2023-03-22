@@ -46,5 +46,15 @@ class PflotranStatus(BaseStatus):
         else:
             return True
 
+    def add_total_time(self, total_time):
+        """Add the total time of the simulation."""
+        self.total_time = total_time
+
+    def read(self, status_file = None):
+        """Read the status file and extract key information."""
+        self.status_file = status_file if status_file is not None else self.status_file
+        self.read_status_file()
+        self.extract_key_information()
+
 
 

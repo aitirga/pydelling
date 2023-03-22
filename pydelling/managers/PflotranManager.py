@@ -7,7 +7,11 @@ from io import BytesIO
 from pathlib import Path
 from pydelling.utils import create_results_folder
 from pydelling.managers.PflotranPostprocessing import PflotranPostprocessing
+from pydelling.managers.ssh import JurecaSsh
+from pydelling.managers.status import PflotranStatus
 import logging
+import os
+import getpass
 import os
 
 logger = logging.getLogger(__name__)
@@ -96,6 +100,72 @@ class PflotranManager(BaseManager):
         container.stop()
         container.remove()
 
+    def _run_study_jureca(self,
+                            study: PflotranStudy,
+                            user,
+                            project_name,
+                            pkey_path,
+                            n_cores: int = 1,
+                            wallclock_limit: str = None,
+                            shell_script: str = None,
+                            **kwargs,
+                            ):
+        """This method runs a study on JURECA"""
+        if self.password is None:
+            self.password = getpass.getpass(prompt='Password: ', stream=None)
+
+        self.ssh = JurecaSsh(user=user,
+                             project_name=project_name,
+                             pkey_path=pkey_path,
+                             password=self.password,
+                             )
+        # Create a folder for the set of studies
+        self.ssh.cd_project()
+        self.ssh.mkdir(self.studies_folder_name)
+        # Create a folder for the study, delete it if it already exists
+        self.ssh.cd(self.studies_folder_name)
+        if study.name in self.ssh.ls:
+            self.ssh.rmdir(study.name)
+        self.ssh.mkdir(study.name)
+        # Copy the study folder to the server
+        # self.ssh.cpdir(study.output_folder, study.name)
+        # Copy the shell_script to the server
+        if shell_script is not None:
+            # Read the shell script and replace the study name where {input_name} is found\
+            with open(shell_script, 'r') as f:
+                shell_script = f.read()
+            shell_script = shell_script.replace('{input_name}', study.input_file_name)
+            # Write to temporary file
+            with open('temp.sh', 'w') as f:
+                f.write(shell_script)
+            shell_script = 'temp.sh'
+            # Delete the temporary file
+            self.ssh.cp(shell_script, f"{study.name}/{Path(shell_script).name}")
+            os.remove('temp.sh')
+            # Run the shell script
+            self.ssh.send_job(f"{study.name}/{Path(shell_script).name}")
+            # Get the highest job id
+            job_id = max(self.ssh.user_queue['JOBID'])
+            # pflotran_status = PflotranStatus()
+            self.ssh.wait_for_job(job_id)
+            # Copy the results back to the local machine
+            # Detect files ending with .h5
+            dir_list = self.ssh.ls
+            dir_list = [file for file in dir_list if file.endswith('.h5')]
+            for file in dir_list:
+                self.ssh.get(f"{file}", study.output_folder/file)
+
+        else:
+            raise ValueError('shell_script should be provided with the details of the job submission.')
+
+
+
+
+
+
+
+
+
     def merge_results(self, move=False, postprocess=True):
         """This method merges the results of all the studies.
         """
@@ -122,7 +192,6 @@ class PflotranManager(BaseManager):
             logger.info('Postprocessing results')
             pflotran_postprocesser = PflotranPostprocessing()
             # Change the working directory to the results folder
-            import os
             os.chdir(self.results_folder / 'merged_results')
             pflotran_postprocesser.run()
             # Return to the original working directory

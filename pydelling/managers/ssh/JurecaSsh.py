@@ -5,15 +5,17 @@ import logging
 import pandas as pd
 from pathlib import Path
 import rich
-
+from pydelling.managers.status import BaseStatus
 logger = logging.getLogger(__name__)
 
 
 class JurecaSsh(BaseSsh):
     hostname = 'jureca.fz-juelich.de'
-    def __init__(self, user,
+    def __init__(self,
+                 user,
                  pkey_path,
                  project_name,
+                 password=None,
                  ):
         """
         Connects to the remote server.
@@ -21,7 +23,7 @@ class JurecaSsh(BaseSsh):
             user: username
             pkey_path: path to the private key
         """
-        super().__init__(user, pkey_path)
+        super().__init__(user, pkey_path, password)
         self.project_name = project_name
         self.current_job_id = None
 
@@ -87,7 +89,7 @@ class JurecaSsh(BaseSsh):
     def wait_for_job(self,
                      job_id,
                      check_interval=2,
-                     running_object_status = None,
+                     running_object_status: BaseStatus = None,
                      ):
         """
         Waits for a job to finish in the remote server.
@@ -128,6 +130,7 @@ class JurecaSsh(BaseSsh):
                     status_bar.update(task_run, visible=True)
                     status_bar.update(task_start, visible=False)
                     if running_object_status is not None:
+                        running_object_status.read_status_file()
                         status_bar.update(task_run, completed=running_object_status.progress)
                 elif job_status == 'CG':
                     status_bar.update(task_wait, visible=False)
