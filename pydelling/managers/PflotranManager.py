@@ -128,7 +128,7 @@ class PflotranManager(BaseManager):
             self.ssh.rmdir(study.name)
         self.ssh.mkdir(study.name)
         # Copy the study folder to the server
-        # self.ssh.cpdir(study.output_folder, study.name)
+        self.ssh.cpdir(study.output_folder, study.name)
         # Copy the shell_script to the server
         if shell_script is not None:
             # Read the shell script and replace the study name where {input_name} is found\
@@ -138,9 +138,8 @@ class PflotranManager(BaseManager):
             # Write to temporary file
             with open('temp.sh', 'w') as f:
                 f.write(shell_script)
-            shell_script = 'temp.sh'
             # Delete the temporary file
-            self.ssh.cp(shell_script, f"{study.name}/{Path(shell_script).name}")
+            self.ssh.cp('temp.sh', f"{study.name}/{Path(shell_script).name}")
             os.remove('temp.sh')
             # Run the shell script
             self.ssh.send_job(f"{study.name}/{Path(shell_script).name}")
@@ -152,6 +151,8 @@ class PflotranManager(BaseManager):
             # Detect files ending with .h5
             dir_list = self.ssh.ls
             dir_list = [file for file in dir_list if file.endswith('.h5')]
+            # Add the files containing the job id to the list
+            dir_list += [file for file in self.ssh.ls if str(job_id) in file]
             for file in dir_list:
                 self.ssh.get(f"{file}", study.output_folder/file)
 

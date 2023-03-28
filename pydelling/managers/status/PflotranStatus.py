@@ -6,7 +6,9 @@ logger = logging.getLogger(__name__)
 
 class PflotranStatus(BaseStatus):
     """This class reads a pflotran status file and extracts some key information."""
-    def __init__(self, status_file, total_time=None):
+    def __init__(self,
+                 status_file,
+                 total_time=None):
         super().__init__(status_file)
         self.times = []
         self.dts = []
