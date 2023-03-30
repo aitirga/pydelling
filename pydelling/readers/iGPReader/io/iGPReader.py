@@ -59,7 +59,9 @@ class iGPReader(BaseReader, RegionOperations):
             self.is_igp_present = True
         except FileNotFoundError:
             self.is_igp_present = False
-            logger.info("iGP project files were not found")
+            logger.error("iGP project files were not found")
+            raise FileNotFoundError("iGP project files were not found")
+
         self.build_mesh = build_mesh
         self.project_name = project_name
         self.is_write_materials = write_materials
