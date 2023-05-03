@@ -88,7 +88,7 @@ class JurecaSsh(BaseSsh):
 
     def wait_for_job(self,
                      job_id,
-                     check_interval=2,
+                     check_interval=3,
                      running_object_status: BaseStatus = None,
                      ):
         """
@@ -111,20 +111,24 @@ class JurecaSsh(BaseSsh):
             task_start = status_bar.add_task(f"Starting the job {job_id}", total=None, visible=False)
             task_cancel = status_bar.add_task(f"Canceling the job {job_id}", total=None, visible=False)
             task_run = status_bar.add_task(f"Running the job {job_id}", total=None if running_object_status is None else 100, visible=False)
+            assert_finish_counter = 0
 
             while not is_finished:
                 job_status = self.get_job_status(job_id)
                 if job_status == 'CF':
+                    assert_finish_counter = 0
                     status_bar.update(task_wait, visible=False)
                     status_bar.update(task_cancel, visible=False)
                     status_bar.update(task_run, visible=False)
                     status_bar.update(task_start, visible=True)
                 elif job_status == 'PD':
+                    assert_finish_counter = 0
                     status_bar.update(task_wait, visible=True)
                     status_bar.update(task_cancel, visible=False)
                     status_bar.update(task_run, visible=False)
                     status_bar.update(task_start, visible=False)
                 elif job_status == 'R':
+                    assert_finish_counter = 0
                     status_bar.update(task_wait, visible=False)
                     status_bar.update(task_cancel, visible=False)
                     status_bar.update(task_run, visible=True)
@@ -138,11 +142,13 @@ class JurecaSsh(BaseSsh):
                     status_bar.update(task_run, visible=False)
                     status_bar.update(task_start, visible=False)
                 elif job_status == None:
-                    status_bar.remove_task(task_wait)
-                    status_bar.remove_task(task_cancel)
-                    status_bar.remove_task(task_run)
-                    status_bar.remove_task(task_start)
-                    is_finished = True
+                    assert_finish_counter += 1
+                    if assert_finish_counter > 3:
+                        status_bar.remove_task(task_wait)
+                        status_bar.remove_task(task_cancel)
+                        status_bar.remove_task(task_run)
+                        status_bar.remove_task(task_start)
+                        is_finished = True
 
                 time.sleep(check_interval)
 

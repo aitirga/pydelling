@@ -107,7 +107,7 @@ class PflotranManager(BaseManager):
                             pkey_path,
                             n_cores: int = 1,
                             wallclock_limit: str = None,
-                            shell_script: str = None,
+                            shell_script_path: str = None,
                             **kwargs,
                             ):
         """This method runs a study on JURECA"""
@@ -130,19 +130,19 @@ class PflotranManager(BaseManager):
         # Copy the study folder to the server
         self.ssh.cpdir(study.output_folder, study.name)
         # Copy the shell_script to the server
-        if shell_script is not None:
+        if shell_script_path is not None:
             # Read the shell script and replace the study name where {input_name} is found\
-            with open(shell_script, 'r') as f:
+            with open(shell_script_path, 'r') as f:
                 shell_script = f.read()
             shell_script = shell_script.replace('{input_name}', study.input_file_name)
             # Write to temporary file
             with open('temp.sh', 'w') as f:
                 f.write(shell_script)
             # Delete the temporary file
-            self.ssh.cp('temp.sh', f"{study.name}/{Path(shell_script).name}")
+            self.ssh.cp('temp.sh', f"{study.name}/{Path(shell_script_path).name}")
             os.remove('temp.sh')
             # Run the shell script
-            self.ssh.send_job(f"{study.name}/{Path(shell_script).name}")
+            self.ssh.send_job(f"{study.name}/{Path(shell_script_path).name}")
             # Get the highest job id
             job_id = max(self.ssh.user_queue['JOBID'])
             # pflotran_status = PflotranStatus()

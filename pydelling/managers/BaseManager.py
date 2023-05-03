@@ -85,7 +85,7 @@ class BaseManager(ABC):
                                    project_name=project_name,
                                    pkey_path=pkey_path,
                                    wallclock_limit=wallclock_limit,
-                                   shell_script=shell_script,
+                                   shell_script_path=shell_script,
                                    **kwargs)
                     continue
             self.run_study(study,
@@ -99,7 +99,7 @@ class BaseManager(ABC):
                            project_name=project_name,
                            pkey_path=pkey_path,
                            wallclock_limit=wallclock_limit,
-                           shell_script=shell_script,
+                           shell_script_path=shell_script,
                            **kwargs)
 
     def generate_run_files(self, studies_folder: str = './studies'):
