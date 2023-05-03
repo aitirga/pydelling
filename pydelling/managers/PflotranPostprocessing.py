@@ -54,7 +54,12 @@ class PflotranPostprocessing:
         # Set the project name
         domain_file = [file for file in self.output_h5_files if "domain" in file.name]
         assert len(domain_file) > 0, "Domain file couldn't be found"
-        self.output_h5_files.remove(domain_file[0])
+        # Remove the domain files from the list
+        for file in domain_file:
+            self.output_h5_files.remove(file)
+        restart_file = [file for file in self.output_h5_files if "restart" in file.name]
+        if len(restart_file) > 0:
+            self.output_h5_files.remove(restart_file[0])
         self.project_name = self.output_h5_files[0].stem.split('-')[0]
         # Rename domain file using the project name
         domain_file[0].rename(self.output_directory / f"{self.project_name}-domain.h5")
@@ -234,4 +239,5 @@ class PflotranPostprocessing:
 
     @property
     def n_output_files(self):
+
         return len(self.output_h5_files)
