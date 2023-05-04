@@ -71,7 +71,7 @@ class BaseManager(ABC):
         for study in tqdm(self.studies.values(), desc="Running studies", colour="white"):
             study: BaseStudy
             if start_from is not None:
-                if study.idx < start_from:
+                if study.idx < start_from - 1:
                     logger.info(
                         f"Skipping study {study.name} (idx: {study.idx}) because start_from is set to {start_from}")
                     self.run_study(study,
@@ -160,32 +160,31 @@ class BaseManager(ABC):
         logger.info(f"Running study {study.name}")
         # Create the study files
         study.output_folder = self.results_folder / study.name
-        study.pre_run()
-        for callback in study.callbacks:
-            if callback.kind == 'pre':
-                callback.run()
-        study.to_file(self.results_folder / study.name)
-        # Run the study
         if dummy:
             logger.info("Dummy run, not running the study")
-        elif run_on_jureca:
-            self._run_study_jureca(study,
-                                   n_cores=n_cores,
-                                   user=user,
-                                   project_name=project_name,
-                                   pkey_path=pkey_path,
-                                   wallclock_limit=wallclock_limit,
-                                   shell_script=shell_script,
-                                   **kwargs)
-        elif docker_image is not None:
-            self._run_study_docker(study, docker_image, n_cores=n_cores, **kwargs)
         else:
-            self._run_study(study, n_cores=n_cores, **kwargs)
-
-        for callback in study.callbacks:
-            if callback.kind == 'post':
-                callback.run()
-        study.post_run()
+            for callback in study.callbacks:
+                if callback.kind == 'pre':
+                    callback.run()
+            study.to_file(self.results_folder / study.name)
+            # Run the study
+            if run_on_jureca:
+                self._run_study_jureca(study,
+                                       n_cores=n_cores,
+                                       user=user,
+                                       project_name=project_name,
+                                       pkey_path=pkey_path,
+                                       wallclock_limit=wallclock_limit,
+                                       shell_script=shell_script,
+                                       **kwargs)
+            elif docker_image is not None:
+                self._run_study_docker(study, docker_image, n_cores=n_cores, **kwargs)
+            else:
+                self._run_study(study, n_cores=n_cores, **kwargs)
+            for callback in study.callbacks:
+                if callback.kind == 'post':
+                    callback.run()
+            study.post_run()
 
 
     @property
