@@ -55,7 +55,7 @@ class BaseManager(ABC):
         """This method runs all the studies.
         """
         self.is_dummy = dummy
-        shell_script = Path(shell_script).absolute()
+        shell_script = Path(shell_script).absolute() if shell_script is not None else None
         # Initialize callbacks
         for study in self.studies.values():
             study.initialize_callbacks(self)
