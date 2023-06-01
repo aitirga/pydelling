@@ -28,15 +28,18 @@ class PflotranSaveResultsCallback(BaseCallback):
         target_folder = Path(self.manager.results_folder / 'merged_results')
         target_folder.mkdir(exist_ok=True, parents=True)
         for file in output_files:
-            if 'restart' not in file.name:
-                if move:
-                    # Check if the file already exists
-                    if (target_folder / file.name).exists():
-                        target_file = target_folder / file.name
-                        target_file.unlink()
-                    shutil.move(str(file), str(target_folder.absolute()))
-                else:
-                    shutil.copy(str(file), str(target_folder.absolute()))
+            if 'restart' in file.name:
+                continue
+            if file.stem[-1] == 'y':
+                continue
+            if move:
+                # Check if the file already exists
+                if (target_folder / file.name).exists():
+                    target_file = target_folder / file.name
+                    target_file.unlink()
+                shutil.move(str(file), str(target_folder.absolute()))
+            else:
+                shutil.copy(str(file), str(target_folder.absolute()))
 
         if postprocess:
             import os

@@ -8,7 +8,9 @@ from pathlib import Path
 class BaseSsh(ABC):
     client: paramiko.SSHClient
     sftp: paramiko.SFTPClient
-    def __init__(self, user,  pkey_path):
+    def __init__(self, user,
+                 pkey_path,
+                 password=None):
         """
         Connects to the remote server.
         Args:
@@ -17,7 +19,7 @@ class BaseSsh(ABC):
         """
         self.pkey_path = pkey_path
         self.user = user
-        self.password = None
+        self.password = password
         self.connect()
 
     @abstractmethod
@@ -50,6 +52,7 @@ class BaseSsh(ABC):
         Args:
             path: path to change to
             """
+        path = str(path)
         self.sftp.chdir(path)
         logger.info(f'Changed directory to {path}')
 
@@ -76,6 +79,7 @@ class BaseSsh(ABC):
         Returns:
 
         """
+        path = str(path)
         self.sftp.remove(path)
         logger.info(f'Removed file {path}')
 
@@ -110,20 +114,6 @@ class BaseSsh(ABC):
         self.sftp.put(src, dst)
         logger.info(f'Copied {src} to {dst}')
 
-    def cp_dir(self, src, dst):
-        """
-        Copies a directory from the local machine to the remote server.
-        Args:
-            src: source directory
-            dst: destination directory
-        """
-        self.mkdir(dst)
-        for file in Path(src).iterdir():
-            if file.is_dir():
-                self.cp_dir(file, str(dst / file.name))
-            else:
-                self.cp(file, str(dst / file.name))
-
     def cpdir(self, src, dst):
         """
         Copies a directory from the local machine to the remote server.
@@ -131,7 +121,41 @@ class BaseSsh(ABC):
             src: source directory
             dst: destination directory
         """
-        pass
+        src = Path(src)
+        dst = Path(dst)
+
+        self.mkdir(str(dst))
+        for file in src.iterdir():
+            if file.is_dir():
+                self.cpdir(file, str(dst / file.name))
+            else:
+                self.cp(file, str(dst / file.name))
+
+    def get(self, src, dst):
+        """
+        Copies a file from the remote server to the local machine.
+        Args:
+            src: source file
+            dst: destination file
+        """
+        self.sftp.get(src, dst)
+        logger.info(f'Copied {src} to {dst}')
+
+    def getdir(self, src, dst):
+        """
+        Copies a directory from the remote server to the local machine.
+        Args:
+            src: source directory
+            dst: destination directory
+        """
+        src = Path(src)
+        dst = Path(dst)
+
+        dst.mkdir(parents=True, exist_ok=True)
+        self.cd(src)
+        for file in self.ls:
+            self.get(file, dst / Path(file).name)
+
 
     @property
     def ls(self):

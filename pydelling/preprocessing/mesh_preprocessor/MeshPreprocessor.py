@@ -35,6 +35,7 @@ class MeshPreprocessor(object):
     def __init__(self, *args, **kwargs):
         self.unordered_nodes = {}
         self.elements = []
+        BaseElement.local_id = 0
         if 'st_file' in kwargs:
             self.is_streamlit = True
 
@@ -496,8 +497,6 @@ class MeshPreprocessor(object):
                 temp_fracture['fracture'] = cur_fracture['fracture']
                 temp_associated_fractures[key] = temp_fracture
             mesh.elements[local_id].associated_fractures = temp_associated_fractures
-
-
 
     def refactor_array_by_element_type(self, array: np.ndarray or list) -> list:
         """Refactors a given array based on the element type"""
