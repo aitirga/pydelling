@@ -2,12 +2,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pydelling.readers.iGPReader import iGPReader
+    from pydelling.readers.iGPReader.geometry import BaseElement
 import logging
 from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 import numpy as np
 from pydelling.utils.utility_subclasses import SemistructuredFinder
+# Import a kd-tree class from scipy.spatial
+from scipy.spatial import cKDTree as KDTree
+from typing import List, Union
 
 
 class RegionOperations:
@@ -158,4 +162,58 @@ class RegionOperations:
                 logger.warning(f'The number of clusters found ({self.cluster_engine.n_clusters}) does not match the number of elements in the top region ({len(top_region_elements)}).')
         except:
             logger.warning(f'No top region was provided. The number of clusters found ({self.cluster_engine.n_clusters}) may not match the number of elements in the top region.')
+
+
+    def get_closest_region_node_from_x_y(self: iGPReader,
+                                         region_name: str,
+                                         x: float,
+                                         y: float,
+                                         ) -> list:
+        """
+        Returns the (x, y, z) coordinates of the closest specified region to the specified x and y coordinates.
+        """
+        # Carry out a
+        if not hasattr(self, f"{region_name}_kd_tree"):
+            kd_tree = self._setup_kd_tree_on_region(region_name)
+        else:
+            kd_tree = getattr(self, f"{region_name}_kd_tree")
+        # Find the closest node id
+        closest_node_z = kd_tree.query([x, y])[1]
+        return self.get_region_nodes(region_name)[closest_node_z]
+
+    def get_closest_region_node_from_elements(self: iGPReader,
+                                         region_name: str,
+                                         elements: Union[BaseElement, list],
+                                         ) -> list:
+        """
+        Returns the (x, y, z) coordinates of the closest specified region to the specified x and y coordinates.
+        """
+        # Carry out a
+        if not hasattr(self, f"{region_name}_kd_tree"):
+            kd_tree = self._setup_kd_tree_on_region(region_name)
+        else:
+            kd_tree = getattr(self, f"{region_name}_kd_tree")
+        # Find the closest node id
+        from pydelling.readers.iGPReader.geometry import BaseElement
+        if isinstance(elements, BaseElement):
+            element_centroid = elements.centroid_coords
+            closest_nodes_z = [kd_tree.query(element_centroid[:2])[1]]
+        else:
+            element_centroids = [element.centroid_coords for element in elements]
+            element_centroids_2d = [element_centroid[:2] for element_centroid in element_centroids]
+            closest_nodes_z = kd_tree.query(element_centroids_2d)[1]
+        region_nodes = self.get_region_nodes(region_name)
+        region_coords = [region_nodes[closest_node_z] for closest_node_z in closest_nodes_z]
+        return region_coords
+
+
+    def _setup_kd_tree_on_region(self: iGPReader, region_name):
+        region_nodes = self.get_region_nodes(region_name)
+        # Get only the x and y coordinates
+        region_nodes = region_nodes[:, :2]
+        # Setup the KD tree
+        kd_tree = KDTree(region_nodes)
+        return kd_tree
+
+
 

@@ -899,7 +899,7 @@ class iGPReader(BaseReader, RegionOperations):
         return self.boundaries[region_name]
 
     def get_material_elements(self, material_name) -> List[BaseElement]:
-        return self.material_dict[material_name]
+        return [self.elements[element_id - 1] for element_id in self.material_dict[material_name]]
 
     def get_material_centroids(self, material_name):
         return self.centroids[self.material_dict[material_name]]
