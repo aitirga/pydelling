@@ -1,0 +1,4 @@
+
+
+class iGPLogic():
+    pass

@@ -12,11 +12,11 @@ import pydelling.preprocessing.mesh_preprocessor.geometry as geometry
 from pydelling.preprocessing.dfn_preprocessor.Fracture import Fracture
 from pydelling.preprocessing.mesh_preprocessor.geometry import BaseElement
 from pydelling.utils.geometry_utils import compute_polygon_area
-
+from .utils import iGPLogic
 logger = logging.getLogger(__name__)
 
 
-class MeshPreprocessor(object):
+class MeshPreprocessor(object, iGPLogic):
     """Contains the logic to preprocess and work with a generic unstructured mesh"""
     elements: List[geometry.BaseElement]
     coords: List[np.ndarray]
